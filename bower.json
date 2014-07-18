@@ -5,7 +5,7 @@
     "Starqle Indonesia <info@starqle.com>"
   ],
   "description": "Collection of Starqle Angular utilities.",
-  "main": "./modules/main.js",
+  "main": "./src/main.js",
   "keywords": [
     "starqle",
     "angular",

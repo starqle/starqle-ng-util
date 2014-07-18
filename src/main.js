@@ -10,7 +10,7 @@
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
 // PARTICULAR PURPOSE.
 //
-// @file_name modules/main.js
+// @file_name src/main.js
 // @author Giovanni Sakti
 // @email giosakti@starqle.com
 // @company PT. Starqle Indonesia

@@ -10,7 +10,7 @@
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
 // PARTICULAR PURPOSE.
 //
-// @file_name modules/directives/sh-datepicker.js
+// @file_name src/directives/sh-datepicker.js
 // @author Bimo Horizon
 // @email bimo@starqle.com
 // @company PT. Starqle Indonesia
