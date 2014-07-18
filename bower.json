@@ -1,0 +1,29 @@
+{
+  "name": "starqle-ng-util",
+  "version": "0.0.1",
+  "authors": [
+    "Starqle Indonesia <info@starqle.com>"
+  ],
+  "description": "Collection of Starqle Angular utilities.",
+  "main": "./modules/main.js",
+  "keywords": [
+    "starqle",
+    "angular",
+    "utility"
+  ],
+  "license": "MIT",
+  "homepage": "http://www.starqle.com/",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.2.20",
+    "bootstrap-datepicker": "~1.3.0",
+    "jquery": "1.10.2"
+  }
+}
