@@ -38,18 +38,23 @@ gulp.task('build-clean', function(callback) {
   rimraf('dist', callback);
 });
 
-gulp.task('build-js', ['build-clean'], function() {
+gulp.task('build-coffee', ['build-clean'], function() {
   source = [
-    'src/directives/*.js',
-    'src/filters/*.js',
-    'src/main.js'
+    'src/config/*.coffee',
+    'src/directives/*.coffee',
+    'src/factories/*.coffee',
+    'src/filters/*.coffee',
+    'src/prototypes/*.coffee',
+    'src/services/*.coffee',
+    'src/main.coffee'
   ]
   return gulp.src(source)
+    .pipe(gulpCoffee({bare: true, map: true, compile: true}))
     .pipe(gulpConcat("starqle-ng-util.js"))
     .pipe(gulp.dest('dist/'));
 });
 
-gulp.task('build', ['build-js']);
+gulp.task('build', ['build-coffee']);
 
 // ----------------------------------------------------------------------------
 // Default task
