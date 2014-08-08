@@ -585,7 +585,9 @@ angular.module('sh.init.ng.table', []).run([
           if ($scope.asyncBlock === false) {
             $scope.asyncBlock = true;
             return $timeout((function() {
-              var gridParams;
+              var $defer, gridParams, params;
+              $defer = $scope.tableParamsGetData.defer;
+              params = $scope.tableParamsGetData.params;
               gridParams = $scope.generateGridParams();
               return $scope.resource.get($.extend(gridParams, $scope.optParams)).$promise.then(function(success) {
                 params.total(success.data.total_server_items);
@@ -631,8 +633,10 @@ angular.module('sh.init.ng.table', []).run([
           return $scope.tableParams.sorting(fieldName, newDirection);
         };
         return $scope.exportToXls = function() {
-          var elementId, gridParams, xlsFullpath;
+          var $defer, elementId, gridParams, params, xlsFullpath;
           if ($scope.xlsPath) {
+            $defer = $scope.tableParamsGetData.defer;
+            params = $scope.tableParamsGetData.params;
             gridParams = $scope.generateGridParams();
             $.extend(gridParams, $scope.optParams);
             $.extend(gridParams, {

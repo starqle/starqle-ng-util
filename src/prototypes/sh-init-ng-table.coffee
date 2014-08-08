@@ -93,6 +93,8 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
         $scope.asyncBlock = true
 
         $timeout (->
+          $defer = $scope.tableParamsGetData.defer
+          params = $scope.tableParamsGetData.params
           gridParams = $scope.generateGridParams()
 
           $scope.resource.get(
@@ -153,6 +155,8 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
 
     $scope.exportToXls = ->
       if $scope.xlsPath
+        $defer = $scope.tableParamsGetData.defer
+        params = $scope.tableParamsGetData.params
         gridParams = $scope.generateGridParams()
 
         $.extend gridParams, $scope.optParams
