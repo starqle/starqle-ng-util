@@ -1492,4 +1492,4 @@ angular.module("sh.priv", []).service("ShPriv", function() {
 });
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.datepicker', 'sh.form', 'sh.number.format', 'sh.select2', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.element.finder', 'sh.button.state', 'sh.notification', 'sh.priv']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.datepicker', 'sh.form', 'sh.number.format', 'sh.select2', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.priv']);

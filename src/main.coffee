@@ -48,8 +48,8 @@ angular.module 'starqle.ng.util', [
   'sh.persistence',
 
   # services
-  'sh.element.finder',
   'sh.button.state',
+  'sh.element.finder',
   'sh.notification',
   'sh.priv'
 ]
