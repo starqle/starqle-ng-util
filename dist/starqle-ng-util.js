@@ -662,7 +662,7 @@ angular.module('sh.init.ng.table', []).run([
 angular.module('sh.modal.persistence', []).run([
   '$rootScope', function($rootScope) {
     return $rootScope.modalPersistence = [
-      '$scope', '$timeout', 'ShNotification', function($scope, $timeout, ShNotification) {
+      '$scope', '$timeout', 'ShNotification', 'ShButtonState', function($scope, $timeout, ShNotification, ShButtonState) {
         $scope.entity = {};
         $scope.errors = [];
         $scope.localLookup = {};
@@ -803,11 +803,11 @@ angular.module('sh.modal.persistence', []).run([
           angular.element("#" + elementStr).modal('hide');
           return $scope.resetEntityModal();
         };
-        $scope.saveEntity = function(elementStr) {
+        $scope.saveEntity = function(elementStr, $event) {
           if ($scope.entity.id != null) {
-            return $scope.updateEntity(elementStr);
+            return $scope.updateEntity(elementStr, $event);
           } else {
-            return $scope.createEntity(elementStr);
+            return $scope.createEntity(elementStr, $event);
           }
         };
         $scope.showNewEntityModal = function(elementStr) {
@@ -833,8 +833,10 @@ angular.module('sh.modal.persistence', []).run([
           angular.element("#" + elementStr).modal('hide');
           return $scope.resetEntityModal();
         };
-        $scope.createEntity = function(elementStr) {
+        $scope.createEntity = function(elementStr, $event) {
           $scope.beforeCreateEntity();
+          $event = ShButtonState.initializeEvent($event);
+          ShButtonState.loading($event);
           return $scope.resource.save($.extend({}, $scope.optParams), {
             data: $scope.entity
           }).$promise.then(function(success) {
@@ -845,10 +847,12 @@ angular.module('sh.modal.persistence', []).run([
             if (typeof $scope.getPagedDataAsync === 'function') {
               $scope.refreshGrid();
             }
+            ShButtonState.enable($event);
             $scope.createEntitySuccess(success);
             return $scope.createEntitySuccessNotification(success);
           }, function(error) {
             $scope.errors = error.data.error.errors;
+            ShButtonState.enable($event);
             $scope.createEntityFailure(error);
             return $scope.createEntityFailureNotification(error);
           });
@@ -878,8 +882,10 @@ angular.module('sh.modal.persistence', []).run([
           angular.element("#" + elementStr).modal('hide');
           return $scope.resetEntityModal();
         };
-        $scope.updateEntity = function(elementStr) {
+        $scope.updateEntity = function(elementStr, $event) {
           $scope.beforeUpdateEntity();
+          $event = ShButtonState.initializeEvent($event);
+          ShButtonState.loading($event);
           return $scope.resource.update($.extend({
             id: $scope.entity.id
           }, $scope.optParams), {
@@ -892,21 +898,30 @@ angular.module('sh.modal.persistence', []).run([
             if (typeof $scope.getPagedDataAsync === 'function') {
               $scope.refreshGrid();
             }
+            ShButtonState.enable($event);
             $scope.updateEntitySuccess(success);
             return $scope.updateEntitySuccessNotification(success);
           }, function(error) {
             $scope.errors = error.data.error.errors;
+            ShButtonState.enable($event);
             $scope.updateEntityFailure(error);
             return $scope.updateEntityFailureNotification(error);
           });
         };
-        $scope.destroyEntity = function(id, name) {
+        $scope.destroyEntity = function(id, name, $event) {
           if (name == null) {
             name = 'this entry';
+          }
+          if (typeof name !== "String") {
+            $event = ShButtonState.initializeEvent(name);
+            name = 'this entry';
+          } else {
+            $event = ShButtonState.initializeEvent($event);
           }
           if (!confirm("Are you sure you want to delete " + name + "?")) {
             return false;
           }
+          ShButtonState.loading($event);
           $scope.beforeDestroyEntity();
           return $scope.resource["delete"]($.extend({
             id: id
@@ -918,11 +933,15 @@ angular.module('sh.modal.persistence', []).run([
             return $scope.destroyEntitySuccessNotification(success);
           }, function(error) {
             $scope.destroyEntityFailure(error);
-            return $scope.destroyEntityFailureNotification(error);
+            $scope.destroyEntityFailureNotification(error);
+            return ShButtonState.enable($event);
           });
         };
-        $scope.deleteEntity = function(id) {
-          return $scope.destroyEntity(id);
+        $scope.deleteEntity = function(id, name, $event) {
+          if (name == null) {
+            name = 'this entry';
+          }
+          return $scope.destroyEntity(id, name, $event);
         };
         $scope.multipleDestroyEntity = function(ids, name) {
           if (name == null) {
@@ -946,8 +965,19 @@ angular.module('sh.modal.persistence', []).run([
             return $scope.multipleDestroyEntityFailureNotification(error);
           });
         };
-        return $scope.multipleDeleteEntity = function(ids) {
+        $scope.multipleDeleteEntity = function(ids) {
           return $scope.multipleDestroyEntity(ids);
+        };
+        return $scope.rowEvent = function(entity) {
+          if ($scope.recentlyDeletedIds.indexOf(entity.id) >= 0) {
+            return 'recently-deleted';
+          } else if ($scope.recentlyUpdatedIds.indexOf(entity.id) >= 0) {
+            return 'recently-updated';
+          } else if ($scope.recentlyCreatedIds.indexOf(entity.id) >= 0) {
+            return 'recently-created';
+          } else {
+            return 'else';
+          }
         };
       }
     ];
@@ -1084,7 +1114,7 @@ angular.module('sh.ng.table.filter', []).run([
 angular.module('sh.persistence', []).run([
   '$rootScope', function($rootScope) {
     return $rootScope.persistence = [
-      '$scope', '$timeout', '$state', 'ShNotification', function($scope, $timeout, $state, ShNotification) {
+      '$scope', '$timeout', '$state', 'ShNotification', 'ShButtonState', function($scope, $timeout, $state, ShNotification, ShButtonState) {
         $scope.entity = {};
         $scope.localLookup = {};
         $scope.privileges = {};
@@ -1150,15 +1180,17 @@ angular.module('sh.persistence', []).run([
             message: 'Failed to Update'
           });
         };
-        $scope.saveEntity = function() {
+        $scope.saveEntity = function($event) {
           if ($scope.entity.id != null) {
-            return $scope.updateEntity();
+            return $scope.updateEntity($event);
           } else {
-            return $scope.createEntity();
+            return $scope.createEntity($event);
           }
         };
-        $scope.createEntity = function() {
+        $scope.createEntity = function($event) {
           $scope.beforeCreateEntity();
+          $event = ShButtonState.initializeEvent($event);
+          ShButtonState.loading($event);
           return $scope.resource.save($.extend({}, $scope.optParams), {
             data: $scope.entity
           }).$promise.then(function(success) {
@@ -1167,14 +1199,18 @@ angular.module('sh.persistence', []).run([
             params['id'] = success.data.id;
             $state.transitionTo($scope.showPath, params);
             $scope.createEntitySuccess(success);
-            return $scope.createEntitySuccessNotification(success);
+            $scope.createEntitySuccessNotification(success);
+            return ShButtonState.enable($event);
           }, function(error) {
             $scope.createEntityFailure(error);
-            return $scope.createEntityFailureNotification(error);
+            $scope.createEntityFailureNotification(error);
+            return ShButtonState.enable($event);
           });
         };
-        $scope.updateEntity = function() {
+        $scope.updateEntity = function($event) {
           $scope.beforeUpdateEntity();
+          $event = ShButtonState.initializeEvent($event);
+          ShButtonState.loading($event);
           $scope.saved = false;
           return $scope.resource.update($.extend({
             id: $scope.entity.id
@@ -1186,10 +1222,12 @@ angular.module('sh.persistence', []).run([
               return $scope.saved = false;
             }), 5000);
             $scope.updateEntitySuccess(success);
-            return $scope.updateEntitySuccessNotification(success);
+            $scope.updateEntitySuccessNotification(success);
+            return ShButtonState.enable($event);
           }, function(error) {
             $scope.updateEntityFailure(error);
-            return $scope.updateEntityFailureNotification(error);
+            $scope.updateEntityFailureNotification(error);
+            return ShButtonState.enable($event);
           });
         };
         $scope.init = function() {
@@ -1226,6 +1264,43 @@ angular.module('sh.persistence', []).run([
         }
       }
     ];
+  }
+]);
+
+"use strict";
+angular.module('sh.button.state', []).service("ShButtonState", [
+  '$timeout', function($timeout) {
+    this.initializeEvent = function($event, defaultValue) {
+      defaultValue = (typeof defaultValue === "undefined" ? null : defaultValue);
+      return (typeof $event === "undefined" ? defaultValue : $event);
+    };
+    this.setEnable = function($event, enabled) {
+      var btn, target;
+      if ($event != null) {
+        target = $($event.target);
+        target.prop('disabled', !enabled);
+        if (target.is('form')) {
+          btn = target.find('button[type="submit"]');
+          return btn.prop('disabled', !enabled);
+        } else if (target.is('a')) {
+          if (enabled) {
+            return target.removeClass('disabled');
+          } else {
+            return target.addClass('disabled');
+          }
+        }
+      }
+    };
+    this.disable = function($event) {
+      return this.setEnable($event, false);
+    };
+    this.loading = function($event) {
+      return this.disable($event);
+    };
+    this.enable = function($event) {
+      return this.setEnable($event, true);
+    };
+    return this;
   }
 ]);
 
@@ -1417,4 +1492,4 @@ angular.module("sh.priv", []).service("ShPriv", function() {
 });
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.datepicker', 'sh.form', 'sh.number.format', 'sh.select2', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.element.finder', 'sh.notification', 'sh.priv']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.datepicker', 'sh.form', 'sh.number.format', 'sh.select2', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.element.finder', 'sh.button.state', 'sh.notification', 'sh.priv']);

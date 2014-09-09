@@ -25,7 +25,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
   # modalPersistence Prototype
   # ===========================================================================
 
-  $rootScope.modalPersistence = ['$scope', '$timeout', 'ShNotification', ($scope, $timeout, ShNotification) ->
+  $rootScope.modalPersistence = ['$scope', '$timeout', 'ShNotification', 'ShButtonState', ($scope, $timeout, ShNotification, ShButtonState) ->
     $scope.entity = {}
     $scope.errors = []
     $scope.localLookup = {}
@@ -162,12 +162,12 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       angular.element("##{elementStr}").modal('hide')
       $scope.resetEntityModal()
 
-    $scope.saveEntity = (elementStr) ->
+    $scope.saveEntity = (elementStr, $event) ->
       # Update entity in database
       if $scope.entity.id?
-        $scope.updateEntity(elementStr)
+        $scope.updateEntity(elementStr, $event)
       else # Persist entity into database
-        $scope.createEntity(elementStr)
+        $scope.createEntity(elementStr, $event)
 
     # =========================================================================
     # Create
@@ -198,8 +198,11 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       angular.element("##{elementStr}").modal('hide')
       $scope.resetEntityModal()
 
-    $scope.createEntity = (elementStr) ->
+    $scope.createEntity = (elementStr, $event) ->
       $scope.beforeCreateEntity()
+
+      $event = ShButtonState.initializeEvent $event
+      ShButtonState.loading $event
 
       # Persist entity into database
       $scope.resource.save($.extend({}, $scope.optParams)
@@ -208,10 +211,12 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         $scope.closeNewEntityModal(elementStr)
         $scope.recentlyCreatedIds.push success.data.id if $scope.recentlyCreatedIds?
         $scope.refreshGrid() if typeof $scope.getPagedDataAsync is 'function'
+        ShButtonState.enable $event
         $scope.createEntitySuccess(success)
         $scope.createEntitySuccessNotification(success)
       , (error) ->
         $scope.errors = error.data.error.errors
+        ShButtonState.enable $event
         $scope.createEntityFailure(error)
         $scope.createEntityFailureNotification(error)
       )
@@ -245,8 +250,11 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       angular.element("##{elementStr}").modal('hide')
       $scope.resetEntityModal()
 
-    $scope.updateEntity = (elementStr) ->
+    $scope.updateEntity = (elementStr, $event) ->
       $scope.beforeUpdateEntity()
+
+      $event = ShButtonState.initializeEvent $event
+      ShButtonState.loading $event
 
       # Update entity into database
       $scope.resource.update($.extend({id: $scope.entity.id}, $scope.optParams)
@@ -255,10 +263,12 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         $scope.closeEditEntityModal(elementStr)
         $scope.recentlyUpdatedIds.push success.data.id if $scope.recentlyUpdatedIds?
         $scope.refreshGrid() if typeof $scope.getPagedDataAsync is 'function'
+        ShButtonState.enable $event
         $scope.updateEntitySuccess(success)
         $scope.updateEntitySuccessNotification(success)
       , (error) ->
         $scope.errors = error.data.error.errors
+        ShButtonState.enable $event
         $scope.updateEntityFailure(error)
         $scope.updateEntityFailureNotification(error)
       )
@@ -267,9 +277,17 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
     # Destroy
     # =========================================================================
 
-    $scope.destroyEntity = (id, name='this entry') ->
+    $scope.destroyEntity = (id, name='this entry', $event) ->
+      if (typeof name isnt "String")
+        $event = ShButtonState.initializeEvent name
+        name = 'this entry'
+      else
+        $event = ShButtonState.initializeEvent $event
+
       if !confirm("Are you sure you want to delete #{name}?")
         return false
+
+      ShButtonState.loading $event
 
       $scope.beforeDestroyEntity()
 
@@ -283,10 +301,11 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       , (error) ->
         $scope.destroyEntityFailure(error)
         $scope.destroyEntityFailureNotification(error)
+        ShButtonState.enable $event
       )
 
-    $scope.deleteEntity = (id) ->
-      $scope.destroyEntity(id)
+    $scope.deleteEntity = (id, name='this entry', $event) ->
+      $scope.destroyEntity(id, name, $event)
 
     $scope.multipleDestroyEntity = (ids, name='these entries') ->
       if !confirm("Are you sure you want to delete #{name}?")
@@ -309,5 +328,16 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
 
     $scope.multipleDeleteEntity = (ids) ->
       $scope.multipleDestroyEntity(ids)
+
+    # Recently Row Event Class
+    $scope.rowEvent = (entity) ->
+      if $scope.recentlyDeletedIds.indexOf(entity.id) >= 0  
+        'recently-deleted'
+      else if $scope.recentlyUpdatedIds.indexOf(entity.id) >= 0  
+        'recently-updated'
+      else if $scope.recentlyCreatedIds.indexOf(entity.id) >= 0  
+        'recently-created'
+      else
+        'else'
   ]
 ]
