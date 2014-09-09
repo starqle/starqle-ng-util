@@ -25,7 +25,7 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
   # persistence Prototype
   # ===========================================================================
 
-  $rootScope.persistence = ['$scope', '$timeout', '$state', 'ShNotification', ($scope, $timeout, $state, ShNotification) ->
+  $rootScope.persistence = ['$scope', '$timeout', '$state', 'ShNotification', 'ShButtonState', ($scope, $timeout, $state, ShNotification, ShButtonState) ->
 
     $scope.entity = {}
     $scope.localLookup = {}
@@ -107,19 +107,22 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
     # Save
     # =========================================================================
 
-    $scope.saveEntity = ->
+    $scope.saveEntity = ($event) ->
       # Update entity in database
       if $scope.entity.id?
-        $scope.updateEntity()
+        $scope.updateEntity($event)
       else # Persist entity into database
-        $scope.createEntity()
+        $scope.createEntity($event)
 
     # =========================================================================
     # Create
     # =========================================================================
 
-    $scope.createEntity = ->
+    $scope.createEntity = ($event) ->
       $scope.beforeCreateEntity()
+
+      $event = ShButtonState.initializeEvent $event
+      ShButtonState.loading $event
 
       # Persist entity into database
       $scope.resource.save($.extend({}, $scope.optParams)
@@ -136,18 +139,23 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
         # Callback
         $scope.createEntitySuccess(success)
         $scope.createEntitySuccessNotification(success)
+        ShButtonState.enable $event
       , (error) ->
         # Callback
         $scope.createEntityFailure(error)
         $scope.createEntityFailureNotification(error)
+        ShButtonState.enable $event
       )
 
     # =========================================================================
     # Update
     # =========================================================================
 
-    $scope.updateEntity = ->
+    $scope.updateEntity = ($event) ->
       $scope.beforeUpdateEntity()
+
+      $event = ShButtonState.initializeEvent $event
+      ShButtonState.loading $event
 
       # Set 'saved' flag
       $scope.saved = false
@@ -166,11 +174,13 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
         # Callback
         $scope.updateEntitySuccess(success)
         $scope.updateEntitySuccessNotification(success)
+        ShButtonState.enable $event
 
       , (error) ->
         # Callback
         $scope.updateEntityFailure(error)
         $scope.updateEntityFailureNotification(error)
+        ShButtonState.enable $event
       )
 
     # =========================================================================
