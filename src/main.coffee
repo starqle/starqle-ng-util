@@ -27,6 +27,7 @@ angular.module 'starqle.ng.util', [
   'sh.dialog',
   'sh.datepicker',
   'sh.form',
+  'sh.focus',
   'sh.nicescroll',
   'sh.number.format',
   'sh.select2',

@@ -29,6 +29,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
     $scope.entity = {}
     $scope.errors = []
     $scope.localLookup = {}
+    $scope.modalProperties = {}
 
     $scope.refreshGrid ?= (currentPage = null) ->
       if currentPage is null
@@ -184,6 +185,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       angular.element("##{elementStr}").modal('show')
       angular.element("##{elementStr}").on 'hidden.bs.modal', () ->
         $scope.closeNewEntityModal elementStr
+        $scope.modalProperties.visible = false
       $scope.fetchNewEntity()
 
     $scope.fetchNewEntity = ->
@@ -196,6 +198,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         $rootScope.spinningService.stop('modal')
         $scope.entity = success.data
         $scope.localLookup = success.lookup
+        $scope.modalProperties.visible = true
         $scope.newEntitySuccess(success)
         $scope.newEntitySuccessNotification(success)
       , (error) ->
@@ -239,6 +242,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       angular.element("##{elementStr}").modal('show')
       angular.element("##{elementStr}").on 'hidden.bs.modal', () ->
         $scope.closeEditEntityModal elementStr
+        $scope.modalProperties.visible = false
       $scope.fetchEditEntity(id)
 
     $scope.fetchEditEntity = (id) ->
@@ -251,6 +255,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         $rootScope.spinningService.stop('modal')
         $scope.entity = success.data
         $scope.localLookup = success.lookup
+        $scope.modalProperties.visible = true
         $scope.editEntitySuccess(success)
         $scope.editEntitySuccessNotification(success)
       , (error) ->
