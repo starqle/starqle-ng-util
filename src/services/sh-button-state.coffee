@@ -14,10 +14,10 @@
 # @author Raymond Ralibi
 # @email ralibi@starqle.com
 # @company PT. Starqle Indonesia
-# @note This file contains ShButtonState service.
+# @note This file contains shButtonState service.
 # =============================================================================
 
-"use strict";
+"use strict"
 
 angular.module('sh.button.state',[]).service "ShButtonState", ['$timeout', ($timeout) ->
 
@@ -33,13 +33,11 @@ angular.module('sh.button.state',[]).service "ShButtonState", ['$timeout', ($tim
       if target.is 'form'
         btn = target.find('button[type="submit"]')
         btn.prop('disabled', !enabled)
-
       else if target.is 'a'
         if enabled
           target.removeClass 'disabled'
         else
           target.addClass 'disabled'
-
 
   @disable = ($event) ->
     @setEnable $event, false
@@ -51,5 +49,4 @@ angular.module('sh.button.state',[]).service "ShButtonState", ['$timeout', ($tim
     @setEnable $event, true
 
   return this
- 
 ]
