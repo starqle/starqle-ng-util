@@ -24,10 +24,13 @@ angular.module 'starqle.ng.util', [
   'on.root.scope',
 
   # directives
+  'sh.dialog',
   'sh.datepicker',
   'sh.form',
+  'sh.nicescroll',
   'sh.number.format',
   'sh.select2',
+  'sh.spinning',
   'sh.submit',
   'sh.tooltip',
 
@@ -51,5 +54,6 @@ angular.module 'starqle.ng.util', [
   'sh.element.finder',
   'sh.button.state',
   'sh.notification',
-  'sh.priv'
+  'sh.priv',
+  'sh.spinning.service'
 ]

@@ -27,7 +27,6 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
 
   $rootScope.initNgTable = ['$scope', '$timeout', '$filter', ($scope, $timeout, $filter) ->
 
-    $scope.items = []
     $scope.recentlyCreatedIds = []
     $scope.recentlyUpdatedIds = []
     $scope.recentlyDeletedIds = []
@@ -173,5 +172,16 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
           , 50
 
       return
+
+    # Method related to ng-table for generating pagination
+    $scope.getGeneratedPagesArray = ->
+      $scope.tableParams.generatePagesArray($scope.tableParams.page(), $scope.tableParams.total(), $scope.tableParams.count())
+
+    $scope.pages = $scope.getGeneratedPagesArray()
+    
+    # Explicitely assign pages when ng-table reloaded
+    $scope.$on('ngTableAfterReloadData', () ->
+      $scope.pages = $scope.getGeneratedPagesArray()
+    , true)
   ]
 ]
