@@ -1,0 +1,34 @@
+# =============================================================================
+# Copyright (c) 2013 All Right Reserved, http://starqle.com/
+#
+# This source is subject to the Starqle Permissive License.
+# Please see the License.txt file for more information.
+# All other rights reserved.
+#
+# THIS CODE AND INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
+# KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+# PARTICULAR PURPOSE.
+#
+# @file_name src/services/sh-spinning-service.coffee
+# @author Raymond Ralibi
+# @email ralibi@starqle.com
+# @company PT. Starqle Indonesia
+# @note This file contains ShSpinningService service.
+# =============================================================================
+
+"use strict";
+
+angular.module('sh.spinning.service',[]).service "ShSpinningService", ->
+  spinningStates = {}
+
+  @spin = (key) ->
+    spinningStates[key] = true
+
+  @stop = (key) ->
+    delete spinningStates[key]
+
+  @isSpinning = (key) ->
+    spinningStates[key] == true
+
+  return this
