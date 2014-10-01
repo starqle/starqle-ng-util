@@ -29,6 +29,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
     $scope.entity = {}
     $scope.errors = []
     $scope.localLookup = {}
+    $scope.modalProperties = {}
 
     $scope.refreshGrid ?= (currentPage = null) ->
       if currentPage is null
@@ -143,10 +144,16 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
           message: 'Failed to Delete'
 
     # =========================================================================
+    # Additional callbacks
+    $scope.beforeShowEntityModal = (elementStr, id = null) ->
+    $scope.beforeSaveEntity = (elementStr, $event) ->
+
+    # =========================================================================
     # Save
     # =========================================================================
 
     $scope.showEntityModal = (elementStr, id = null) ->
+      $scope.beforeShowEntityModal(elementStr, id)
       # Fetch blank entity if it's a new record
       if id is null
         $scope.showNewEntityModal(elementStr)
@@ -163,6 +170,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.resetEntityModal()
 
     $scope.saveEntity = (elementStr, $event) ->
+      $scope.beforeSaveEntity(elementStr, $event)
       # Update entity in database
       if $scope.entity.id?
         $scope.updateEntity(elementStr, $event)
@@ -177,19 +185,24 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       angular.element("##{elementStr}").modal('show')
       angular.element("##{elementStr}").on 'hidden.bs.modal', () ->
         $scope.closeNewEntityModal elementStr
+        $scope.modalProperties.visible = false
       $scope.fetchNewEntity()
 
     $scope.fetchNewEntity = ->
+      $rootScope.spinningService.spin('modal')
       $scope.beforeNewEntity()
 
       # Fetch blank entity
       $scope.resource.new($.extend({}, $scope.optParams)
       ).$promise.then((success) ->
+        $rootScope.spinningService.stop('modal')
         $scope.entity = success.data
         $scope.localLookup = success.lookup
+        $scope.modalProperties.visible = true
         $scope.newEntitySuccess(success)
         $scope.newEntitySuccessNotification(success)
       , (error) ->
+        $rootScope.spinningService.stop('modal')
         $scope.newEntityFailure(error)
         $scope.newEntityFailureNotification(error)
       )
@@ -229,19 +242,24 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       angular.element("##{elementStr}").modal('show')
       angular.element("##{elementStr}").on 'hidden.bs.modal', () ->
         $scope.closeEditEntityModal elementStr
+        $scope.modalProperties.visible = false
       $scope.fetchEditEntity(id)
 
     $scope.fetchEditEntity = (id) ->
+      $rootScope.spinningService.spin('modal')
       $scope.beforeEditEntity()
 
       # Fetch entity for editing
       $scope.resource.edit($.extend({id: id}, $scope.optParams)
       ).$promise.then((success) ->
+        $rootScope.spinningService.stop('modal')
         $scope.entity = success.data
         $scope.localLookup = success.lookup
+        $scope.modalProperties.visible = true
         $scope.editEntitySuccess(success)
         $scope.editEntitySuccessNotification(success)
       , (error) ->
+        $rootScope.spinningService.stop('modal')
         $scope.editEntityFailure(error)
         $scope.editEntityFailureNotification(error)
       )
@@ -278,15 +296,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
     # =========================================================================
 
     $scope.destroyEntity = (id, name='this entry', $event) ->
-      if (typeof name isnt "String")
-        $event = ShButtonState.initializeEvent name
-        name = 'this entry'
-      else
-        $event = ShButtonState.initializeEvent $event
-
-      if !confirm("Are you sure you want to delete #{name}?")
-        return false
-
+      $event = ShButtonState.initializeEvent $event
       ShButtonState.loading $event
 
       $scope.beforeDestroyEntity()
@@ -295,7 +305,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.resource.delete($.extend({id: id}, $scope.optParams)
       ).$promise.then((success) ->
         $scope.recentlyDeletedIds.push success.data.id if $scope.recentlyDeletedIds?
-        # $scope.refreshGrid() if typeof $scope.getPagedDataAsync is 'function'
+        $scope.refreshGrid() if typeof $scope.getPagedDataAsync is 'function'
         $scope.destroyEntitySuccess(success)
         $scope.destroyEntitySuccessNotification(success)
       , (error) ->
@@ -308,9 +318,6 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.destroyEntity(id, name, $event)
 
     $scope.multipleDestroyEntity = (ids, name='these entries') ->
-      if !confirm("Are you sure you want to delete #{name}?")
-        return false
-
       $scope.beforeMultipleDestroyEntity()
 
       # Delete entity from database

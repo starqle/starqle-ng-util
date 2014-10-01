@@ -67,6 +67,74 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
 ]);
 
 "use strict";
+angular.module('sh.dialog', []).directive("shDialog", [
+  '$compile', function($compile) {
+    return {
+      restrict: 'E',
+      transclude: true,
+      replace: true,
+      scope: {
+        shDialogOk: '&',
+        shDialogCancel: '&?',
+        shDialogContent: '@?',
+        title: '@?'
+      },
+      template: '<span>\n  <a title="{{getTitle()}}" ng-click="onHandleClick()" ng-transclude></a>\n</span>',
+      link: function(scope, element, attrs) {
+        scope.getShDialogModal = function() {
+          return element.find('#modal-sh-dialog');
+        };
+        scope.getShDialogContent = function() {
+          return scope.shDialogContent || 'Are you sure?';
+        };
+        scope.getTitle = function() {
+          return scope.title || element.text();
+        };
+        scope.onHandleClick = function() {
+          var shDialogModal;
+          if (!(scope.getShDialogModal().length > 0)) {
+            shDialogModal = angular.element('<div id="modal-sh-dialog" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">\n  <div class="modal-dialog modal-sm">\n    <div class="modal-content">\n      <div class="modal-header">\n        <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>\n        <div class="modal-title">&nbsp;</div>\n      </div>\n      <div class="modal-body">\n        <div class="row">\n          <div class="col-lg-12">{{getShDialogContent()}}</div>\n        </div>\n      </div>\n      <div class="modal-footer">\n        <button ng-click="onHandleModalOkClick()" class="btn btn-primary">OK</button>\n        <button data-dismiss="modal" class="btn btn-default">Cancel</button>\n      </div>\n    </div>\n  </div>\n</div>');
+            $compile(shDialogModal)(scope);
+            element.append(shDialogModal);
+          }
+          scope.getShDialogModal().modal('show');
+        };
+        return scope.onHandleModalOkClick = function() {
+          scope.getShDialogModal().modal('hide');
+          scope.shDialogOk();
+        };
+      }
+    };
+  }
+]);
+
+"use strict";
+angular.module('sh.focus', []).directive("shFocus", [
+  '$timeout', function($timeout) {
+    return {
+      scope: {
+        shFocus: '='
+      },
+      link: function(scope, element, attrs) {
+        scope.$watch('shFocus', function(value) {
+          if (value === true) {
+            $timeout(function() {
+              return element.eq(0).select();
+            });
+            return;
+          } else {
+            $timeout(function() {
+              return element.eq(0).blur();
+            });
+            return;
+          }
+        });
+      }
+    };
+  }
+]);
+
+"use strict";
 angular.module('sh.form', []).directive("shForm", [
   function() {
     return {
@@ -87,6 +155,24 @@ angular.module('sh.form', []).directive("shForm", [
     };
   }
 ]);
+
+"use strict";
+angular.module('sh.nicescroll', []).directive("shNicescroll", function() {
+  return {
+    restrict: 'C',
+    link: function(scope, elem, attrs) {
+      var nS;
+      nS = elem.niceScroll({
+        autohidemode: false,
+        cursoropacitymax: 0.4,
+        cursorwidth: 8,
+        cursorborderradius: 0,
+        horizrailenabled: false
+      });
+      elem.addClass(nS.id);
+    }
+  };
+});
 
 "use strict";
 angular.module('sh.number.format', []).directive("shNumberFormat", [
@@ -269,6 +355,81 @@ angular.module('sh.select2', []).directive("shSelect2", [
             elem.select2('val', newVal);
           }
           return scope.applyValidity();
+        });
+      }
+    };
+  }
+]);
+
+"use strict";
+angular.module('sh.spinning', []).directive("shSpinning", [
+  'ShSpinningService', function(ShSpinningService) {
+    return {
+      restrict: 'A',
+      scope: {
+        shSpinning: '@',
+        shSpinningLines: '@?',
+        shSpinningLength: '@?',
+        shSpinningWidth: '@?',
+        shSpinningRadius: '@?',
+        shSpinningCorners: '@?',
+        shSpinningRotate: '@?',
+        shSpinningDirection: '@?',
+        shSpinningColor: '@?',
+        shSpinningSpeed: '@?',
+        shSpinningTrail: '@?',
+        shSpinningShadow: '@?',
+        shSpinningHwaccel: '@?',
+        shSpinningClassName: '@?',
+        shSpinningZIndex: '@?',
+        shSpinningTop: '@?',
+        shSpinningLeft: '@?'
+      },
+      link: function(scope, element, attrs) {
+        var opts;
+        scope.shSpinningLines = scope.shSpinningLines || 13;
+        scope.shSpinningLength = scope.shSpinningLength || 30;
+        scope.shSpinningWidth = scope.shSpinningWidth || 10;
+        scope.shSpinningRadius = scope.shSpinningRadius || 38;
+        scope.shSpinningCorners = scope.shSpinningCorners || 1;
+        scope.shSpinningRotate = scope.shSpinningRotate || 0;
+        scope.shSpinningDirection = scope.shSpinningDirection || 1;
+        scope.shSpinningColor = scope.shSpinningColor || '#000';
+        scope.shSpinningSpeed = scope.shSpinningSpeed || 2.2;
+        scope.shSpinningTrail = scope.shSpinningTrail || 100;
+        scope.shSpinningShadow = scope.shSpinningShadow || false;
+        scope.shSpinningHwaccel = scope.shSpinningHwaccel || false;
+        scope.shSpinningClassName = scope.shSpinningClassName || 'spinner';
+        scope.shSpinningZIndex = scope.shSpinningZIndex || 2e9;
+        scope.shSpinningTop = scope.shSpinningTop || '45%';
+        scope.shSpinningLeft = scope.shSpinningLeft || '50%';
+        opts = {
+          lines: scope.shSpinningLines,
+          length: scope.shSpinningLength,
+          width: scope.shSpinningWidth,
+          radius: scope.shSpinningRadius,
+          corners: scope.shSpinningCorners,
+          rotate: scope.shSpinningRotate,
+          direction: scope.shSpinningDirection,
+          color: scope.shSpinningColor,
+          speed: scope.shSpinningSpeed,
+          trail: scope.shSpinningTrail,
+          shadow: scope.shSpinningShadow,
+          hwaccel: scope.shSpinningHwaccel,
+          className: scope.shSpinningClassName,
+          zIndex: scope.shSpinningZIndex,
+          top: scope.shSpinningTop,
+          left: scope.shSpinningLeft
+        };
+        scope.spinner = new Spinner(opts);
+        scope.$watch((function() {
+          return ShSpinningService.isSpinning(scope.shSpinning);
+        }), function(newVal) {
+          if (ShSpinningService.isSpinning(scope.shSpinning)) {
+            scope.spinner.spin(element[0]);
+          } else {
+            scope.spinner.stop();
+          }
         });
       }
     };
@@ -516,7 +677,6 @@ angular.module('sh.init.ng.table', []).run([
   '$rootScope', '$templateCache', 'ngTableParams', function($rootScope, $templateCache, ngTableParams) {
     return $rootScope.initNgTable = [
       '$scope', '$timeout', '$filter', function($scope, $timeout, $filter) {
-        $scope.items = [];
         $scope.recentlyCreatedIds = [];
         $scope.recentlyUpdatedIds = [];
         $scope.recentlyDeletedIds = [];
@@ -632,7 +792,7 @@ angular.module('sh.init.ng.table', []).run([
           }
           return $scope.tableParams.sorting(fieldName, newDirection);
         };
-        return $scope.exportToXls = function() {
+        $scope.exportToXls = function() {
           var $defer, elementId, gridParams, params, xlsFullpath;
           if ($scope.xlsPath) {
             $defer = $scope.tableParamsGetData.defer;
@@ -653,6 +813,13 @@ angular.module('sh.init.ng.table', []).run([
             });
           }
         };
+        $scope.getGeneratedPagesArray = function() {
+          return $scope.tableParams.generatePagesArray($scope.tableParams.page(), $scope.tableParams.total(), $scope.tableParams.count());
+        };
+        $scope.pages = $scope.getGeneratedPagesArray();
+        return $scope.$on('ngTableAfterReloadData', function() {
+          return $scope.pages = $scope.getGeneratedPagesArray();
+        }, true);
       }
     ];
   }
@@ -666,6 +833,7 @@ angular.module('sh.modal.persistence', []).run([
         $scope.entity = {};
         $scope.errors = [];
         $scope.localLookup = {};
+        $scope.modalProperties = {};
         if ($scope.refreshGrid == null) {
           $scope.refreshGrid = function(currentPage) {
             if (currentPage == null) {
@@ -784,10 +952,17 @@ angular.module('sh.modal.persistence', []).run([
             });
           }
         };
+        $scope.beforeShowEntityModal = function(elementStr, id) {
+          if (id == null) {
+            id = null;
+          }
+        };
+        $scope.beforeSaveEntity = function(elementStr, $event) {};
         $scope.showEntityModal = function(elementStr, id) {
           if (id == null) {
             id = null;
           }
+          $scope.beforeShowEntityModal(elementStr, id);
           if (id === null) {
             return $scope.showNewEntityModal(elementStr);
           } else {
@@ -804,6 +979,7 @@ angular.module('sh.modal.persistence', []).run([
           return $scope.resetEntityModal();
         };
         $scope.saveEntity = function(elementStr, $event) {
+          $scope.beforeSaveEntity(elementStr, $event);
           if ($scope.entity.id != null) {
             return $scope.updateEntity(elementStr, $event);
           } else {
@@ -813,18 +989,23 @@ angular.module('sh.modal.persistence', []).run([
         $scope.showNewEntityModal = function(elementStr) {
           angular.element("#" + elementStr).modal('show');
           angular.element("#" + elementStr).on('hidden.bs.modal', function() {
-            return $scope.closeNewEntityModal(elementStr);
+            $scope.closeNewEntityModal(elementStr);
+            return $scope.modalProperties.visible = false;
           });
           return $scope.fetchNewEntity();
         };
         $scope.fetchNewEntity = function() {
+          $rootScope.spinningService.spin('modal');
           $scope.beforeNewEntity();
           return $scope.resource["new"]($.extend({}, $scope.optParams)).$promise.then(function(success) {
+            $rootScope.spinningService.stop('modal');
             $scope.entity = success.data;
             $scope.localLookup = success.lookup;
+            $scope.modalProperties.visible = true;
             $scope.newEntitySuccess(success);
             return $scope.newEntitySuccessNotification(success);
           }, function(error) {
+            $rootScope.spinningService.stop('modal');
             $scope.newEntityFailure(error);
             return $scope.newEntityFailureNotification(error);
           });
@@ -860,20 +1041,25 @@ angular.module('sh.modal.persistence', []).run([
         $scope.showEditEntityModal = function(id, elementStr) {
           angular.element("#" + elementStr).modal('show');
           angular.element("#" + elementStr).on('hidden.bs.modal', function() {
-            return $scope.closeEditEntityModal(elementStr);
+            $scope.closeEditEntityModal(elementStr);
+            return $scope.modalProperties.visible = false;
           });
           return $scope.fetchEditEntity(id);
         };
         $scope.fetchEditEntity = function(id) {
+          $rootScope.spinningService.spin('modal');
           $scope.beforeEditEntity();
           return $scope.resource.edit($.extend({
             id: id
           }, $scope.optParams)).$promise.then(function(success) {
+            $rootScope.spinningService.stop('modal');
             $scope.entity = success.data;
             $scope.localLookup = success.lookup;
+            $scope.modalProperties.visible = true;
             $scope.editEntitySuccess(success);
             return $scope.editEntitySuccessNotification(success);
           }, function(error) {
+            $rootScope.spinningService.stop('modal');
             $scope.editEntityFailure(error);
             return $scope.editEntityFailureNotification(error);
           });
@@ -912,15 +1098,7 @@ angular.module('sh.modal.persistence', []).run([
           if (name == null) {
             name = 'this entry';
           }
-          if (typeof name !== "String") {
-            $event = ShButtonState.initializeEvent(name);
-            name = 'this entry';
-          } else {
-            $event = ShButtonState.initializeEvent($event);
-          }
-          if (!confirm("Are you sure you want to delete " + name + "?")) {
-            return false;
-          }
+          $event = ShButtonState.initializeEvent($event);
           ShButtonState.loading($event);
           $scope.beforeDestroyEntity();
           return $scope.resource["delete"]($.extend({
@@ -928,6 +1106,9 @@ angular.module('sh.modal.persistence', []).run([
           }, $scope.optParams)).$promise.then(function(success) {
             if ($scope.recentlyDeletedIds != null) {
               $scope.recentlyDeletedIds.push(success.data.id);
+            }
+            if (typeof $scope.getPagedDataAsync === 'function') {
+              $scope.refreshGrid();
             }
             $scope.destroyEntitySuccess(success);
             return $scope.destroyEntitySuccessNotification(success);
@@ -946,9 +1127,6 @@ angular.module('sh.modal.persistence', []).run([
         $scope.multipleDestroyEntity = function(ids, name) {
           if (name == null) {
             name = 'these entries';
-          }
-          if (!confirm("Are you sure you want to delete " + name + "?")) {
-            return false;
           }
           $scope.beforeMultipleDestroyEntity();
           return $scope.resource.multiple_delete($.extend({
@@ -1344,10 +1522,12 @@ angular.module("sh.element.finder", []).service("shElementFinder", function() {
 
 "use strict";
 angular.module('sh.notification', []).service("ShNotification", [
-  '$timeout', function($timeout) {
+  '$timeout', '$interval', function($timeout, $interval) {
     var defaultDuration, defaultLifetime;
     defaultLifetime = 4000;
     defaultDuration = 500;
+    this.toasts = [];
+    this.notifications = [];
     this.addToast = function(options, lifetimeOpt, durationOpt) {
       var opts;
       opts = {
@@ -1367,13 +1547,14 @@ angular.module('sh.notification', []).service("ShNotification", [
         if (durationOpt != null) {
           opts.duration = durationOpt;
         }
+        opts.toast.deathtime = Date.now() + opts.lifetime;
+        opts.toast.alive = true;
       } else {
         jQuery.extend(opts, options);
       }
       opts.beforeAdd.call(this);
       this.toasts.unshift(opts.toast);
-      opts.afterAdd.call(this);
-      return this.removeToast(opts);
+      return opts.afterAdd.call(this);
     };
     this.removeOldestToast = function() {
       return this.removeToast(this.toasts.length - 1);
@@ -1399,19 +1580,33 @@ angular.module('sh.notification', []).service("ShNotification", [
         jQuery.extend(opts, options);
       }
       toasts = this.toasts;
+      opts.beforeRemove.call(this);
+      angular.element("#toast-group-item-" + opts.index).animate({
+        height: 0,
+        opacity: 0
+      }, opts.duration);
       return $timeout(function() {
-        opts.beforeRemove.call(this);
-        angular.element("#toast-group-item-" + opts.index).animate({
-          height: 0,
-          opacity: 0
-        }, opts.duration);
-        return $timeout(function() {
-          toasts.splice(opts.index, 1);
-          return opts.afterRemove.call(this);
-        }, opts.duration);
-      }, opts.lifetime);
+        toasts.splice(opts.index, 1);
+        return opts.afterRemove.call(this);
+      }, opts.duration + 1);
     };
-    this.toasts = [];
+    this.runInterval = function(self) {
+      return $interval(function() {
+        var i, toast, _i, _len, _ref, _results;
+        _ref = self.toasts;
+        _results = [];
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          toast = _ref[i];
+          if (toast.alive && toast.deathtime < Date.now()) {
+            toast.alive = false;
+            _results.push(self.removeToast(i, 1));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      }, 500);
+    };
     this.addNotification = function(options) {
       var opts;
       opts = {
@@ -1478,7 +1673,7 @@ angular.module('sh.notification', []).service("ShNotification", [
         return this.addToast(defaultToast);
       }
     };
-    this.notifications = [];
+    this.runInterval(this);
     return this;
   }
 ]);
@@ -1491,5 +1686,21 @@ angular.module("sh.priv", []).service("ShPriv", function() {
   return this;
 });
 
+"use strict";
+angular.module('sh.spinning.service', []).service("ShSpinningService", function() {
+  var spinningStates;
+  spinningStates = {};
+  this.spin = function(key) {
+    return spinningStates[key] = true;
+  };
+  this.stop = function(key) {
+    return delete spinningStates[key];
+  };
+  this.isSpinning = function(key) {
+    return spinningStates[key] === true;
+  };
+  return this;
+});
+
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.datepicker', 'sh.form', 'sh.number.format', 'sh.select2', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.priv']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.form', 'sh.nicescroll', 'sh.number.format', 'sh.select2', 'sh.spinning', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.priv', 'sh.spinning.service']);

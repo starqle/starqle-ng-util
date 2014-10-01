@@ -19,10 +19,13 @@
 
 "use strict";
 
-angular.module('sh.notification',[]).service "ShNotification", ['$timeout', ($timeout) ->
+angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$interval', ($timeout, $interval) ->
   
   defaultLifetime = 4000
   defaultDuration = 500
+
+  @toasts = []
+  @notifications = []
 
   #
   # Adding toast
@@ -50,13 +53,14 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', ($ti
       opts.toast = options
       opts.lifetime = lifetimeOpt if lifetimeOpt?
       opts.duration = durationOpt if durationOpt?
+      opts.toast.deathtime = Date.now() + opts.lifetime 
+      opts.toast.alive = true
     else
       jQuery.extend(opts, options)
 
     opts.beforeAdd.call this
     @toasts.unshift opts.toast
     opts.afterAdd.call this
-    @removeToast(opts)
 
   #
   # Adding oldest toast
@@ -91,21 +95,30 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', ($ti
     # Setup local variable for toast
     toasts = @toasts
 
+    # $timeout ->
+    opts.beforeRemove.call this
+
+    angular.element("#toast-group-item-#{opts.index}").animate
+      height: 0
+      opacity: 0
+    , opts.duration
+
     $timeout ->
-      opts.beforeRemove.call this
+      toasts.splice opts.index, 1
+      opts.afterRemove.call this
+    , opts.duration + 1
+    # , opts.lifetime
 
-      angular.element("#toast-group-item-#{opts.index}").animate
-        height: 0
-        opacity: 0
-      , opts.duration
-
-      $timeout ->
-        toasts.splice opts.index, 1
-        opts.afterRemove.call this
-      , opts.duration
-    , opts.lifetime
-
-  @toasts = []
+  #
+  # Periodic checking
+  #
+  @runInterval = (self) ->
+    $interval ->
+      for toast, i in self.toasts
+        if toast.alive and toast.deathtime < Date.now()
+          toast.alive = false
+          self.removeToast(i, 1)
+    , 500
 
   #
   # Adding notification
@@ -186,8 +199,10 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', ($ti
     else
       @addToast defaultToast
 
-
-  @notifications = []
+  #
+  #
+  #
+  @runInterval(this)
 
   return this
 ]
