@@ -10,11 +10,11 @@
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
 # PARTICULAR PURPOSE.
 #
-# @file_name app/scripts/directives/sh-spinning.coffee
+# @file_name src/directives/sh-spinning.coffee
 # @author Raymond Ralibi
 # @email ralibi@starqle.com
 # @company PT. Starqle Indonesia
-# @note This file contains sh-spinning directive
+# @note This file contains shSpinning directive
 # =============================================================================
 
 "use strict"

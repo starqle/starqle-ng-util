@@ -1,5 +1,5 @@
 # =============================================================================
-# Copyright (c) 2013 All Right Reserved, http://starqle.com/
+# Copyright (c) 2014 All Right Reserved, http://starqle.com/
 #
 # This source is subject to the Starqle Permissive License.
 # Please see the License.txt file for more information.
@@ -18,6 +18,7 @@
 # =============================================================================
 
 "use strict"
+
 angular.module('sh.focus', []).directive "shFocus", ['$timeout', ($timeout) ->
   scope:
     shFocus: '='

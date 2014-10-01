@@ -24,10 +24,10 @@ angular.module 'starqle.ng.util', [
   'on.root.scope',
 
   # directives
-  'sh.dialog',
   'sh.datepicker',
-  'sh.form',
+  'sh.dialog',
   'sh.focus',
+  'sh.form',
   'sh.nicescroll',
   'sh.number.format',
   'sh.select2',
