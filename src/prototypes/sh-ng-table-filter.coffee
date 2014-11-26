@@ -39,9 +39,9 @@ angular.module('sh.ng.table.filter', []).run ['$rootScope', '$filter', ($rootSco
 
     $scope.prepareFilterDate = (navbarFilter) ->
       dateParams = {}
-      delete $scope.filterParams[navbarFilter+"Eqdate"]
-      delete $scope.filterParams[navbarFilter+"Lteqdate"]
-      delete $scope.filterParams[navbarFilter+"Gteqdate"]
+      delete $scope.filterParams[navbarFilter+"_eqdate"]
+      delete $scope.filterParams[navbarFilter+"_lteqdate"]
+      delete $scope.filterParams[navbarFilter+"_gteqdate"]
 
     $scope.executeFilterDate = () ->
       $.extend $scope.filterParams, dateParams
@@ -54,41 +54,41 @@ angular.module('sh.ng.table.filter', []).run ['$rootScope', '$filter', ($rootSco
 
     $scope.filterDateToday = (navbarFilter) ->
       $scope.prepareFilterDate(navbarFilter)
-      dateParams[navbarFilter+"Eqdate"] = moment().format('YYYY-MM-DD')
+      dateParams[navbarFilter+"_eqdate"] = moment().format('YYYY-MM-DD')
       $scope.executeFilterDate()
 
     $scope.filterDatePastNDays = (navbarFilter, n) ->
       $scope.prepareFilterDate(navbarFilter)
-      dateParams[navbarFilter+"Lteqdate"] = moment().format('YYYY-MM-DD')
-      dateParams[navbarFilter+"Gteqdate"] = moment().subtract('days', n).format('YYYY-MM-DD')
+      dateParams[navbarFilter+"_lteqdate"] = moment().format('YYYY-MM-DD')
+      dateParams[navbarFilter+"_gteqdate"] = moment().subtract('days', n).format('YYYY-MM-DD')
       $scope.executeFilterDate()
 
     $scope.filterDatePastNWeeks = (navbarFilter, n) ->
       $scope.prepareFilterDate(navbarFilter)
-      dateParams[navbarFilter+"Lteqdate"] = moment().format('YYYY-MM-DD')
-      dateParams[navbarFilter+"Gteqdate"] = moment().subtract('weeks', n).format('YYYY-MM-DD')
+      dateParams[navbarFilter+"_lteqdate"] = moment().format('YYYY-MM-DD')
+      dateParams[navbarFilter+"_gteqdate"] = moment().subtract('weeks', n).format('YYYY-MM-DD')
       $scope.executeFilterDate()
 
     $scope.filterDatePastNMonths = (navbarFilter, n) ->
       $scope.prepareFilterDate(navbarFilter)
-      dateParams[navbarFilter+"Lteqdate"] = moment().format('YYYY-MM-DD')
-      dateParams[navbarFilter+"Gteqdate"] = moment().subtract('months', n).format('YYYY-MM-DD')
+      dateParams[navbarFilter+"_lteqdate"] = moment().format('YYYY-MM-DD')
+      dateParams[navbarFilter+"_gteqdate"] = moment().subtract('months', n).format('YYYY-MM-DD')
       $scope.executeFilterDate()
 
     $scope.filterDatePastNYears = (navbarFilter, n) ->
       $scope.prepareFilterDate(navbarFilter)
-      dateParams[navbarFilter+"Lteqdate"] = moment().format('YYYY-MM-DD')
-      dateParams[navbarFilter+"Gteqdate"] = moment().subtract('years', n).format('YYYY-MM-DD')
+      dateParams[navbarFilter+"_lteqdate"] = moment().format('YYYY-MM-DD')
+      dateParams[navbarFilter+"_gteqdate"] = moment().subtract('years', n).format('YYYY-MM-DD')
       $scope.executeFilterDate()
 
     $scope.filterDateRange = (navbarFilter) ->
-      fromDate = $scope.filterParams[navbarFilter+"Gteqdate"]
-      thruDate = $scope.filterParams[navbarFilter+"Lteqdate"]
+      fromDate = $scope.filterParams[navbarFilter+"_gteqdate"]
+      thruDate = $scope.filterParams[navbarFilter+"_lteqdate"]
       $scope.prepareFilterDate(navbarFilter)
-      
+
       $scope.filterLabel[navbarFilter] = fromDate + ' - ' + thruDate
-      dateParams[navbarFilter+"Gteqdate"] = fromDate
-      dateParams[navbarFilter+"Lteqdate"] = thruDate
+      dateParams[navbarFilter+"_gteqdate"] = fromDate
+      dateParams[navbarFilter+"_lteqdate"] = thruDate
       $scope.executeFilterDate()
       angular.element("#date-filter-#{navbarFilter}-modal").modal('hide')
       return
@@ -100,14 +100,14 @@ angular.module('sh.ng.table.filter', []).run ['$rootScope', '$filter', ($rootSco
     # =========================================================================
     # Number filters
     # =========================================================================
-    
+
     numberParams = {}
 
     $scope.prepareFilterNumber = (navbarFilter) ->
       numberParams = {}
-      delete $scope.filterParams[navbarFilter+"Eq"]
-      delete $scope.filterParams[navbarFilter+"Lteq"]
-      delete $scope.filterParams[navbarFilter+"Gteq"]
+      delete $scope.filterParams[navbarFilter+"_eq"]
+      delete $scope.filterParams[navbarFilter+"_tleq"]
+      delete $scope.filterParams[navbarFilter+"_gteq"]
 
     $scope.executeFilterNumber = () ->
       $.extend $scope.filterParams, numberParams
@@ -121,17 +121,17 @@ angular.module('sh.ng.table.filter', []).run ['$rootScope', '$filter', ($rootSco
     $scope.filterNumberRange = (navbarFilter, leftNumber, rightNumber) ->
       if leftNumber
         $scope.prepareFilterNumber(navbarFilter)
-        numberParams[navbarFilter+"Lteq"] = rightNumber
-        numberParams[navbarFilter+"Gteq"] = leftNumber
+        numberParams[navbarFilter+"_tleq"] = rightNumber
+        numberParams[navbarFilter+"_gteq"] = leftNumber
         $scope.executeFilterNumber()
       else
         # From modal
-        fromNumber = $scope.filterParams[navbarFilter+"Gteq"]
-        thruNumber = $scope.filterParams[navbarFilter+"Lteq"]
+        fromNumber = $scope.filterParams[navbarFilter+"_gteq"]
+        thruNumber = $scope.filterParams[navbarFilter+"_tleq"]
         $scope.prepareFilterDate(navbarFilter)
         $scope.filterLabel[navbarFilter] = $filter('number')(parseInt(fromNumber), 0) + ' - ' + $filter('number')(parseInt(thruNumber), 0)
-        dateParams[navbarFilter+"Gteq"] = fromNumber
-        dateParams[navbarFilter+"Lteq"] = thruNumber
+        dateParams[navbarFilter+"_gteq"] = fromNumber
+        dateParams[navbarFilter+"_tleq"] = thruNumber
         $scope.executeFilterDate()
         angular.element("#number-filter-#{navbarFilter}-modal").modal('hide')
         return
@@ -151,7 +151,7 @@ angular.module('sh.ng.table.filter', []).run ['$rootScope', '$filter', ($rootSco
     # =========================================================================
     # Helpers
     # =========================================================================
-    
+
     $scope.toggleFilterRegion = ->
       $scope.filterRegion.visible = !$scope.filterRegion.visible
 
