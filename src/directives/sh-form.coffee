@@ -26,7 +26,7 @@ angular.module('sh.form',[]).directive "shForm", [ ->
     scope.shHighlightRequired[attrs.name] = false
     scope.$watch "shHighlightRequired.#{attrs.name}", (newVal, oldVal) ->
       if "#{scope.shHighlightRequired[attrs.name]}" == 'true'
-        jQuery(".sh-form").addClass('sh-highlight-required')
+        elem.addClass('sh-highlight-required')
       else
-        jQuery(".sh-form").removeClass('sh-highlight-required')
+        elem.removeClass('sh-highlight-required')
 ]
