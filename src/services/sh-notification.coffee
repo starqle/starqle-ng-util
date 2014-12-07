@@ -56,7 +56,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
       opts.toast.deathtime = Date.now() + opts.lifetime 
       opts.toast.alive = true
     else
-      jQuery.extend(opts, options)
+      angular.extend(opts, options)
 
     opts.beforeAdd.call this
     @toasts.unshift opts.toast
@@ -90,7 +90,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
       opts.lifetime = lifetimeOpt if lifetimeOpt?
       opts.duration = durationOpt if durationOpt?
     else
-      jQuery.extend(opts, options)
+      angular.extend(opts, options)
 
     # Setup local variable for toast
     toasts = @toasts
@@ -143,7 +143,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
     if options.type? and options.message?
       opts.notification = options
     else
-      jQuery.extend(opts, options)
+      angular.extend(opts, options)
 
     opts.beforeAdd.call this
     @notifications.unshift opts.notification
@@ -169,7 +169,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
       opts.index = options * 1
       opts.duration = durationOpt if durationOpt?
     else
-      jQuery.extend(opts, options)
+      angular.extend(opts, options)
 
     # Setup local variable for notification
     notifications = @notifications
