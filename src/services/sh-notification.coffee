@@ -119,6 +119,8 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
           toast.alive = false
           self.removeToast(i, 1)
     , 500
+    , 0
+    , false
 
   #
   # Adding notification
