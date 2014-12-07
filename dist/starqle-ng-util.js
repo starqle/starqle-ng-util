@@ -146,9 +146,9 @@ angular.module('sh.form', []).directive("shForm", [
         scope.shHighlightRequired[attrs.name] = false;
         return scope.$watch("shHighlightRequired." + attrs.name, function(newVal, oldVal) {
           if (("" + scope.shHighlightRequired[attrs.name]) === 'true') {
-            return jQuery(".sh-form").addClass('sh-highlight-required');
+            return elem.addClass('sh-highlight-required');
           } else {
-            return jQuery(".sh-form").removeClass('sh-highlight-required');
+            return elem.removeClass('sh-highlight-required');
           }
         });
       }
@@ -582,6 +582,17 @@ angular.module('sh.remove.duplicates', []).filter("shRemoveDuplicates", [
     };
   }
 ]);
+
+"use strict";
+angular.module('sh.strip.html', []).filter("shStripHtml", function() {
+  return function(value) {
+    if (!value) {
+      return "";
+    } else {
+      return value.replace(/<[^>]+>/gm, '');
+    }
+  };
+});
 
 "use strict";
 angular.module('sh.strip.to.newline', []).filter("shStripToNewline", function() {
@@ -1176,9 +1187,9 @@ angular.module('sh.ng.table.filter', []).run([
         $scope.filterLabel = {};
         $scope.prepareFilterDate = function(navbarFilter) {
           dateParams = {};
-          delete $scope.filterParams[navbarFilter + "Eqdate"];
-          delete $scope.filterParams[navbarFilter + "Lteqdate"];
-          return delete $scope.filterParams[navbarFilter + "Gteqdate"];
+          delete $scope.filterParams[navbarFilter + "_eqdate"];
+          delete $scope.filterParams[navbarFilter + "_lteqdate"];
+          return delete $scope.filterParams[navbarFilter + "_gteqdate"];
         };
         $scope.executeFilterDate = function() {
           $.extend($scope.filterParams, dateParams);
@@ -1191,41 +1202,41 @@ angular.module('sh.ng.table.filter', []).run([
         };
         $scope.filterDateToday = function(navbarFilter) {
           $scope.prepareFilterDate(navbarFilter);
-          dateParams[navbarFilter + "Eqdate"] = moment().format('YYYY-MM-DD');
+          dateParams[navbarFilter + "_eqdate"] = moment().format('YYYY-MM-DD');
           return $scope.executeFilterDate();
         };
         $scope.filterDatePastNDays = function(navbarFilter, n) {
           $scope.prepareFilterDate(navbarFilter);
-          dateParams[navbarFilter + "Lteqdate"] = moment().format('YYYY-MM-DD');
-          dateParams[navbarFilter + "Gteqdate"] = moment().subtract('days', n).format('YYYY-MM-DD');
+          dateParams[navbarFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
+          dateParams[navbarFilter + "_gteqdate"] = moment().subtract('days', n).format('YYYY-MM-DD');
           return $scope.executeFilterDate();
         };
         $scope.filterDatePastNWeeks = function(navbarFilter, n) {
           $scope.prepareFilterDate(navbarFilter);
-          dateParams[navbarFilter + "Lteqdate"] = moment().format('YYYY-MM-DD');
-          dateParams[navbarFilter + "Gteqdate"] = moment().subtract('weeks', n).format('YYYY-MM-DD');
+          dateParams[navbarFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
+          dateParams[navbarFilter + "_gteqdate"] = moment().subtract('weeks', n).format('YYYY-MM-DD');
           return $scope.executeFilterDate();
         };
         $scope.filterDatePastNMonths = function(navbarFilter, n) {
           $scope.prepareFilterDate(navbarFilter);
-          dateParams[navbarFilter + "Lteqdate"] = moment().format('YYYY-MM-DD');
-          dateParams[navbarFilter + "Gteqdate"] = moment().subtract('months', n).format('YYYY-MM-DD');
+          dateParams[navbarFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
+          dateParams[navbarFilter + "_gteqdate"] = moment().subtract('months', n).format('YYYY-MM-DD');
           return $scope.executeFilterDate();
         };
         $scope.filterDatePastNYears = function(navbarFilter, n) {
           $scope.prepareFilterDate(navbarFilter);
-          dateParams[navbarFilter + "Lteqdate"] = moment().format('YYYY-MM-DD');
-          dateParams[navbarFilter + "Gteqdate"] = moment().subtract('years', n).format('YYYY-MM-DD');
+          dateParams[navbarFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
+          dateParams[navbarFilter + "_gteqdate"] = moment().subtract('years', n).format('YYYY-MM-DD');
           return $scope.executeFilterDate();
         };
         $scope.filterDateRange = function(navbarFilter) {
           var fromDate, thruDate;
-          fromDate = $scope.filterParams[navbarFilter + "Gteqdate"];
-          thruDate = $scope.filterParams[navbarFilter + "Lteqdate"];
+          fromDate = $scope.filterParams[navbarFilter + "_gteqdate"];
+          thruDate = $scope.filterParams[navbarFilter + "_lteqdate"];
           $scope.prepareFilterDate(navbarFilter);
           $scope.filterLabel[navbarFilter] = fromDate + ' - ' + thruDate;
-          dateParams[navbarFilter + "Gteqdate"] = fromDate;
-          dateParams[navbarFilter + "Lteqdate"] = thruDate;
+          dateParams[navbarFilter + "_gteqdate"] = fromDate;
+          dateParams[navbarFilter + "_lteqdate"] = thruDate;
           $scope.executeFilterDate();
           angular.element("#date-filter-" + navbarFilter + "-modal").modal('hide');
         };
@@ -1235,9 +1246,9 @@ angular.module('sh.ng.table.filter', []).run([
         numberParams = {};
         $scope.prepareFilterNumber = function(navbarFilter) {
           numberParams = {};
-          delete $scope.filterParams[navbarFilter + "Eq"];
-          delete $scope.filterParams[navbarFilter + "Lteq"];
-          return delete $scope.filterParams[navbarFilter + "Gteq"];
+          delete $scope.filterParams[navbarFilter + "_eq"];
+          delete $scope.filterParams[navbarFilter + "_tleq"];
+          return delete $scope.filterParams[navbarFilter + "_gteq"];
         };
         $scope.executeFilterNumber = function() {
           $.extend($scope.filterParams, numberParams);
@@ -1252,16 +1263,16 @@ angular.module('sh.ng.table.filter', []).run([
           var fromNumber, thruNumber;
           if (leftNumber) {
             $scope.prepareFilterNumber(navbarFilter);
-            numberParams[navbarFilter + "Lteq"] = rightNumber;
-            numberParams[navbarFilter + "Gteq"] = leftNumber;
+            numberParams[navbarFilter + "_tleq"] = rightNumber;
+            numberParams[navbarFilter + "_gteq"] = leftNumber;
             return $scope.executeFilterNumber();
           } else {
-            fromNumber = $scope.filterParams[navbarFilter + "Gteq"];
-            thruNumber = $scope.filterParams[navbarFilter + "Lteq"];
+            fromNumber = $scope.filterParams[navbarFilter + "_gteq"];
+            thruNumber = $scope.filterParams[navbarFilter + "_tleq"];
             $scope.prepareFilterDate(navbarFilter);
             $scope.filterLabel[navbarFilter] = $filter('number')(parseInt(fromNumber), 0) + ' - ' + $filter('number')(parseInt(thruNumber), 0);
-            dateParams[navbarFilter + "Gteq"] = fromNumber;
-            dateParams[navbarFilter + "Lteq"] = thruNumber;
+            dateParams[navbarFilter + "_gteq"] = fromNumber;
+            dateParams[navbarFilter + "_tleq"] = thruNumber;
             $scope.executeFilterDate();
             angular.element("#number-filter-" + navbarFilter + "-modal").modal('hide');
           }
@@ -1550,7 +1561,7 @@ angular.module('sh.notification', []).service("ShNotification", [
         opts.toast.deathtime = Date.now() + opts.lifetime;
         opts.toast.alive = true;
       } else {
-        jQuery.extend(opts, options);
+        angular.extend(opts, options);
       }
       opts.beforeAdd.call(this);
       this.toasts.unshift(opts.toast);
@@ -1577,7 +1588,7 @@ angular.module('sh.notification', []).service("ShNotification", [
           opts.duration = durationOpt;
         }
       } else {
-        jQuery.extend(opts, options);
+        angular.extend(opts, options);
       }
       toasts = this.toasts;
       opts.beforeRemove.call(this);
@@ -1605,7 +1616,7 @@ angular.module('sh.notification', []).service("ShNotification", [
           }
         }
         return _results;
-      }, 500);
+      }, 500, 0, false);
     };
     this.addNotification = function(options) {
       var opts;
@@ -1619,7 +1630,7 @@ angular.module('sh.notification', []).service("ShNotification", [
       if ((options.type != null) && (options.message != null)) {
         opts.notification = options;
       } else {
-        jQuery.extend(opts, options);
+        angular.extend(opts, options);
       }
       opts.beforeAdd.call(this);
       this.notifications.unshift(opts.notification);
@@ -1639,7 +1650,7 @@ angular.module('sh.notification', []).service("ShNotification", [
           opts.duration = durationOpt;
         }
       } else {
-        jQuery.extend(opts, options);
+        angular.extend(opts, options);
       }
       notifications = this.notifications;
       opts.beforeRemove.call(this);
@@ -1703,4 +1714,4 @@ angular.module('sh.spinning.service', []).service("ShSpinningService", function(
 });
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.form', 'sh.nicescroll', 'sh.number.format', 'sh.select2', 'sh.spinning', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.priv', 'sh.spinning.service']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.form', 'sh.nicescroll', 'sh.number.format', 'sh.select2', 'sh.spinning', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.priv', 'sh.spinning.service']);
