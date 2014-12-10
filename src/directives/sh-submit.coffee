@@ -25,32 +25,29 @@
 
 angular.module('sh.submit',[]).directive 'shSubmit', ['$compile', ($compile) ->
   restrict: 'A'
-  link: (scope, element, attrs, ctrl) ->
-    elmt = jQuery(element)
-    shSubmitOverlay = jQuery('<span class="sh-submit-overlay" ng-mouseover="overlayHover()" ng-mouseleave="overlayLeave()"></span>')
+  link: (scope, element, attrs) ->
+    shSubmitOverlay = angular.element('<span class="sh-submit-overlay" ng-mouseover="overlayHover()" ng-mouseleave="overlayLeave()"></span>')
     $compile(shSubmitOverlay)(scope)
-    scope.shHighlightRequired = {} unless scope.shHighlightRequired
+
+    shSubmitInvalid = attrs.shSubmitInvalid or 'Please correct/fill out the highlighted fields'
+
+    if element.next('.sh-submit-overlay').length == 0 && element.parents('.sh-submit-overlay').length == 0
+      shSubmitOverlay.insertAfter(element)
+      shSubmitOverlay.tooltip
+        title: shSubmitInvalid
+      element.appendTo(shSubmitOverlay)
 
     scope.overlayHover = ->
-      scope.shHighlightRequired[attrs.shSubmit] = true
-
-    scope.overlayLeave = ->
-      scope.shHighlightRequired[attrs.shSubmit] = false
-
-    if elmt.next('.sh-submit-overlay').length == 0 && elmt.parents('.sh-submit-overlay').length == 0
-      shSubmitOverlay.insertAfter(elmt)
-      shSubmitOverlay.tooltip
-        title: 'Fill the highlighed field(s)'
-      elmt.appendTo(shSubmitOverlay)
+      if scope["#{attrs.shSubmit}"].$invalid
+        element.parents('form').eq(0).addClass('sh-highlight-required')
+      return
 
     scope.$watch "#{attrs.shSubmit}.$invalid", (newValue, oldValue) ->
       # value is a string, not boolean
       if newValue == false
         shSubmitOverlay.tooltip 'destroy'
-        # shSubmitOverlay.tooltip
-        #   title: 'Already filled'
       else
         shSubmitOverlay.tooltip 'destroy'
         shSubmitOverlay.tooltip
-          title: 'Harap lengkapi isian yang disorot'
+          title: shSubmitInvalid
 ]
