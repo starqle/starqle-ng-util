@@ -135,28 +135,6 @@ angular.module('sh.focus', []).directive("shFocus", [
 ]);
 
 "use strict";
-angular.module('sh.form', []).directive("shForm", [
-  function() {
-    return {
-      restrict: 'C',
-      link: function(scope, elem, attrs) {
-        if (!scope.shHighlightRequired) {
-          scope.shHighlightRequired = {};
-        }
-        scope.shHighlightRequired[attrs.name] = false;
-        return scope.$watch("shHighlightRequired." + attrs.name, function(newVal, oldVal) {
-          if (("" + scope.shHighlightRequired[attrs.name]) === 'true') {
-            return elem.addClass('sh-highlight-required');
-          } else {
-            return elem.removeClass('sh-highlight-required');
-          }
-        });
-      }
-    };
-  }
-]);
-
-"use strict";
 angular.module('sh.nicescroll', []).directive("shNicescroll", function() {
   return {
     restrict: 'C',
@@ -441,34 +419,30 @@ angular.module('sh.submit', []).directive('shSubmit', [
   '$compile', function($compile) {
     return {
       restrict: 'A',
-      link: function(scope, element, attrs, ctrl) {
-        var elmt, shSubmitOverlay;
-        elmt = jQuery(element);
-        shSubmitOverlay = jQuery('<span class="sh-submit-overlay" ng-mouseover="overlayHover()" ng-mouseleave="overlayLeave()"></span>');
+      link: function(scope, element, attrs) {
+        var shSubmitInvalid, shSubmitOverlay;
+        shSubmitOverlay = angular.element('<span class="sh-submit-overlay" ng-mouseover="overlayHover()" ng-mouseleave="overlayLeave()"></span>');
         $compile(shSubmitOverlay)(scope);
-        if (!scope.shHighlightRequired) {
-          scope.shHighlightRequired = {};
+        shSubmitInvalid = attrs.shSubmitInvalid || 'Please correct/fill out the highlighted fields';
+        if (element.next('.sh-submit-overlay').length === 0 && element.parents('.sh-submit-overlay').length === 0) {
+          shSubmitOverlay.insertAfter(element);
+          shSubmitOverlay.tooltip({
+            title: shSubmitInvalid
+          });
+          element.appendTo(shSubmitOverlay);
         }
         scope.overlayHover = function() {
-          return scope.shHighlightRequired[attrs.shSubmit] = true;
+          if (scope["" + attrs.shSubmit].$invalid) {
+            element.parents('form').eq(0).addClass('sh-highlight-required');
+          }
         };
-        scope.overlayLeave = function() {
-          return scope.shHighlightRequired[attrs.shSubmit] = false;
-        };
-        if (elmt.next('.sh-submit-overlay').length === 0 && elmt.parents('.sh-submit-overlay').length === 0) {
-          shSubmitOverlay.insertAfter(elmt);
-          shSubmitOverlay.tooltip({
-            title: 'Fill the highlighed field(s)'
-          });
-          elmt.appendTo(shSubmitOverlay);
-        }
         return scope.$watch("" + attrs.shSubmit + ".$invalid", function(newValue, oldValue) {
           if (newValue === false) {
             return shSubmitOverlay.tooltip('destroy');
           } else {
             shSubmitOverlay.tooltip('destroy');
             return shSubmitOverlay.tooltip({
-              title: 'Harap lengkapi isian yang disorot'
+              title: shSubmitInvalid
             });
           }
         });
@@ -1714,4 +1688,4 @@ angular.module('sh.spinning.service', []).service("ShSpinningService", function(
 });
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.form', 'sh.nicescroll', 'sh.number.format', 'sh.select2', 'sh.spinning', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.priv', 'sh.spinning.service']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.nicescroll', 'sh.number.format', 'sh.select2', 'sh.spinning', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.priv', 'sh.spinning.service']);
