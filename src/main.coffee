@@ -24,6 +24,7 @@ angular.module 'starqle.ng.util', [
   'on.root.scope',
 
   # directives
+  'sh.collapsible',
   'sh.datepicker',
   'sh.dialog',
   'sh.focus',
