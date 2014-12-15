@@ -17,6 +17,60 @@ angular.module('on.root.scope', []).config([
   }
 ]);
 
+angular.module('sh.collapsible', []).directive("shCollapsible", function() {
+  return {
+    restrict: 'AEC',
+    scope: {},
+    controller: function() {
+      this.shCollapse = false;
+      this.bodyElements = [];
+      this.toggleCollapse = function() {
+        var bodyElement, _i, _j, _len, _len1, _ref, _ref1;
+        this.shCollapse = !this.shCollapse;
+        if (this.isCollapse()) {
+          _ref = this.bodyElements;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            bodyElement = _ref[_i];
+            bodyElement.slideUp('fast');
+          }
+        } else {
+          _ref1 = this.bodyElements;
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            bodyElement = _ref1[_j];
+            bodyElement.slideDown('fast');
+          }
+        }
+      };
+      this.addCollapsibleBodyElement = function(element) {
+        this.bodyElements.push(element);
+      };
+      this.isCollapse = function() {
+        return this.shCollapse;
+      };
+    }
+  };
+}).directive("shCollapsibleBody", function() {
+  return {
+    restrict: 'AEC',
+    scope: {},
+    require: '^shCollapsible',
+    link: function(scope, element, attrs, shCollapsibleController) {
+      shCollapsibleController.addCollapsibleBodyElement(element);
+    }
+  };
+}).directive("shCollapsibleControl", function() {
+  return {
+    restrict: 'AEC',
+    scope: {},
+    require: '^shCollapsible',
+    link: function(scope, element, attrs, shCollapsibleController) {
+      element.bind('click', function() {
+        shCollapsibleController.toggleCollapse();
+      });
+    }
+  };
+});
+
 "use strict";
 angular.module('sh.datepicker', []).directive("shDatepicker", [
   'dateFilter', function(dateFilter) {
@@ -942,6 +996,11 @@ angular.module('sh.modal.persistence', []).run([
             id = null;
           }
         };
+        $scope.afterCloseEntityModal = function(elementStr, id) {
+          if (id == null) {
+            id = null;
+          }
+        };
         $scope.beforeSaveEntity = function(elementStr, $event) {};
         $scope.showEntityModal = function(elementStr, id) {
           if (id == null) {
@@ -954,14 +1013,27 @@ angular.module('sh.modal.persistence', []).run([
             return $scope.showEditEntityModal(id, elementStr);
           }
         };
-        $scope.resetEntityModal = function() {
+        $scope.resetEntityModal = function(elementStr) {
+          var entityForm, entityFormName;
+          if (elementStr == null) {
+            elementStr = null;
+          }
           $scope.entity = {};
           $scope.errors = [];
-          return $scope.localLookup = {};
+          $scope.localLookup = {};
+          if (elementStr) {
+            entityForm = angular.element("#" + elementStr).find('form').eq(0);
+            entityForm.removeClass('sh-highlight-required');
+            entityFormName = entityForm.attr('name');
+            if ((entityFormName != null) && $scope[entityFormName] !== null) {
+              return $scope[entityFormName].$setPristine();
+            }
+          }
         };
         $scope.closeEntityModal = function(elementStr) {
           angular.element("#" + elementStr).modal('hide');
-          return $scope.resetEntityModal();
+          $scope.resetEntityModal(elementStr);
+          return $scope.afterCloseEntityModal(elementStr);
         };
         $scope.saveEntity = function(elementStr, $event) {
           $scope.beforeSaveEntity(elementStr, $event);
@@ -997,7 +1069,8 @@ angular.module('sh.modal.persistence', []).run([
         };
         $scope.closeNewEntityModal = function(elementStr) {
           angular.element("#" + elementStr).modal('hide');
-          return $scope.resetEntityModal();
+          $scope.resetEntityModal(elementStr);
+          return $scope.afterCloseEntityModal(elementStr);
         };
         $scope.createEntity = function(elementStr, $event) {
           $scope.beforeCreateEntity();
@@ -1026,7 +1099,7 @@ angular.module('sh.modal.persistence', []).run([
         $scope.showEditEntityModal = function(id, elementStr) {
           angular.element("#" + elementStr).modal('show');
           angular.element("#" + elementStr).on('hidden.bs.modal', function() {
-            $scope.closeEditEntityModal(elementStr);
+            $scope.closeEditEntityModal(elementStr, id);
             return $scope.modalProperties.visible = false;
           });
           return $scope.fetchEditEntity(id);
@@ -1049,9 +1122,10 @@ angular.module('sh.modal.persistence', []).run([
             return $scope.editEntityFailureNotification(error);
           });
         };
-        $scope.closeEditEntityModal = function(elementStr) {
+        $scope.closeEditEntityModal = function(elementStr, id) {
           angular.element("#" + elementStr).modal('hide');
-          return $scope.resetEntityModal();
+          $scope.resetEntityModal(elementStr);
+          return $scope.afterCloseEntityModal(elementStr, id);
         };
         $scope.updateEntity = function(elementStr, $event) {
           $scope.beforeUpdateEntity();
@@ -1062,7 +1136,7 @@ angular.module('sh.modal.persistence', []).run([
           }, $scope.optParams), {
             data: $scope.entity
           }).$promise.then(function(success) {
-            $scope.closeEditEntityModal(elementStr);
+            $scope.closeEditEntityModal(elementStr, $scope.entity.id);
             if ($scope.recentlyUpdatedIds != null) {
               $scope.recentlyUpdatedIds.push(success.data.id);
             }
@@ -1664,6 +1738,31 @@ angular.module('sh.notification', []).service("ShNotification", [
 ]);
 
 "use strict";
+angular.module("sh.page.service", []).service("ShPageService", [
+  '$window', function($window) {
+    var _appName, _pageTitle;
+    _pageTitle = '';
+    _appName = '';
+    this.setPageTitle = function(pageTitle) {
+      _pageTitle = pageTitle;
+      $window.document.title = this.getAppName() + ' - ' + this.getPageTitle();
+      return this.getPageTitle();
+    };
+    this.getPageTitle = function() {
+      return _pageTitle;
+    };
+    this.setAppName = function(appName) {
+      _appName = appName;
+      return this.getAppName();
+    };
+    this.getAppName = function() {
+      return _appName;
+    };
+    return this;
+  }
+]);
+
+"use strict";
 angular.module("sh.priv", []).service("ShPriv", function() {
   this.can = function(privileges, ability) {
     return privileges.indexOf(ability) !== -1;
@@ -1688,4 +1787,4 @@ angular.module('sh.spinning.service', []).service("ShSpinningService", function(
 });
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.nicescroll', 'sh.number.format', 'sh.select2', 'sh.spinning', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.priv', 'sh.spinning.service']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.nicescroll', 'sh.number.format', 'sh.select2', 'sh.spinning', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);
