@@ -146,6 +146,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
     # =========================================================================
     # Additional callbacks
     $scope.beforeShowEntityModal = (elementStr, id = null) ->
+    $scope.afterCloseEntityModal = (elementStr, id = null) ->
     $scope.beforeSaveEntity = (elementStr, $event) ->
 
     # =========================================================================
@@ -160,14 +161,21 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       else # Otherwise fetch existing entity for editing
         $scope.showEditEntityModal(id, elementStr)
 
-    $scope.resetEntityModal = ->
+    $scope.resetEntityModal = (elementStr = null) ->
       $scope.entity = {}
       $scope.errors = []
       $scope.localLookup = {}
+      if elementStr
+        entityForm = angular.element("##{elementStr}").find('form').eq(0)
+        entityForm.removeClass('sh-highlight-required')
+        entityFormName = entityForm.attr('name')
+        if entityFormName? and $scope[entityFormName] isnt null
+          $scope[entityFormName].$setPristine()
 
     $scope.closeEntityModal = (elementStr) ->
       angular.element("##{elementStr}").modal('hide')
-      $scope.resetEntityModal()
+      $scope.resetEntityModal(elementStr)
+      $scope.afterCloseEntityModal elementStr
 
     $scope.saveEntity = (elementStr, $event) ->
       $scope.beforeSaveEntity(elementStr, $event)
@@ -209,7 +217,8 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
 
     $scope.closeNewEntityModal = (elementStr) ->
       angular.element("##{elementStr}").modal('hide')
-      $scope.resetEntityModal()
+      $scope.resetEntityModal(elementStr)
+      $scope.afterCloseEntityModal elementStr
 
     $scope.createEntity = (elementStr, $event) ->
       $scope.beforeCreateEntity()
@@ -241,7 +250,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
     $scope.showEditEntityModal = (id, elementStr) ->
       angular.element("##{elementStr}").modal('show')
       angular.element("##{elementStr}").on 'hidden.bs.modal', () ->
-        $scope.closeEditEntityModal elementStr
+        $scope.closeEditEntityModal elementStr, id
         $scope.modalProperties.visible = false
       $scope.fetchEditEntity(id)
 
@@ -264,9 +273,10 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         $scope.editEntityFailureNotification(error)
       )
 
-    $scope.closeEditEntityModal = (elementStr) ->
+    $scope.closeEditEntityModal = (elementStr, id) ->
       angular.element("##{elementStr}").modal('hide')
-      $scope.resetEntityModal()
+      $scope.resetEntityModal(elementStr)
+      $scope.afterCloseEntityModal elementStr, id
 
     $scope.updateEntity = (elementStr, $event) ->
       $scope.beforeUpdateEntity()
@@ -278,7 +288,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.resource.update($.extend({id: $scope.entity.id}, $scope.optParams)
       , data: $scope.entity
       ).$promise.then((success) ->
-        $scope.closeEditEntityModal(elementStr)
+        $scope.closeEditEntityModal(elementStr, $scope.entity.id)
         $scope.recentlyUpdatedIds.push success.data.id if $scope.recentlyUpdatedIds?
         $scope.refreshGrid() if typeof $scope.getPagedDataAsync is 'function'
         ShButtonState.enable $event
@@ -338,11 +348,11 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
 
     # Recently Row Event Class
     $scope.rowEvent = (entity) ->
-      if $scope.recentlyDeletedIds.indexOf(entity.id) >= 0  
+      if $scope.recentlyDeletedIds.indexOf(entity.id) >= 0
         'recently-deleted'
-      else if $scope.recentlyUpdatedIds.indexOf(entity.id) >= 0  
+      else if $scope.recentlyUpdatedIds.indexOf(entity.id) >= 0
         'recently-updated'
-      else if $scope.recentlyCreatedIds.indexOf(entity.id) >= 0  
+      else if $scope.recentlyCreatedIds.indexOf(entity.id) >= 0
         'recently-created'
       else
         'else'
