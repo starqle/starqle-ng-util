@@ -55,6 +55,7 @@ angular.module 'starqle.ng.util', [
   'sh.button.state',
   'sh.element.finder',
   'sh.notification',
+  'sh.page.service',
   'sh.priv',
   'sh.spinning.service'
 ]
