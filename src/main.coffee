@@ -30,7 +30,6 @@ angular.module 'starqle.ng.util', [
   'sh.focus',
   'sh.nicescroll',
   'sh.number.format',
-  'sh.select2',
   'sh.spinning',
   'sh.submit',
   'sh.tooltip',
