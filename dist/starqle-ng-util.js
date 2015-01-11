@@ -189,24 +189,6 @@ angular.module('sh.focus', []).directive("shFocus", [
 ]);
 
 "use strict";
-angular.module('sh.nicescroll', []).directive("shNicescroll", function() {
-  return {
-    restrict: 'C',
-    link: function(scope, elem, attrs) {
-      var nS;
-      nS = elem.niceScroll({
-        autohidemode: false,
-        cursoropacitymax: 0.4,
-        cursorwidth: 8,
-        cursorborderradius: 0,
-        horizrailenabled: false
-      });
-      elem.addClass(nS.id);
-    }
-  };
-});
-
-"use strict";
 angular.module('sh.number.format', []).directive("shNumberFormat", [
   '$filter', function($filter) {
     return {
@@ -1668,4 +1650,4 @@ angular.module('sh.spinning.service', []).service("ShSpinningService", function(
 });
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.nicescroll', 'sh.number.format', 'sh.spinning', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.spinning', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);
