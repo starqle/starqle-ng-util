@@ -23,7 +23,7 @@
 angular.module('sh.collapsible', []).directive("shCollapsible", ->
   restrict: 'AEC'
   scope: {}
-  controller: () ->
+  controller: ($scope, $element) ->
     @shCollapse = false
     @bodyElements = []
 
@@ -32,9 +32,11 @@ angular.module('sh.collapsible', []).directive("shCollapsible", ->
       if @isCollapse()
         for bodyElement in @bodyElements
           bodyElement.slideUp('fast')
+          $element.addClass('is-collapse')
       else
         for bodyElement in @bodyElements
           bodyElement.slideDown('fast')
+          $element.removeClass('is-collapse')
       return
 
     @addCollapsibleBodyElement = (element) ->

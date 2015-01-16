@@ -21,7 +21,7 @@ angular.module('sh.collapsible', []).directive("shCollapsible", function() {
   return {
     restrict: 'AEC',
     scope: {},
-    controller: function() {
+    controller: function($scope, $element) {
       this.shCollapse = false;
       this.bodyElements = [];
       this.toggleCollapse = function() {
@@ -32,12 +32,14 @@ angular.module('sh.collapsible', []).directive("shCollapsible", function() {
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             bodyElement = _ref[_i];
             bodyElement.slideUp('fast');
+            $element.addClass('is-collapse');
           }
         } else {
           _ref1 = this.bodyElements;
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             bodyElement = _ref1[_j];
             bodyElement.slideDown('fast');
+            $element.removeClass('is-collapse');
           }
         }
       };
