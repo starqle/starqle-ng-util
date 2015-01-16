@@ -455,6 +455,16 @@ angular.module('sh.filter.collection', []).filter("shFilterCollection", [
 ]);
 
 "use strict";
+angular.module('sh.floating.precision', []).filter("shFloatingPrecision", function() {
+  return function(value, accuracy) {
+    if (accuracy == null) {
+      accuracy = 12;
+    }
+    return parseFloat(value.toPrecision(accuracy));
+  };
+});
+
+"use strict";
 angular.module('sh.remove.duplicates', []).filter("shRemoveDuplicates", [
   function() {
     return function(collection, fieldName, callback) {
@@ -1658,4 +1668,4 @@ angular.module('sh.spinning.service', []).service("ShSpinningService", function(
 });
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.spinning', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.spinning', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);

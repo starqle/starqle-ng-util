@@ -38,6 +38,7 @@ angular.module 'starqle.ng.util', [
 
   # filters
   'sh.filter.collection',
+  'sh.floating.precision',
   'sh.remove.duplicates',
   'sh.strip.html',
   'sh.strip.to.newline',
