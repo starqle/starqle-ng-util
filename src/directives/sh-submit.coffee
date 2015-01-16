@@ -39,7 +39,11 @@ angular.module('sh.submit',[]).directive 'shSubmit', ['$compile', ($compile) ->
 
     scope.overlayHover = ->
       if scope["#{attrs.shSubmit}"].$invalid
-        element.parents('form').eq(0).addClass('sh-highlight-required')
+        form = element.parents('form').eq(0)
+        if form.length > 0
+          form.addClass('sh-highlight-required')
+        else
+          angular.elemet("form[name='#{attrs.shSubmit}']").addClass('sh-highlight-required')
       return
 
     scope.$watch "#{attrs.shSubmit}.$invalid", (newValue, oldValue) ->
