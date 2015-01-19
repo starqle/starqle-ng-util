@@ -22,7 +22,10 @@
 #
 angular.module('sh.collapsible', []).directive("shCollapsible", ->
   restrict: 'AEC'
-  scope: {}
+  scope:
+    shCollapsibleCollapsed: '@?'
+    shCollapsibleCollapseFn: '&'
+    shCollapsibleExpandFn: '&'
   controller: ($scope, $element) ->
     @shCollapse = false
     @bodyElements = []
@@ -46,6 +49,23 @@ angular.module('sh.collapsible', []).directive("shCollapsible", ->
     @isCollapse = () ->
       @shCollapse
 
+    return
+  controllerAs: 'shCollapsibleController'
+  link: (scope, element, attrs, shCollapsibleController) ->
+
+    scope.shCollapsibleExpandFn
+      expandFn: () ->
+        if shCollapsibleController.isCollapse()
+          shCollapsibleController.toggleCollapse()
+
+    scope.shCollapsibleCollapseFn
+      collapseFn: () ->
+        unless shCollapsibleController.isCollapse()
+          shCollapsibleController.toggleCollapse()
+
+
+    if scope.shCollapsibleCollapsed is 'true'
+      shCollapsibleController.toggleCollapse()
     return
 
 ).directive("shCollapsibleBody", ->

@@ -20,7 +20,11 @@ angular.module('on.root.scope', []).config([
 angular.module('sh.collapsible', []).directive("shCollapsible", function() {
   return {
     restrict: 'AEC',
-    scope: {},
+    scope: {
+      shCollapsibleCollapsed: '@?',
+      shCollapsibleCollapseFn: '&',
+      shCollapsibleExpandFn: '&'
+    },
     controller: function($scope, $element) {
       this.shCollapse = false;
       this.bodyElements = [];
@@ -49,6 +53,26 @@ angular.module('sh.collapsible', []).directive("shCollapsible", function() {
       this.isCollapse = function() {
         return this.shCollapse;
       };
+    },
+    controllerAs: 'shCollapsibleController',
+    link: function(scope, element, attrs, shCollapsibleController) {
+      scope.shCollapsibleExpandFn({
+        expandFn: function() {
+          if (shCollapsibleController.isCollapse()) {
+            return shCollapsibleController.toggleCollapse();
+          }
+        }
+      });
+      scope.shCollapsibleCollapseFn({
+        collapseFn: function() {
+          if (!shCollapsibleController.isCollapse()) {
+            return shCollapsibleController.toggleCollapse();
+          }
+        }
+      });
+      if (scope.shCollapsibleCollapsed === 'true') {
+        shCollapsibleController.toggleCollapse();
+      }
     }
   };
 }).directive("shCollapsibleBody", function() {
