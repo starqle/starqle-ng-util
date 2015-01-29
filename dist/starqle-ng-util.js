@@ -1430,6 +1430,13 @@ angular.module('sh.button.state', []).service("ShButtonState", [
           } else {
             return target.addClass('disabled');
           }
+        } else if (target.is('span')) {
+          target = target.parent();
+          if (enabled) {
+            return target.removeClass('disabled');
+          } else {
+            return target.addClass('disabled');
+          }
         }
       }
     };

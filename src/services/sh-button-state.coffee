@@ -38,6 +38,12 @@ angular.module('sh.button.state',[]).service "ShButtonState", ['$timeout', ($tim
           target.removeClass 'disabled'
         else
           target.addClass 'disabled'
+      else if target.is 'span'
+        target = target.parent()
+        if enabled
+          target.removeClass 'disabled'
+        else
+          target.addClass 'disabled'
 
   @disable = ($event) ->
     @setEnable $event, false
