@@ -50,7 +50,7 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
     ,
       total: 0 # length of data
       getData: ($defer, params) ->
-        $scope.tableParamsGetData = 
+        $scope.tableParamsGetData =
           defer: $defer
           params: params
         $scope.refreshGrid()
@@ -73,7 +73,7 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
         fields.push property
         directions.push params.$params.sorting[property]
 
-      gridParams = 
+      gridParams =
         column_defs: JSON.stringify $scope.getProcessedColumnDefs($scope.columnDefs)
         page: params.$params.page
         per_page: params.$params.count
@@ -161,13 +161,13 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
         $.extend gridParams, $scope.optParams
         $.extend gridParams,
           username: $rootScope.currentUser.username
-          auth_token: $rootScope.authToken
+          authn_token: $rootScope.authToken
 
         elementId = 'xls' + moment()
         xlsFullpath = "#{$scope.xlsPath}?#{$.param gridParams}"
         $('body').append("<iframe id='" + elementId + "' style='display: none;' src='" + xlsFullpath + "'></iframe>")
-        $("#" + elementId).load () -> 
-          setTimeout () -> 
+        $("#" + elementId).load () ->
+          setTimeout () ->
             $("#" + elementId).remove()
           , 50
 
@@ -178,7 +178,7 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
       $scope.tableParams.generatePagesArray($scope.tableParams.page(), $scope.tableParams.total(), $scope.tableParams.count())
 
     $scope.pages = $scope.getGeneratedPagesArray()
-    
+
     # Explicitely assign pages when ng-table reloaded
     $scope.$on('ngTableAfterReloadData', () ->
       $scope.pages = $scope.getGeneratedPagesArray()

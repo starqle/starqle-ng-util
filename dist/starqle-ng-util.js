@@ -449,14 +449,14 @@ angular.module('auth.token.handler', []).factory("AuthTokenHandler", [
         return resource[action] = function(params, data, success, error) {
           return resource['_' + action](angular.extend({}, params || {}, {
             username: authTokenHandler.getUsername(),
-            auth_token: authTokenHandler.getAuthToken()
+            authn_token: authTokenHandler.getAuthToken()
           }), data, success, error);
         };
       } else {
         return resource[action] = function(params, success, error) {
           return resource["_" + action](angular.extend({}, params || {}, {
             username: authTokenHandler.getUsername(),
-            auth_token: authTokenHandler.getAuthToken()
+            authn_token: authTokenHandler.getAuthToken()
           }), success, error);
         };
       }
@@ -745,7 +745,7 @@ angular.module('sh.init.ng.table', []).run([
             $.extend(gridParams, $scope.optParams);
             $.extend(gridParams, {
               username: $rootScope.currentUser.username,
-              auth_token: $rootScope.authToken
+              authn_token: $rootScope.authToken
             });
             elementId = 'xls' + moment();
             xlsFullpath = "" + $scope.xlsPath + "?" + ($.param(gridParams));

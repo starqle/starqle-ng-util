@@ -47,7 +47,7 @@ angular.module('auth.token.handler',[]).factory "AuthTokenHandler", [ ->
 
     wrappedResource
 
-  # Wrap an action in a resource with auth_token
+  # Wrap an action in a resource with authn_token
   # Treat each kind of action accordingly
   tokenWrapper = (resource, action) ->
     resource['_' + action] = resource[action]
@@ -56,13 +56,13 @@ angular.module('auth.token.handler',[]).factory "AuthTokenHandler", [ ->
       resource[action] = (params, data, success, error) ->
         resource['_' + action] angular.extend({}, params or {},
           username: authTokenHandler.getUsername()
-          auth_token: authTokenHandler.getAuthToken()
+          authn_token: authTokenHandler.getAuthToken()
         ), data, success, error
     else
       resource[action] = (params, success, error) ->
         resource["_" + action] angular.extend({}, params or {},
           username: authTokenHandler.getUsername()
-          auth_token: authTokenHandler.getAuthToken()
+          authn_token: authTokenHandler.getAuthToken()
         ), success, error
 
   return authTokenHandler
