@@ -26,7 +26,7 @@ angular.module('sh.collapsible', []).directive("shCollapsible", ->
     shCollapsibleCollapsed: '@?'
     shCollapsibleCollapseFn: '&'
     shCollapsibleExpandFn: '&'
-  controller: ($scope, $element) ->
+  controller: ['$scope', '$element', ($scope, $element) ->
     @shCollapse = false
     @bodyElements = []
 
@@ -50,6 +50,7 @@ angular.module('sh.collapsible', []).directive("shCollapsible", ->
       @shCollapse
 
     return
+  ]
   controllerAs: 'shCollapsibleController'
   link: (scope, element, attrs, shCollapsibleController) ->
 

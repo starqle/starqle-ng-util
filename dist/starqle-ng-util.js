@@ -25,35 +25,37 @@ angular.module('sh.collapsible', []).directive("shCollapsible", function() {
       shCollapsibleCollapseFn: '&',
       shCollapsibleExpandFn: '&'
     },
-    controller: function($scope, $element) {
-      this.shCollapse = false;
-      this.bodyElements = [];
-      this.toggleCollapse = function() {
-        var bodyElement, _i, _j, _len, _len1, _ref, _ref1;
-        this.shCollapse = !this.shCollapse;
-        if (this.isCollapse()) {
-          _ref = this.bodyElements;
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            bodyElement = _ref[_i];
-            bodyElement.slideUp('fast');
-            $element.addClass('is-collapse');
+    controller: [
+      '$scope', '$element', function($scope, $element) {
+        this.shCollapse = false;
+        this.bodyElements = [];
+        this.toggleCollapse = function() {
+          var bodyElement, i, j, len, len1, ref, ref1;
+          this.shCollapse = !this.shCollapse;
+          if (this.isCollapse()) {
+            ref = this.bodyElements;
+            for (i = 0, len = ref.length; i < len; i++) {
+              bodyElement = ref[i];
+              bodyElement.slideUp('fast');
+              $element.addClass('is-collapse');
+            }
+          } else {
+            ref1 = this.bodyElements;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              bodyElement = ref1[j];
+              bodyElement.slideDown('fast');
+              $element.removeClass('is-collapse');
+            }
           }
-        } else {
-          _ref1 = this.bodyElements;
-          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-            bodyElement = _ref1[_j];
-            bodyElement.slideDown('fast');
-            $element.removeClass('is-collapse');
-          }
-        }
-      };
-      this.addCollapsibleBodyElement = function(element) {
-        this.bodyElements.push(element);
-      };
-      this.isCollapse = function() {
-        return this.shCollapse;
-      };
-    },
+        };
+        this.addCollapsibleBodyElement = function(element) {
+          this.bodyElements.push(element);
+        };
+        this.isCollapse = function() {
+          return this.shCollapse;
+        };
+      }
+    ],
     controllerAs: 'shCollapsibleController',
     link: function(scope, element, attrs, shCollapsibleController) {
       scope.shCollapsibleExpandFn({
@@ -385,7 +387,7 @@ angular.module('sh.submit', []).directive('shSubmit', [
             }
           }
         };
-        return scope.$watch("" + attrs.shSubmit + ".$invalid", function(newValue, oldValue) {
+        return scope.$watch(attrs.shSubmit + ".$invalid", function(newValue, oldValue) {
           if (newValue === false) {
             return shSubmitOverlay.tooltip('destroy');
           } else {
@@ -492,13 +494,13 @@ angular.module('sh.floating.precision', []).filter("shFloatingPrecision", functi
 angular.module('sh.remove.duplicates', []).filter("shRemoveDuplicates", [
   function() {
     return function(collection, fieldName, callback) {
-      var aggregateItems, item, key, newArray, newCollection, newItem, value, _i, _len;
+      var aggregateItems, i, item, key, len, newArray, newCollection, newItem, value;
       if (collection) {
         newArray = [];
         newCollection = {};
         aggregateItems = {};
-        for (_i = 0, _len = collection.length; _i < _len; _i++) {
-          item = collection[_i];
+        for (i = 0, len = collection.length; i < len; i++) {
+          item = collection[i];
           newCollection[item[fieldName]] = $.extend({}, item);
           newItem = newCollection[item[fieldName]];
           if (typeof callback === 'function') {
@@ -597,18 +599,18 @@ angular.module('sh.bulk.helper', []).run([
           }
         };
         return $scope.selectedItems = function(items) {
-          var activeItems, i, _i, _len, _ref, _results;
+          var activeItems, i, j, len, ref, results;
           if (items instanceof Array) {
             activeItems = $scope.activeItems(items);
-            _ref = activeItems.filter(function(item) {
+            ref = activeItems.filter(function(item) {
               return !!item.$selected;
             });
-            _results = [];
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              i = _ref[_i];
-              _results.push(i.id);
+            results = [];
+            for (j = 0, len = ref.length; j < len; j++) {
+              i = ref[j];
+              results.push(i.id);
             }
-            return _results;
+            return results;
           }
         };
       }
@@ -708,10 +710,10 @@ angular.module('sh.init.ng.table', []).run([
           }
         };
         $scope.getProcessedColumnDefs = function(columnDefs) {
-          var columnDef, processedColumnDefs, _i, _len;
+          var columnDef, i, len, processedColumnDefs;
           processedColumnDefs = [];
-          for (_i = 0, _len = columnDefs.length; _i < _len; _i++) {
-            columnDef = columnDefs[_i];
+          for (i = 0, len = columnDefs.length; i < len; i++) {
+            columnDef = columnDefs[i];
             if (columnDef.field !== '') {
               processedColumnDefs.push({
                 field: columnDef.field
@@ -748,7 +750,7 @@ angular.module('sh.init.ng.table', []).run([
               authn_token: $rootScope.authToken
             });
             elementId = 'xls' + moment();
-            xlsFullpath = "" + $scope.xlsPath + "?" + ($.param(gridParams));
+            xlsFullpath = $scope.xlsPath + "?" + ($.param(gridParams));
             $('body').append("<iframe id='" + elementId + "' style='display: none;' src='" + xlsFullpath + "'></iframe>");
             $("#" + elementId).load(function() {
               return setTimeout(function() {
@@ -1563,19 +1565,19 @@ angular.module('sh.notification', []).service("ShNotification", [
     };
     this.runInterval = function(self) {
       return $interval(function() {
-        var i, toast, _i, _len, _ref, _results;
-        _ref = self.toasts;
-        _results = [];
-        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-          toast = _ref[i];
+        var i, j, len, ref, results, toast;
+        ref = self.toasts;
+        results = [];
+        for (i = j = 0, len = ref.length; j < len; i = ++j) {
+          toast = ref[i];
           if (toast.alive && toast.deathtime < Date.now()) {
             toast.alive = false;
-            _results.push(self.removeToast(i, 1));
+            results.push(self.removeToast(i, 1));
           } else {
-            _results.push(void 0);
+            results.push(void 0);
           }
         }
-        return _results;
+        return results;
       }, 500, 0, false);
     };
     this.addNotification = function(options) {
@@ -1624,13 +1626,13 @@ angular.module('sh.notification', []).service("ShNotification", [
       }, opts.duration);
     };
     this.toastByResponse = function(response, defaultToast) {
-      var n, _i, _len, _ref, _results;
+      var j, len, n, ref, results;
       if (response.notification) {
-        _ref = response.notification.notifications;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          n = _ref[_i];
-          _results.push((function(_this) {
+        ref = response.notification.notifications;
+        results = [];
+        for (j = 0, len = ref.length; j < len; j++) {
+          n = ref[j];
+          results.push((function(_this) {
             return function(n) {
               return _this.addToast({
                 type: n.type,
@@ -1639,7 +1641,7 @@ angular.module('sh.notification', []).service("ShNotification", [
             };
           })(this)(n));
         }
-        return _results;
+        return results;
       } else {
         return this.addToast(defaultToast);
       }
