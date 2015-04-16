@@ -658,10 +658,6 @@ angular.module('sh.init.ng.table', []).run([
           if (currentPage == null) {
             currentPage = null;
           }
-          if (currentPage === null) {
-            currentPage = $scope.pagingOptions.currentPage;
-          }
-          $scope.tableParams.page(currentPage);
           return $scope.getPagedDataAsync();
         };
         $scope.generateGridParams = function() {
