@@ -26,7 +26,8 @@
 angular.module('sh.submit',[]).directive 'shSubmit', ['$compile', ($compile) ->
   restrict: 'A'
   link: (scope, element, attrs) ->
-    shSubmitOverlay = angular.element('<span class="sh-submit-overlay" ng-mouseover="overlayHover()" ng-mouseleave="overlayLeave()"></span>')
+    random = (Math.random() + '').slice(2)
+    shSubmitOverlay = angular.element('<span class="sh-submit-overlay" ng-mouseover="overlayHover'+random+'()" ng-mouseleave="overlayLeave()"></span>')
     $compile(shSubmitOverlay)(scope)
 
     shSubmitInvalid = attrs.shSubmitInvalid or 'Please correct/fill out the highlighted fields'
@@ -37,13 +38,13 @@ angular.module('sh.submit',[]).directive 'shSubmit', ['$compile', ($compile) ->
         title: shSubmitInvalid
       element.appendTo(shSubmitOverlay)
 
-    scope.overlayHover = ->
+    scope['overlayHover' + random] = ->
       if scope["#{attrs.shSubmit}"].$invalid
         form = element.parents('form').eq(0)
         if form.length > 0
           form.addClass('sh-highlight-required')
         else
-          angular.elemet("form[name='#{attrs.shSubmit}']").addClass('sh-highlight-required')
+          angular.element("form[name='#{attrs.shSubmit}']").addClass('sh-highlight-required')
       return
 
     scope.$watch "#{attrs.shSubmit}.$invalid", (newValue, oldValue) ->
