@@ -365,8 +365,9 @@ angular.module('sh.submit', []).directive('shSubmit', [
     return {
       restrict: 'A',
       link: function(scope, element, attrs) {
-        var shSubmitInvalid, shSubmitOverlay;
-        shSubmitOverlay = angular.element('<span class="sh-submit-overlay" ng-mouseover="overlayHover()" ng-mouseleave="overlayLeave()"></span>');
+        var random, shSubmitInvalid, shSubmitOverlay;
+        random = (Math.random() + '').slice(2);
+        shSubmitOverlay = angular.element('<span class="sh-submit-overlay" ng-mouseover="overlayHover' + random + '()" ng-mouseleave="overlayLeave()"></span>');
         $compile(shSubmitOverlay)(scope);
         shSubmitInvalid = attrs.shSubmitInvalid || 'Please correct/fill out the highlighted fields';
         if (element.next('.sh-submit-overlay').length === 0 && element.parents('.sh-submit-overlay').length === 0) {
@@ -376,14 +377,14 @@ angular.module('sh.submit', []).directive('shSubmit', [
           });
           element.appendTo(shSubmitOverlay);
         }
-        scope.overlayHover = function() {
+        scope['overlayHover' + random] = function() {
           var form;
           if (scope["" + attrs.shSubmit].$invalid) {
             form = element.parents('form').eq(0);
             if (form.length > 0) {
               form.addClass('sh-highlight-required');
             } else {
-              angular.elemet("form[name='" + attrs.shSubmit + "']").addClass('sh-highlight-required');
+              angular.element("form[name='" + attrs.shSubmit + "']").addClass('sh-highlight-required');
             }
           }
         };
@@ -660,6 +661,7 @@ angular.module('sh.init.ng.table', []).run([
           if (currentPage === null) {
             currentPage = $scope.pagingOptions.currentPage;
           }
+          $scope.tableParams.page(currentPage);
           return $scope.getPagedDataAsync();
         };
         $scope.generateGridParams = function() {
