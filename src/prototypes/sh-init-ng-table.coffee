@@ -59,8 +59,9 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
     $scope.refreshGrid = (currentPage = null) ->
       if currentPage is null
         currentPage = $scope.pagingOptions.currentPage
+      # TODO: @ralibi should be able to set total perPage
 
-      # TODO: @giosakti should be able to go to the page specified in parameter
+      $scope.tableParams.page(currentPage)
       $scope.getPagedDataAsync()
 
     $scope.generateGridParams = ->
