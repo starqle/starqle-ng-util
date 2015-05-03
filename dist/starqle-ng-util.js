@@ -26,7 +26,7 @@ angular.module('sh.collapsible', []).directive("shCollapsible", function() {
       shCollapsibleExpandFn: '&'
     },
     controller: [
-      '$scope', '$element', function($scope, $element) {
+      '$scope', '$element', '$timeout', function($scope, $element, $timeout) {
         this.shCollapse = false;
         this.bodyElements = [];
         this.toggleCollapse = function() {
@@ -36,14 +36,22 @@ angular.module('sh.collapsible', []).directive("shCollapsible", function() {
             ref = this.bodyElements;
             for (i = 0, len = ref.length; i < len; i++) {
               bodyElement = ref[i];
-              bodyElement.slideUp('fast');
+              bodyElement.slideUp('fast', function() {
+                return $timeout((function() {
+                  return $(window).trigger('resize');
+                }), 10);
+              });
               $element.addClass('is-collapse');
             }
           } else {
             ref1 = this.bodyElements;
             for (j = 0, len1 = ref1.length; j < len1; j++) {
               bodyElement = ref1[j];
-              bodyElement.slideDown('fast');
+              bodyElement.slideDown('fast', function() {
+                return $timeout((function() {
+                  return $(window).trigger('resize');
+                }), 10);
+              });
               $element.removeClass('is-collapse');
             }
           }
@@ -109,8 +117,8 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
         shEndDate: '='
       },
       require: '?ngModel',
-      link: function($scope, $element, $attrs, ngModel) {
-        var datepickerOptions, init, onChangeDateEvent, onShowEvent;
+      link: function($scope, $element, $attrs, ngModelCtrl) {
+        var datepickerOptions, init;
         datepickerOptions = {
           format: 'dd-mm-yyyy',
           autoclose: true,
@@ -118,30 +126,70 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           todayHighlight: true,
           weekStart: 1
         };
-        onChangeDateEvent = function(event) {
-          ngModel.$setViewValue(event.date);
-          return $($element).datepicker("update");
-        };
-        onShowEvent = function() {
-          $attrs.value = $attrs.value || '';
-          if ($attrs.value !== dateFilter($element.datepicker('getDate'), 'dd-MM-yyyy')) {
-            return $element.datepicker('setDate', $attrs.value);
-          }
-        };
         init = function() {
-          return $element.datepicker(datepickerOptions).on('changeDate', onChangeDateEvent).on('show', onShowEvent);
+          return $element.datepicker(datepickerOptions);
         };
-        init();
-        ngModel.$formatters.push(function(data) {
+        ngModelCtrl.$formatters.push(function(data) {
           return dateFilter(data, 'dd-MM-yyyy');
         });
+        ngModelCtrl.$parsers.push(function(data) {
+          return moment(data, 'DD-MM-YYYY').format('YYYY-MM-DD');
+        });
+        init();
         $scope.$watch('shStartDate', function(newVal, oldVal) {
-          newVal = newVal || -Infinity;
-          return $element.datepicker('setStartDate', newVal);
+          if (newVal) {
+            newVal = newVal || -Infinity;
+            return $element.datepicker('setStartDate', dateFilter(newVal, 'dd-MM-yyyy'));
+          }
         });
         return $scope.$watch('shEndDate', function(newVal, oldVal) {
-          newVal = newVal || 0;
-          return $element.datepicker('setEndDate', newVal);
+          if (newVal) {
+            newVal = newVal || 0;
+            return $element.datepicker('setEndDate', dateFilter(newVal, 'dd-MM-yyyy'));
+          }
+        });
+      }
+    };
+  }
+]).directive("shMillisecondDatepicker", [
+  'dateFilter', function(dateFilter) {
+    return {
+      restrict: 'A',
+      scope: {
+        shStartDate: '=',
+        shEndDate: '='
+      },
+      require: '?ngModel',
+      link: function($scope, $element, $attrs, ngModelCtrl) {
+        var datepickerOptions, init;
+        datepickerOptions = {
+          format: 'dd-mm-yyyy',
+          autoclose: true,
+          todayBtn: 'linked',
+          todayHighlight: true,
+          weekStart: 1
+        };
+        init = function() {
+          return $element.datepicker(datepickerOptions);
+        };
+        ngModelCtrl.$formatters.push(function(data) {
+          return dateFilter(data, 'dd-MM-yyyy');
+        });
+        ngModelCtrl.$parsers.push(function(data) {
+          return moment(data, 'DD-MM-YYYY').valueOf();
+        });
+        init();
+        $scope.$watch('shStartDate', function(newVal, oldVal) {
+          if (newVal) {
+            newVal = newVal || -Infinity;
+            return $element.datepicker('setStartDate', newVal);
+          }
+        });
+        return $scope.$watch('shEndDate', function(newVal, oldVal) {
+          if (newVal) {
+            newVal = newVal || 0;
+            return $element.datepicker('setEndDate', newVal);
+          }
         });
       }
     };
@@ -284,6 +332,104 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
   }
 ]);
 
+angular.module('sh.segment', []).directive("wideTableContainer", function() {
+  var scrollSlave;
+  scrollSlave = function(body, head) {
+    if (!head || !head[0]) {
+      return;
+    }
+    head[0].scrollLeft = body[0].scrollLeft;
+  };
+  return {
+    restrict: 'C',
+    replace: false,
+    compile: function(element, attrs) {
+      var body, foot, head;
+      body = element.find('.table-scroll-body');
+      head = element.find('.table-scroll-head');
+      foot = element.find('.table-scroll-foot');
+      body.on('scroll', function() {
+        scrollSlave(body, head);
+        scrollSlave(body, foot);
+      });
+    }
+  };
+}).directive("tableScrollHead", function() {
+  return {
+    restrict: 'C',
+    link: function(scope, elem, attrs) {
+      scope.__scrollHeadHeight = 0;
+      scope.$watch(function() {
+        return scope.__scrollHeadHeight = elem.outerHeight();
+      });
+      scope.$watch('__scrollHeadHeight', function(newVal, oldVal) {
+        return elem.next().css('top', newVal + 'px');
+      });
+      return $(window).resize(function() {
+        return scope.$apply(function() {
+          return scope.__scrollHeadHeight = elem.outerHeight();
+        });
+      });
+    }
+  };
+}).directive("tableScrollFoot", function() {
+  return {
+    restrict: 'C',
+    link: function(scope, elem, attrs) {
+      scope.__scrollFootHeight = 0;
+      scope.$watch(function() {
+        return scope.__scrollFootHeight = elem.outerHeight();
+      });
+      scope.$watch('__scrollFootHeight', function(newVal, oldVal) {
+        return elem.prev().css('bottom', newVal + 'px');
+      });
+      return $(window).resize(function() {
+        return scope.$apply(function() {
+          return scope.__scrollFootHeight = elem.outerHeight();
+        });
+      });
+    }
+  };
+}).directive("shSegmentHead", function() {
+  return {
+    restrict: 'C',
+    scope: {},
+    link: function(scope, elem, attrs) {
+      scope.height = 0;
+      scope.$watch(function() {
+        return scope.height = elem.outerHeight();
+      });
+      scope.$watch('height', function(newVal, oldVal) {
+        return elem.next().css('top', newVal + 'px');
+      });
+      return $(window).resize(function() {
+        return scope.$apply(function() {
+          return scope.height = elem.outerHeight();
+        });
+      });
+    }
+  };
+}).directive("shSegmentFoot", function() {
+  return {
+    restrict: 'C',
+    scope: {},
+    link: function(scope, elem, attrs) {
+      scope.height = 0;
+      scope.$watch(function() {
+        return scope.height = elem.outerHeight();
+      });
+      scope.$watch('height', function(newVal, oldVal) {
+        return elem.prev().css('bottom', newVal + 'px');
+      });
+      return $(window).resize(function() {
+        return scope.$apply(function() {
+          return scope.height = elem.outerHeight();
+        });
+      });
+    }
+  };
+});
+
 "use strict";
 angular.module('sh.spinning', []).directive("shSpinning", [
   'ShSpinningService', function(ShSpinningService) {
@@ -310,20 +456,20 @@ angular.module('sh.spinning', []).directive("shSpinning", [
       },
       link: function(scope, element, attrs) {
         var opts;
-        scope.shSpinningLines = scope.shSpinningLines || 13;
-        scope.shSpinningLength = scope.shSpinningLength || 30;
-        scope.shSpinningWidth = scope.shSpinningWidth || 10;
-        scope.shSpinningRadius = scope.shSpinningRadius || 38;
-        scope.shSpinningCorners = scope.shSpinningCorners || 1;
-        scope.shSpinningRotate = scope.shSpinningRotate || 0;
-        scope.shSpinningDirection = scope.shSpinningDirection || 1;
+        scope.shSpinningLines = +scope.shSpinningLines || 13;
+        scope.shSpinningLength = +scope.shSpinningLength || 30;
+        scope.shSpinningWidth = +scope.shSpinningWidth || 10;
+        scope.shSpinningRadius = +scope.shSpinningRadius || 38;
+        scope.shSpinningCorners = +scope.shSpinningCorners || 1;
+        scope.shSpinningRotate = +scope.shSpinningRotate || 0;
+        scope.shSpinningDirection = +scope.shSpinningDirection || 1;
         scope.shSpinningColor = scope.shSpinningColor || '#000';
-        scope.shSpinningSpeed = scope.shSpinningSpeed || 2.2;
-        scope.shSpinningTrail = scope.shSpinningTrail || 100;
+        scope.shSpinningSpeed = +scope.shSpinningSpeed || 2.2;
+        scope.shSpinningTrail = +scope.shSpinningTrail || 100;
         scope.shSpinningShadow = scope.shSpinningShadow || false;
         scope.shSpinningHwaccel = scope.shSpinningHwaccel || false;
         scope.shSpinningClassName = scope.shSpinningClassName || 'spinner';
-        scope.shSpinningZIndex = scope.shSpinningZIndex || 2e9;
+        scope.shSpinningZIndex = +scope.shSpinningZIndex || 2e9;
         scope.shSpinningTop = scope.shSpinningTop || '45%';
         scope.shSpinningLeft = scope.shSpinningLeft || '50%';
         opts = {
@@ -657,6 +803,9 @@ angular.module('sh.init.ng.table', []).run([
         $scope.refreshGrid = function(currentPage) {
           if (currentPage == null) {
             currentPage = null;
+          }
+          if (currentPage) {
+            $scope.tableParams.page(currentPage);
           }
           return $scope.getPagedDataAsync();
         };
@@ -1699,4 +1848,4 @@ angular.module('sh.spinning.service', []).service("ShSpinningService", function(
 });
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.spinning', 'sh.submit', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.spinning', 'sh.submit', 'sh.segment', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);

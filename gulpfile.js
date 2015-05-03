@@ -52,6 +52,7 @@ gulp.task('build-coffee', ['build-clean'], function() {
     .pipe(gulpCoffee({bare: true, map: true, compile: true}))
     .pipe(gulpConcat("starqle-ng-util.js"))
     .pipe(gulp.dest('dist/'));
+    // .pipe(gulp.dest('/opt/ruby-projects/eproc-webapp/.tmp/bower_components/starqle-ng-util/dist/'));
 });
 
 gulp.task('build', ['build-coffee']);
