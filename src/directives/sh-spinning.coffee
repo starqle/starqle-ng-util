@@ -40,20 +40,20 @@ angular.module('sh.spinning', []).directive "shSpinning", ['ShSpinningService', 
     shSpinningTop: '@?'
     shSpinningLeft: '@?'
   link: (scope, element, attrs) ->
-    scope.shSpinningLines = scope.shSpinningLines or 13 # The number of lines to draw
-    scope.shSpinningLength = scope.shSpinningLength or 30 # The length of each line
-    scope.shSpinningWidth = scope.shSpinningWidth or 10 # The line thickness
-    scope.shSpinningRadius = scope.shSpinningRadius or 38 # The radius of the inner circle
-    scope.shSpinningCorners = scope.shSpinningCorners or 1 # Corner roundness (0..1)
-    scope.shSpinningRotate = scope.shSpinningRotate or 0 # The rotation offset
-    scope.shSpinningDirection = scope.shSpinningDirection or 1 # 1: clockwise, -1: counterclockwise
+    scope.shSpinningLines = +scope.shSpinningLines or 13 # The number of lines to draw
+    scope.shSpinningLength = +scope.shSpinningLength or 30 # The length of each line
+    scope.shSpinningWidth = +scope.shSpinningWidth or 10 # The line thickness
+    scope.shSpinningRadius = +scope.shSpinningRadius or 38 # The radius of the inner circle
+    scope.shSpinningCorners = +scope.shSpinningCorners or 1 # Corner roundness (0..1)
+    scope.shSpinningRotate = +scope.shSpinningRotate or 0 # The rotation offset
+    scope.shSpinningDirection = +scope.shSpinningDirection or 1 # 1: clockwise, -1: counterclockwise
     scope.shSpinningColor = scope.shSpinningColor or '#000' # #rgb or #rrggbb or array of colors
-    scope.shSpinningSpeed = scope.shSpinningSpeed or 2.2 # Rounds per second
-    scope.shSpinningTrail = scope.shSpinningTrail or 100 # Afterglow percentage
+    scope.shSpinningSpeed = +scope.shSpinningSpeed or 2.2 # Rounds per second
+    scope.shSpinningTrail = +scope.shSpinningTrail or 100 # Afterglow percentage
     scope.shSpinningShadow = scope.shSpinningShadow or false # Whether to render a shadow
     scope.shSpinningHwaccel = scope.shSpinningHwaccel or false # Whether to use hardware acceleration
     scope.shSpinningClassName = scope.shSpinningClassName or 'spinner' # The CSS class to assign to the spinner
-    scope.shSpinningZIndex = scope.shSpinningZIndex or 2e9 # The z-index (defaults to 2000000000)
+    scope.shSpinningZIndex = +scope.shSpinningZIndex or 2e9 # The z-index (defaults to 2000000000)
     scope.shSpinningTop = scope.shSpinningTop or '45%' # Top position relative to parent
     scope.shSpinningLeft = scope.shSpinningLeft or '50%' # Left position relative to parent
 

@@ -19,13 +19,18 @@
 
 "use strict"
 
-angular.module('sh.datepicker', []).directive "shDatepicker", ['dateFilter', (dateFilter) ->
+angular.module('sh.datepicker', []
+
+).directive("shDatepicker", ['dateFilter', (dateFilter) ->
+  #
+  #
+  #
   restrict: 'A'
   scope:
     shStartDate: '='
     shEndDate:  '='
   require: '?ngModel'
-  link: ($scope, $element, $attrs, ngModel) ->
+  link: ($scope, $element, $attrs, ngModelCtrl) ->
     datepickerOptions =
       format: 'dd-mm-yyyy'
       autoclose: true
@@ -33,32 +38,68 @@ angular.module('sh.datepicker', []).directive "shDatepicker", ['dateFilter', (da
       todayHighlight: true
       weekStart: 1
 
-    onChangeDateEvent = (event) ->
-      ngModel.$setViewValue event.date
-      $($element).datepicker("update")
+    # Initialize datepicker
+    init = ->
+      $element.datepicker(datepickerOptions)
 
-    onShowEvent = ->
-      $attrs.value = $attrs.value || ''
-      if $attrs.value != dateFilter $element.datepicker('getDate'), 'dd-MM-yyyy'
-        $element.datepicker('setDate', $attrs.value)
+    ngModelCtrl.$formatters.push (data) ->
+      dateFilter data, 'dd-MM-yyyy'
+
+    ngModelCtrl.$parsers.push (data) ->
+      moment(data, 'DD-MM-YYYY').format('YYYY-MM-DD')
+
+    init()
+
+    # When i18n language is changed
+    $scope.$watch 'shStartDate', (newVal, oldVal) ->
+      if newVal
+        newVal = newVal || -Infinity
+        $element.datepicker('setStartDate', dateFilter(newVal, 'dd-MM-yyyy'))
+
+    $scope.$watch 'shEndDate', (newVal, oldVal) ->
+      if newVal
+        newVal = newVal || 0
+        $element.datepicker('setEndDate', dateFilter(newVal, 'dd-MM-yyyy'))
+
+
+
+]).directive("shMillisecondDatepicker", ['dateFilter', (dateFilter) ->
+  #
+  #
+  #
+  restrict: 'A'
+  scope:
+    shStartDate: '='
+    shEndDate:  '='
+  require: '?ngModel'
+  link: ($scope, $element, $attrs, ngModelCtrl) ->
+    datepickerOptions =
+      format: 'dd-mm-yyyy'
+      autoclose: true
+      todayBtn: 'linked'
+      todayHighlight: true
+      weekStart: 1
 
     # Initialize datepicker
     init = ->
       $element.datepicker(datepickerOptions)
-        .on('changeDate', onChangeDateEvent)
-        .on('show', onShowEvent)
+
+    ngModelCtrl.$formatters.push (data) ->
+      dateFilter data, 'dd-MM-yyyy'
+
+    ngModelCtrl.$parsers.push (data) ->
+      moment(data, 'DD-MM-YYYY').valueOf()
 
     init()
 
-    ngModel.$formatters.push (data) ->
-      dateFilter data, 'dd-MM-yyyy'
-
     # When i18n language is changed
     $scope.$watch 'shStartDate', (newVal, oldVal) ->
-      newVal = newVal || -Infinity
-      $element.datepicker('setStartDate', newVal)
+      if newVal
+        newVal = newVal || -Infinity
+        $element.datepicker('setStartDate', newVal)
 
     $scope.$watch 'shEndDate', (newVal, oldVal) ->
-      newVal = newVal || 0
-      $element.datepicker('setEndDate', newVal)
-]
+      if newVal
+        newVal = newVal || 0
+        $element.datepicker('setEndDate', newVal)
+])
