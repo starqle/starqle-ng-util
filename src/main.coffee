@@ -31,6 +31,7 @@ angular.module 'starqle.ng.util', [
   'sh.number.format',
   'sh.spinning',
   'sh.submit',
+  'sh.segment',
   'sh.tooltip',
 
   # factories
