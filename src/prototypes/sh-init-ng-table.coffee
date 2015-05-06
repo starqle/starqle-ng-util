@@ -32,6 +32,7 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
     $scope.recentlyDeletedIds = []
 
     $scope.asyncBlock = false unless $scope.asyncBlock?
+    $scope.gridRefreshing = true
 
     $scope.pagingOptions =
       currentPage: 1
@@ -57,7 +58,6 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
     )
 
     $scope.refreshGrid = (currentPage = null) ->
-      # TODO: @ralibi should be able to set page & per_page
       $scope.tableParams.page(currentPage) if currentPage
       $scope.getPagedDataAsync()
 
@@ -93,6 +93,7 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
           $defer = $scope.tableParamsGetData.defer
           params = $scope.tableParamsGetData.params
           gridParams = $scope.generateGridParams()
+          $scope.gridRefreshing = true
 
           $scope.resource.get(
             $.extend gridParams, $scope.optParams
@@ -103,14 +104,17 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
 
             # Set new data
             $defer.resolve success.data.items
+
             $scope.tableParams.reload()
 
             # Callback after getPagedDataAsync
             $scope.getPagedDataAsyncSuccess(success) if $scope.getPagedDataAsyncSuccess? && typeof($scope.getPagedDataAsyncSuccess) == 'function'
 
+            $scope.gridRefreshing = false
             $scope.asyncBlock = false
             return
           , (error) ->
+            $scope.gridRefreshing = false
             $scope.asyncBlock = false
           )
         ), 100
@@ -139,9 +143,11 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
     # Returns either '', 'sort-asc', or 'sort-desc'
     $scope.sortableClass = (fieldName) ->
       if $scope.tableParams.isSortBy(fieldName, 'asc')
-        'sort-asc'
+        'sortable sort-asc'
       else if $scope.tableParams.isSortBy(fieldName, 'desc')
-        'sort-desc'
+        'sortable sort-desc'
+      else
+        'sortable'
 
     # Called from ng-click as <th> attributes within ng-table
     # Call ng-table tableParams sorting
