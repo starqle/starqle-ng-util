@@ -31,20 +31,6 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
     $scope.localLookup = {}
     $scope.modalProperties = {}
 
-    $scope.refreshGrid ?= (currentPage = null) ->
-      if currentPage is null
-        currentPage = $scope.pagingOptions.currentPage
-
-      # TODO: @giosakti should be able to go to the page specified in parameter
-      $scope.getPagedDataAsync()
-
-    $scope.toggleSelection = (obj, arr) ->
-      idx = arr.indexOf(obj)
-      if idx > -1
-        arr.splice(idx, 1)
-      else
-        arr.push(obj)
-
     # =========================================================================
     # Default Callbacks
     # =========================================================================
