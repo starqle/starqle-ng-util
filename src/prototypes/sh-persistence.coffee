@@ -32,13 +32,6 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
     $scope.privileges = {}
     $scope.saved = false
 
-    $scope.toggleSelection = (obj, arr) ->
-      idx = arr.indexOf(obj)
-      if idx > -1
-        arr.splice(idx, 1)
-      else
-        arr.push(obj)
-
     # =========================================================================
     # Methods for adding/removing nested attributes
     # =========================================================================
@@ -67,15 +60,15 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
 
     # =========================================================================
     # Create callback methods
-    $scope.beforeCreateEntity = () ->
-    $scope.createEntitySuccess = (response) ->
-    $scope.createEntitySuccessNotification = (response) ->
+    $scope.beforeCreateEntity = ($event) ->
+    $scope.createEntitySuccess = (response, $event) ->
+    $scope.createEntitySuccessNotification = (response, $event) ->
       ShNotification.toastByResponse response,
         type: 'success'
         message: 'Successfully Created'
 
-    $scope.createEntityFailure = (response) ->
-    $scope.createEntityFailureNotification = (response) ->
+    $scope.createEntityFailure = (response, $event) ->
+    $scope.createEntityFailureNotification = (response, $event) ->
       ShNotification.toastByResponse response,
         type: 'danger'
         message: 'Failed to Create'
@@ -90,15 +83,15 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
 
     # =========================================================================
     # Update callback methods
-    $scope.beforeUpdateEntity = () ->
-    $scope.updateEntitySuccess = (response) ->
-    $scope.updateEntitySuccessNotification = (response) ->
+    $scope.beforeUpdateEntity = ($event) ->
+    $scope.updateEntitySuccess = (response, $event) ->
+    $scope.updateEntitySuccessNotification = (response, $event) ->
       ShNotification.toastByResponse response,
         type: 'success'
         message: 'Successfully Updated'
 
-    $scope.updateEntityFailure = (response) ->
-    $scope.updateEntityFailureNotification = (response) ->
+    $scope.updateEntityFailure = (response, $event) ->
+    $scope.updateEntityFailureNotification = (response, $event) ->
       ShNotification.toastByResponse response,
         type: 'danger'
         message: 'Failed to Update'
@@ -119,7 +112,7 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
     # =========================================================================
 
     $scope.createEntity = ($event) ->
-      $scope.beforeCreateEntity()
+      $scope.beforeCreateEntity($event)
 
       $event = ShButtonState.initializeEvent $event
       ShButtonState.loading $event
@@ -137,13 +130,13 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
         $state.transitionTo $scope.showPath, params
 
         # Callback
-        $scope.createEntitySuccess(success)
-        $scope.createEntitySuccessNotification(success)
+        $scope.createEntitySuccess(success, $event)
+        $scope.createEntitySuccessNotification(success, $event)
         ShButtonState.enable $event
       , (error) ->
         # Callback
-        $scope.createEntityFailure(error)
-        $scope.createEntityFailureNotification(error)
+        $scope.createEntityFailure(error, $event)
+        $scope.createEntityFailureNotification(error, $event)
         ShButtonState.enable $event
       )
 
@@ -152,7 +145,7 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
     # =========================================================================
 
     $scope.updateEntity = ($event) ->
-      $scope.beforeUpdateEntity()
+      $scope.beforeUpdateEntity($event)
 
       $event = ShButtonState.initializeEvent $event
       ShButtonState.loading $event
@@ -172,14 +165,14 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
         ), 5000
 
         # Callback
-        $scope.updateEntitySuccess(success)
-        $scope.updateEntitySuccessNotification(success)
+        $scope.updateEntitySuccess(success, $event)
+        $scope.updateEntitySuccessNotification(success, $event)
         ShButtonState.enable $event
 
       , (error) ->
         # Callback
-        $scope.updateEntityFailure(error)
-        $scope.updateEntityFailureNotification(error)
+        $scope.updateEntityFailure(error, $event)
+        $scope.updateEntityFailureNotification(error, $event)
         ShButtonState.enable $event
       )
 

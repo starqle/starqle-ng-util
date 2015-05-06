@@ -45,15 +45,15 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
 
     # =========================================================================
     # Create callback methods
-    $scope.beforeCreateEntity = () ->
-    $scope.createEntitySuccess = (response) ->
-    $scope.createEntitySuccessNotification = (response) ->
+    $scope.beforeCreateEntity = ($event) ->
+    $scope.createEntitySuccess = (response, $event) ->
+    $scope.createEntitySuccessNotification = (response, $event) ->
       ShNotification.toastByResponse response,
         type: 'success'
         message: 'Successfully Created'
 
-    $scope.createEntityFailure = (response) ->
-    $scope.createEntityFailureNotification = (response) ->
+    $scope.createEntityFailure = (response, $event) ->
+    $scope.createEntityFailureNotification = (response, $event) ->
       if response and response.data and response.data.error
         ShNotification.toastByResponse response,
           type: 'danger'
@@ -73,15 +73,15 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
 
     # =========================================================================
     # Update callback methods
-    $scope.beforeUpdateEntity = () ->
-    $scope.updateEntitySuccess = (response) ->
-    $scope.updateEntitySuccessNotification = (response) ->
+    $scope.beforeUpdateEntity = ($event) ->
+    $scope.updateEntitySuccess = (response, $event) ->
+    $scope.updateEntitySuccessNotification = (response, $event) ->
       ShNotification.toastByResponse response,
         type: 'success'
         message: 'Successfully Updated'
 
-    $scope.updateEntityFailure = (response) ->
-    $scope.updateEntityFailureNotification = (response) ->
+    $scope.updateEntityFailure = (response, $event) ->
+    $scope.updateEntityFailureNotification = (response, $event) ->
       if response and response.data and response.data.error
         ShNotification.toastByResponse response,
           type: 'danger'
@@ -93,15 +93,15 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
 
     # =========================================================================
     # Destroy callbacks
-    $scope.beforeDestroyEntity = () ->
-    $scope.destroyEntitySuccess = (response) ->
-    $scope.destroyEntitySuccessNotification = (response) ->
+    $scope.beforeDestroyEntity = ($event) ->
+    $scope.destroyEntitySuccess = (response, $event) ->
+    $scope.destroyEntitySuccessNotification = (response, $event) ->
       ShNotification.toastByResponse response,
         type: 'success'
         message: 'Successfully Deleted'
 
-    $scope.destroyEntityFailure = (response) ->
-    $scope.destroyEntityFailureNotification = (response) ->
+    $scope.destroyEntityFailure = (response, $event) ->
+    $scope.destroyEntityFailureNotification = (response, $event) ->
       if response.data.error.message != null
         ShNotification.toastByResponse response,
           type: 'danger'
@@ -207,7 +207,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.afterCloseEntityModal elementStr
 
     $scope.createEntity = (elementStr, $event) ->
-      $scope.beforeCreateEntity()
+      $scope.beforeCreateEntity($event)
 
       $event = ShButtonState.initializeEvent $event
       ShButtonState.loading $event
@@ -220,13 +220,13 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         $scope.recentlyCreatedIds.push success.data.id if $scope.recentlyCreatedIds?
         $scope.refreshGrid() if typeof $scope.getPagedDataAsync is 'function'
         ShButtonState.enable $event
-        $scope.createEntitySuccess(success)
-        $scope.createEntitySuccessNotification(success)
+        $scope.createEntitySuccess(success, $event)
+        $scope.createEntitySuccessNotification(success, $event)
       , (error) ->
         $scope.errors = error.data.error.errors
         ShButtonState.enable $event
-        $scope.createEntityFailure(error)
-        $scope.createEntityFailureNotification(error)
+        $scope.createEntityFailure(error, $event)
+        $scope.createEntityFailureNotification(error, $event)
       )
 
     # =========================================================================
@@ -265,7 +265,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.afterCloseEntityModal elementStr, id
 
     $scope.updateEntity = (elementStr, $event) ->
-      $scope.beforeUpdateEntity()
+      $scope.beforeUpdateEntity($event)
 
       $event = ShButtonState.initializeEvent $event
       ShButtonState.loading $event
@@ -278,13 +278,13 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         $scope.recentlyUpdatedIds.push success.data.id if $scope.recentlyUpdatedIds?
         $scope.refreshGrid() if typeof $scope.getPagedDataAsync is 'function'
         ShButtonState.enable $event
-        $scope.updateEntitySuccess(success)
-        $scope.updateEntitySuccessNotification(success)
+        $scope.updateEntitySuccess(success, $event)
+        $scope.updateEntitySuccessNotification(success, $event)
       , (error) ->
         $scope.errors = error.data.error.errors
         ShButtonState.enable $event
-        $scope.updateEntityFailure(error)
-        $scope.updateEntityFailureNotification(error)
+        $scope.updateEntityFailure(error, $event)
+        $scope.updateEntityFailureNotification(error, $event)
       )
 
     # =========================================================================
@@ -295,18 +295,18 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $event = ShButtonState.initializeEvent $event
       ShButtonState.loading $event
 
-      $scope.beforeDestroyEntity()
+      $scope.beforeDestroyEntity($event)
 
       # Delete entity from database
       $scope.resource.delete($.extend({id: id}, $scope.optParams)
       ).$promise.then((success) ->
         $scope.recentlyDeletedIds.push success.data.id if $scope.recentlyDeletedIds?
         $scope.refreshGrid() if typeof $scope.getPagedDataAsync is 'function'
-        $scope.destroyEntitySuccess(success)
-        $scope.destroyEntitySuccessNotification(success)
+        $scope.destroyEntitySuccess(success, $event)
+        $scope.destroyEntitySuccessNotification(success, $event)
       , (error) ->
-        $scope.destroyEntityFailure(error)
-        $scope.destroyEntityFailureNotification(error)
+        $scope.destroyEntityFailure(error, $event)
+        $scope.destroyEntityFailureNotification(error, $event)
         ShButtonState.enable $event
       )
 
