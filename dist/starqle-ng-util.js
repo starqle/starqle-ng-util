@@ -776,6 +776,7 @@ angular.module('sh.init.ng.table', []).run([
         if ($scope.asyncBlock == null) {
           $scope.asyncBlock = false;
         }
+        $scope.gridRefreshing = true;
         $scope.pagingOptions = {
           currentPage: 1,
           pageSize: 10,
@@ -842,6 +843,7 @@ angular.module('sh.init.ng.table', []).run([
               $defer = $scope.tableParamsGetData.defer;
               params = $scope.tableParamsGetData.params;
               gridParams = $scope.generateGridParams();
+              $scope.gridRefreshing = true;
               return $scope.resource.get($.extend(gridParams, $scope.optParams)).$promise.then(function(success) {
                 params.total(success.data.total_server_items);
                 $defer.resolve(success.data.items);
@@ -849,8 +851,10 @@ angular.module('sh.init.ng.table', []).run([
                 if (($scope.getPagedDataAsyncSuccess != null) && typeof $scope.getPagedDataAsyncSuccess === 'function') {
                   $scope.getPagedDataAsyncSuccess(success);
                 }
+                $scope.gridRefreshing = false;
                 $scope.asyncBlock = false;
               }, function(error) {
+                $scope.gridRefreshing = false;
                 return $scope.asyncBlock = false;
               });
             }), 100);
@@ -872,9 +876,11 @@ angular.module('sh.init.ng.table', []).run([
         $scope.getPagedDataAsyncSuccess = function(response) {};
         $scope.sortableClass = function(fieldName) {
           if ($scope.tableParams.isSortBy(fieldName, 'asc')) {
-            return 'sort-asc';
+            return 'sortable sort-asc';
           } else if ($scope.tableParams.isSortBy(fieldName, 'desc')) {
-            return 'sort-desc';
+            return 'sortable sort-desc';
+          } else {
+            return 'sortable';
           }
         };
         $scope.sortableClick = function(fieldName) {
@@ -927,41 +933,21 @@ angular.module('sh.modal.persistence', []).run([
         $scope.errors = [];
         $scope.localLookup = {};
         $scope.modalProperties = {};
-        if ($scope.refreshGrid == null) {
-          $scope.refreshGrid = function(currentPage) {
-            if (currentPage == null) {
-              currentPage = null;
-            }
-            if (currentPage === null) {
-              currentPage = $scope.pagingOptions.currentPage;
-            }
-            return $scope.getPagedDataAsync();
-          };
-        }
-        $scope.toggleSelection = function(obj, arr) {
-          var idx;
-          idx = arr.indexOf(obj);
-          if (idx > -1) {
-            return arr.splice(idx, 1);
-          } else {
-            return arr.push(obj);
-          }
-        };
         $scope.beforeNewEntity = function() {};
         $scope.newEntitySuccess = function(response) {};
         $scope.newEntitySuccessNotification = function(response) {};
         $scope.newEntityFailure = function(response) {};
         $scope.newEntityFailureNotification = function(response) {};
-        $scope.beforeCreateEntity = function() {};
-        $scope.createEntitySuccess = function(response) {};
-        $scope.createEntitySuccessNotification = function(response) {
+        $scope.beforeCreateEntity = function($event) {};
+        $scope.createEntitySuccess = function(response, $event) {};
+        $scope.createEntitySuccessNotification = function(response, $event) {
           return ShNotification.toastByResponse(response, {
             type: 'success',
             message: 'Successfully Created'
           });
         };
-        $scope.createEntityFailure = function(response) {};
-        $scope.createEntityFailureNotification = function(response) {
+        $scope.createEntityFailure = function(response, $event) {};
+        $scope.createEntityFailureNotification = function(response, $event) {
           if (response && response.data && response.data.error) {
             return ShNotification.toastByResponse(response, {
               type: 'danger',
@@ -979,16 +965,16 @@ angular.module('sh.modal.persistence', []).run([
         $scope.editEntitySuccessNotification = function(response) {};
         $scope.editEntityFailure = function(response) {};
         $scope.editEntityFailureNotification = function(response) {};
-        $scope.beforeUpdateEntity = function() {};
-        $scope.updateEntitySuccess = function(response) {};
-        $scope.updateEntitySuccessNotification = function(response) {
+        $scope.beforeUpdateEntity = function($event) {};
+        $scope.updateEntitySuccess = function(response, $event) {};
+        $scope.updateEntitySuccessNotification = function(response, $event) {
           return ShNotification.toastByResponse(response, {
             type: 'success',
             message: 'Successfully Updated'
           });
         };
-        $scope.updateEntityFailure = function(response) {};
-        $scope.updateEntityFailureNotification = function(response) {
+        $scope.updateEntityFailure = function(response, $event) {};
+        $scope.updateEntityFailureNotification = function(response, $event) {
           if (response && response.data && response.data.error) {
             return ShNotification.toastByResponse(response, {
               type: 'danger',
@@ -1001,16 +987,16 @@ angular.module('sh.modal.persistence', []).run([
             });
           }
         };
-        $scope.beforeDestroyEntity = function() {};
-        $scope.destroyEntitySuccess = function(response) {};
-        $scope.destroyEntitySuccessNotification = function(response) {
+        $scope.beforeDestroyEntity = function($event) {};
+        $scope.destroyEntitySuccess = function(response, $event) {};
+        $scope.destroyEntitySuccessNotification = function(response, $event) {
           return ShNotification.toastByResponse(response, {
             type: 'success',
             message: 'Successfully Deleted'
           });
         };
-        $scope.destroyEntityFailure = function(response) {};
-        $scope.destroyEntityFailureNotification = function(response) {
+        $scope.destroyEntityFailure = function(response, $event) {};
+        $scope.destroyEntityFailureNotification = function(response, $event) {
           if (response.data.error.message !== null) {
             return ShNotification.toastByResponse(response, {
               type: 'danger',
@@ -1127,7 +1113,7 @@ angular.module('sh.modal.persistence', []).run([
           return $scope.afterCloseEntityModal(elementStr);
         };
         $scope.createEntity = function(elementStr, $event) {
-          $scope.beforeCreateEntity();
+          $scope.beforeCreateEntity($event);
           $event = ShButtonState.initializeEvent($event);
           ShButtonState.loading($event);
           return $scope.resource.save($.extend({}, $scope.optParams), {
@@ -1141,13 +1127,13 @@ angular.module('sh.modal.persistence', []).run([
               $scope.refreshGrid();
             }
             ShButtonState.enable($event);
-            $scope.createEntitySuccess(success);
-            return $scope.createEntitySuccessNotification(success);
+            $scope.createEntitySuccess(success, $event);
+            return $scope.createEntitySuccessNotification(success, $event);
           }, function(error) {
             $scope.errors = error.data.error.errors;
             ShButtonState.enable($event);
-            $scope.createEntityFailure(error);
-            return $scope.createEntityFailureNotification(error);
+            $scope.createEntityFailure(error, $event);
+            return $scope.createEntityFailureNotification(error, $event);
           });
         };
         $scope.showEditEntityModal = function(id, elementStr) {
@@ -1182,7 +1168,7 @@ angular.module('sh.modal.persistence', []).run([
           return $scope.afterCloseEntityModal(elementStr, id);
         };
         $scope.updateEntity = function(elementStr, $event) {
-          $scope.beforeUpdateEntity();
+          $scope.beforeUpdateEntity($event);
           $event = ShButtonState.initializeEvent($event);
           ShButtonState.loading($event);
           return $scope.resource.update($.extend({
@@ -1198,13 +1184,13 @@ angular.module('sh.modal.persistence', []).run([
               $scope.refreshGrid();
             }
             ShButtonState.enable($event);
-            $scope.updateEntitySuccess(success);
-            return $scope.updateEntitySuccessNotification(success);
+            $scope.updateEntitySuccess(success, $event);
+            return $scope.updateEntitySuccessNotification(success, $event);
           }, function(error) {
             $scope.errors = error.data.error.errors;
             ShButtonState.enable($event);
-            $scope.updateEntityFailure(error);
-            return $scope.updateEntityFailureNotification(error);
+            $scope.updateEntityFailure(error, $event);
+            return $scope.updateEntityFailureNotification(error, $event);
           });
         };
         $scope.destroyEntity = function(id, name, $event) {
@@ -1213,7 +1199,7 @@ angular.module('sh.modal.persistence', []).run([
           }
           $event = ShButtonState.initializeEvent($event);
           ShButtonState.loading($event);
-          $scope.beforeDestroyEntity();
+          $scope.beforeDestroyEntity($event);
           return $scope.resource["delete"]($.extend({
             id: id
           }, $scope.optParams)).$promise.then(function(success) {
@@ -1223,11 +1209,11 @@ angular.module('sh.modal.persistence', []).run([
             if (typeof $scope.getPagedDataAsync === 'function') {
               $scope.refreshGrid();
             }
-            $scope.destroyEntitySuccess(success);
-            return $scope.destroyEntitySuccessNotification(success);
+            $scope.destroyEntitySuccess(success, $event);
+            return $scope.destroyEntitySuccessNotification(success, $event);
           }, function(error) {
-            $scope.destroyEntityFailure(error);
-            $scope.destroyEntityFailureNotification(error);
+            $scope.destroyEntityFailure(error, $event);
+            $scope.destroyEntityFailureNotification(error, $event);
             return ShButtonState.enable($event);
           });
         };
@@ -1410,15 +1396,6 @@ angular.module('sh.persistence', []).run([
         $scope.localLookup = {};
         $scope.privileges = {};
         $scope.saved = false;
-        $scope.toggleSelection = function(obj, arr) {
-          var idx;
-          idx = arr.indexOf(obj);
-          if (idx > -1) {
-            return arr.splice(idx, 1);
-          } else {
-            return arr.push(obj);
-          }
-        };
         $scope.addNestedAttributes = function(objName) {
           return $scope.entity[objName].push({});
         };
@@ -1436,16 +1413,16 @@ angular.module('sh.persistence', []).run([
         $scope.newEntitySuccessNotification = function(response) {};
         $scope.newEntityFailure = function(response) {};
         $scope.newEntityFailureNotification = function(response) {};
-        $scope.beforeCreateEntity = function() {};
-        $scope.createEntitySuccess = function(response) {};
-        $scope.createEntitySuccessNotification = function(response) {
+        $scope.beforeCreateEntity = function($event) {};
+        $scope.createEntitySuccess = function(response, $event) {};
+        $scope.createEntitySuccessNotification = function(response, $event) {
           return ShNotification.toastByResponse(response, {
             type: 'success',
             message: 'Successfully Created'
           });
         };
-        $scope.createEntityFailure = function(response) {};
-        $scope.createEntityFailureNotification = function(response) {
+        $scope.createEntityFailure = function(response, $event) {};
+        $scope.createEntityFailureNotification = function(response, $event) {
           return ShNotification.toastByResponse(response, {
             type: 'danger',
             message: 'Failed to Create'
@@ -1456,16 +1433,16 @@ angular.module('sh.persistence', []).run([
         $scope.editEntitySuccessNotification = function(response) {};
         $scope.editEntityFailure = function(response) {};
         $scope.editEntityFailureNotification = function(response) {};
-        $scope.beforeUpdateEntity = function() {};
-        $scope.updateEntitySuccess = function(response) {};
-        $scope.updateEntitySuccessNotification = function(response) {
+        $scope.beforeUpdateEntity = function($event) {};
+        $scope.updateEntitySuccess = function(response, $event) {};
+        $scope.updateEntitySuccessNotification = function(response, $event) {
           return ShNotification.toastByResponse(response, {
             type: 'success',
             message: 'Successfully Updated'
           });
         };
-        $scope.updateEntityFailure = function(response) {};
-        $scope.updateEntityFailureNotification = function(response) {
+        $scope.updateEntityFailure = function(response, $event) {};
+        $scope.updateEntityFailureNotification = function(response, $event) {
           return ShNotification.toastByResponse(response, {
             type: 'danger',
             message: 'Failed to Update'
@@ -1479,7 +1456,7 @@ angular.module('sh.persistence', []).run([
           }
         };
         $scope.createEntity = function($event) {
-          $scope.beforeCreateEntity();
+          $scope.beforeCreateEntity($event);
           $event = ShButtonState.initializeEvent($event);
           ShButtonState.loading($event);
           return $scope.resource.save($.extend({}, $scope.optParams), {
@@ -1489,17 +1466,17 @@ angular.module('sh.persistence', []).run([
             params = {};
             params['id'] = success.data.id;
             $state.transitionTo($scope.showPath, params);
-            $scope.createEntitySuccess(success);
-            $scope.createEntitySuccessNotification(success);
+            $scope.createEntitySuccess(success, $event);
+            $scope.createEntitySuccessNotification(success, $event);
             return ShButtonState.enable($event);
           }, function(error) {
-            $scope.createEntityFailure(error);
-            $scope.createEntityFailureNotification(error);
+            $scope.createEntityFailure(error, $event);
+            $scope.createEntityFailureNotification(error, $event);
             return ShButtonState.enable($event);
           });
         };
         $scope.updateEntity = function($event) {
-          $scope.beforeUpdateEntity();
+          $scope.beforeUpdateEntity($event);
           $event = ShButtonState.initializeEvent($event);
           ShButtonState.loading($event);
           $scope.saved = false;
@@ -1512,12 +1489,12 @@ angular.module('sh.persistence', []).run([
             $timeout((function() {
               return $scope.saved = false;
             }), 5000);
-            $scope.updateEntitySuccess(success);
-            $scope.updateEntitySuccessNotification(success);
+            $scope.updateEntitySuccess(success, $event);
+            $scope.updateEntitySuccessNotification(success, $event);
             return ShButtonState.enable($event);
           }, function(error) {
-            $scope.updateEntityFailure(error);
-            $scope.updateEntityFailureNotification(error);
+            $scope.updateEntityFailure(error, $event);
+            $scope.updateEntityFailureNotification(error, $event);
             return ShButtonState.enable($event);
           });
         };
