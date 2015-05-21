@@ -57,7 +57,7 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
         $scope.refreshGrid()
     )
 
-    $scope.beforeGetPagedData = ()
+    $scope.beforeGetPagedData = () ->
       ### Befor Get PAge Data Callback ###
 
     $scope.refreshGrid = (currentPage = null) ->
