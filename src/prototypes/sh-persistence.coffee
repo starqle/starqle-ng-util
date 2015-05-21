@@ -185,7 +185,7 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
         $scope.beforeNewEntity()
 
         # Fetch blank entity
-        $scope.resource.new({}).$promise.then((success) ->
+        $scope.resource.new($scope.optParams).$promise.then((success) ->
           $scope.entity = success.data
           $scope.localLookup = success.lookup
           $scope.privileges = success.privileges
