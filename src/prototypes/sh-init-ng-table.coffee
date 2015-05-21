@@ -57,6 +57,9 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
         $scope.refreshGrid()
     )
 
+    $scope.beforeGetPagedData = ()
+      ### Befor Get PAge Data Callback ###
+
     $scope.refreshGrid = (currentPage = null) ->
       $scope.tableParams.page(currentPage) if currentPage
       $scope.getPagedDataAsync()
@@ -90,6 +93,7 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
         $scope.asyncBlock = true
 
         $timeout (->
+          $scope.beforeGetPagedData()
           $defer = $scope.tableParamsGetData.defer
           params = $scope.tableParamsGetData.params
           gridParams = $scope.generateGridParams()
