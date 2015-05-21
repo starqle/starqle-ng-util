@@ -801,6 +801,10 @@ angular.module('sh.init.ng.table', []).run([
             return $scope.refreshGrid();
           }
         });
+        $scope.beforeGetPagedData = function() {
+
+          /* Befor Get PAge Data Callback */
+        };
         $scope.refreshGrid = function(currentPage) {
           if (currentPage == null) {
             currentPage = null;
@@ -840,6 +844,7 @@ angular.module('sh.init.ng.table', []).run([
             $scope.asyncBlock = true;
             return $timeout((function() {
               var $defer, gridParams, params;
+              $scope.beforeGetPagedData();
               $defer = $scope.tableParamsGetData.defer;
               params = $scope.tableParamsGetData.params;
               gridParams = $scope.generateGridParams();
@@ -1501,7 +1506,7 @@ angular.module('sh.persistence', []).run([
         $scope.init = function() {
           if ($scope.id === void 0) {
             $scope.beforeNewEntity();
-            return $scope.resource["new"]({}).$promise.then(function(success) {
+            return $scope.resource["new"]($scope.optParams).$promise.then(function(success) {
               $scope.entity = success.data;
               $scope.localLookup = success.lookup;
               $scope.privileges = success.privileges;
