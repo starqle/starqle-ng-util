@@ -118,26 +118,35 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
       },
       require: '?ngModel',
       link: function($scope, $element, $attrs, ngModelCtrl) {
-        var init;
-        init = function() {
-          $element.datetimepicker({
-            showTodayButton: true,
-            format: 'DD-MM-YYYY',
-            icons: {
-              time: 'fa fa-clock-o',
-              date: 'fa fa-calendar',
-              up: 'fa fa-chevron-up',
-              down: 'fa fa-chevron-down',
-              previous: 'fa fa-chevron-left',
-              next: 'fa fa-chevron-right',
-              today: 'fa fa-crosshairs',
-              clear: 'fa fa-trash',
-              close: 'fa fa-times'
-            }
-          });
+        $element.datetimepicker({
+          showClear: true,
+          showTodayButton: true,
+          format: 'DD-MM-YYYY',
+          icons: {
+            time: 'fa fa-clock-o',
+            date: 'fa fa-calendar',
+            up: 'fa fa-chevron-up',
+            down: 'fa fa-chevron-down',
+            previous: 'fa fa-chevron-left',
+            next: 'fa fa-chevron-right',
+            today: 'fa fa-crosshairs',
+            clear: 'fa fa-trash',
+            close: 'fa fa-times'
+          }
+        });
+        ngModelCtrl.$render = function() {
+          var date;
+          date = ngModelCtrl.$viewValue;
+          if (angular.isDefined(date) && date !== null) {
+            $element.data('DateTimePicker').date(moment(date, 'YYYY-MM-DD'));
+          }
+          return ngModelCtrl.$viewValue;
         };
-        $element.bind('dp.change', function(aa) {
-          return ngModelCtrl.$setViewValue(aa.date.format('YYYY-MM-DD'));
+        ngModelCtrl.$parsers.push(function(data) {
+          return moment(data, 'DD-MM-YYYY').format('YYYY-MM-DD');
+        });
+        $element.bind('dp.change', function(data) {
+          return ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY'));
         });
         $scope.$watch('shStartDate', function(newVal, oldVal) {
           if (newVal) {
@@ -145,13 +154,12 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
             return $element.data('DateTimePicker').minDate(moment(newVal));
           }
         });
-        $scope.$watch('shEndDate', function(newVal, oldVal) {
+        return $scope.$watch('shEndDate', function(newVal, oldVal) {
           if (newVal) {
             newVal = newVal || 0;
             return $element.data('DateTimePicker').maxDate(moment(newVal));
           }
         });
-        return init();
       }
     };
   }
@@ -165,26 +173,38 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
       },
       require: '?ngModel',
       link: function($scope, $element, $attrs, ngModelCtrl) {
-        var init;
-        init = function() {
-          return $element.datetimepicker({
-            showTodayButton: true,
-            format: 'DD-MM-YYYY, HH:mm',
-            icons: {
-              time: 'fa fa-clock-o',
-              date: 'fa fa-calendar',
-              up: 'fa fa-chevron-up',
-              down: 'fa fa-chevron-down',
-              previous: 'fa fa-chevron-left',
-              next: 'fa fa-chevron-right',
-              today: 'fa fa-crosshairs',
-              clear: 'fa fa-trash',
-              close: 'fa fa-times'
-            }
-          });
+        $element.datetimepicker({
+          showClose: true,
+          showClear: true,
+          showTodayButton: true,
+          format: 'DD-MM-YYYY, HH:mm',
+          icons: {
+            time: 'fa fa-clock-o',
+            date: 'fa fa-calendar',
+            up: 'fa fa-chevron-up',
+            down: 'fa fa-chevron-down',
+            previous: 'fa fa-chevron-left',
+            next: 'fa fa-chevron-right',
+            today: 'fa fa-crosshairs',
+            clear: 'fa fa-trash',
+            close: 'fa fa-times'
+          }
+        });
+        ngModelCtrl.$render = function() {
+          var date;
+          date = ngModelCtrl.$viewValue;
+          if (angular.isDefined(date) && date !== null) {
+            $element.data('DateTimePicker').date(moment(date, 'x'));
+          }
+          return ngModelCtrl.$viewValue;
         };
-        $element.bind('dp.change', function(aa) {
-          return ngModelCtrl.$setViewValue(aa.date.format('x'));
+        ngModelCtrl.$parsers.push(function(data) {
+          return moment(data, 'DD-MM-YYYY, hh:mm').format('x');
+        });
+        $element.bind('dp.change', function(data) {
+          if (data.date) {
+            return ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, hh:mm'));
+          }
         });
         $scope.$watch('shStartDate', function(newVal, oldVal) {
           if (newVal) {
@@ -192,13 +212,12 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
             return $element.data('DateTimePicker').minDate(moment(newVal));
           }
         });
-        $scope.$watch('shEndDate', function(newVal, oldVal) {
+        return $scope.$watch('shEndDate', function(newVal, oldVal) {
           if (newVal) {
             newVal = newVal || 0;
             return $element.data('DateTimePicker').maxDate(moment(newVal));
           }
         });
-        return init();
       }
     };
   }
