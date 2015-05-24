@@ -21,7 +21,7 @@
 
 angular.module('sh.datepicker', []
 
-).directive("shDatepicker", ['dateFilter', (dateFilter) ->
+).directive("shDatepicker", [ ->
   #
   #
   #
@@ -31,39 +31,41 @@ angular.module('sh.datepicker', []
     shEndDate:  '='
   require: '?ngModel'
   link: ($scope, $element, $attrs, ngModelCtrl) ->
-    datepickerOptions =
-      format: 'dd-mm-yyyy'
-      autoclose: true
-      todayBtn: 'linked'
-      todayHighlight: true
-      weekStart: 1
-
-    # Initialize datepicker
     init = ->
-      $element.datepicker(datepickerOptions)
+      $element.datetimepicker(
+        showTodayButton: true
+        format: 'DD-MM-YYYY'
+        icons:
+          time: 'fa fa-clock-o'
+          date: 'fa fa-calendar'
+          up: 'fa fa-chevron-up'
+          down: 'fa fa-chevron-down'
+          previous: 'fa fa-chevron-left'
+          next: 'fa fa-chevron-right'
+          today: 'fa fa-crosshairs'
+          clear: 'fa fa-trash'
+          close: 'fa fa-times'
+      )
+      return
 
-    ngModelCtrl.$formatters.push (data) ->
-      dateFilter data, 'dd-MM-yyyy'
+    $element.bind 'dp.change', (aa) ->
+      ngModelCtrl.$setViewValue(aa.date.format('YYYY-MM-DD'));
 
-    ngModelCtrl.$parsers.push (data) ->
-      moment(data, 'DD-MM-YYYY').format('YYYY-MM-DD')
-
-    init()
-
-    # When i18n language is changed
     $scope.$watch 'shStartDate', (newVal, oldVal) ->
       if newVal
         newVal = newVal || -Infinity
-        $element.datepicker('setStartDate', dateFilter(newVal, 'dd-MM-yyyy'))
+        $element.data('DateTimePicker').minDate(moment(newVal))
 
     $scope.$watch 'shEndDate', (newVal, oldVal) ->
       if newVal
         newVal = newVal || 0
-        $element.datepicker('setEndDate', dateFilter(newVal, 'dd-MM-yyyy'))
+        $element.data('DateTimePicker').maxDate(moment(newVal))
+
+    init()
 
 
 
-]).directive("shMillisecondDatepicker", ['dateFilter', (dateFilter) ->
+]).directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
   #
   #
   #
@@ -73,33 +75,33 @@ angular.module('sh.datepicker', []
     shEndDate:  '='
   require: '?ngModel'
   link: ($scope, $element, $attrs, ngModelCtrl) ->
-    datepickerOptions =
-      format: 'dd-mm-yyyy'
-      autoclose: true
-      todayBtn: 'linked'
-      todayHighlight: true
-      weekStart: 1
-
-    # Initialize datepicker
     init = ->
-      $element.datepicker(datepickerOptions)
+      $element.datetimepicker
+        showTodayButton: true
+        format: 'DD-MM-YYYY, HH:mm'
+        icons:
+          time: 'fa fa-clock-o'
+          date: 'fa fa-calendar'
+          up: 'fa fa-chevron-up'
+          down: 'fa fa-chevron-down'
+          previous: 'fa fa-chevron-left'
+          next: 'fa fa-chevron-right'
+          today: 'fa fa-crosshairs'
+          clear: 'fa fa-trash'
+          close: 'fa fa-times'
 
-    ngModelCtrl.$formatters.push (data) ->
-      dateFilter data, 'dd-MM-yyyy'
+    $element.bind 'dp.change', (aa) ->
+      ngModelCtrl.$setViewValue(aa.date.format('x'));
 
-    ngModelCtrl.$parsers.push (data) ->
-      moment(data, 'DD-MM-YYYY').valueOf()
-
-    init()
-
-    # When i18n language is changed
     $scope.$watch 'shStartDate', (newVal, oldVal) ->
       if newVal
         newVal = newVal || -Infinity
-        $element.datepicker('setStartDate', newVal)
+        $element.data('DateTimePicker').minDate(moment(newVal))
 
     $scope.$watch 'shEndDate', (newVal, oldVal) ->
       if newVal
         newVal = newVal || 0
-        $element.datepicker('setEndDate', newVal)
+        $element.data('DateTimePicker').maxDate(moment(newVal))
+
+    init()
 ])
