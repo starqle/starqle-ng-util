@@ -31,26 +31,46 @@ angular.module('sh.datepicker', []
     shEndDate:  '='
   require: '?ngModel'
   link: ($scope, $element, $attrs, ngModelCtrl) ->
-    init = ->
-      $element.datetimepicker(
-        showTodayButton: true
-        format: 'DD-MM-YYYY'
-        icons:
-          time: 'fa fa-clock-o'
-          date: 'fa fa-calendar'
-          up: 'fa fa-chevron-up'
-          down: 'fa fa-chevron-down'
-          previous: 'fa fa-chevron-left'
-          next: 'fa fa-chevron-right'
-          today: 'fa fa-crosshairs'
-          clear: 'fa fa-trash'
-          close: 'fa fa-times'
-      )
-      return
+    #
+    # SETUP
+    #
+    $element.datetimepicker(
+      showClear: true
+      showTodayButton: true
+      format: 'DD-MM-YYYY'
+      icons:
+        time: 'fa fa-clock-o'
+        date: 'fa fa-calendar'
+        up: 'fa fa-chevron-up'
+        down: 'fa fa-chevron-down'
+        previous: 'fa fa-chevron-left'
+        next: 'fa fa-chevron-right'
+        today: 'fa fa-crosshairs'
+        clear: 'fa fa-trash'
+        close: 'fa fa-times'
+    )
 
-    $element.bind 'dp.change', (aa) ->
-      ngModelCtrl.$setViewValue(aa.date.format('YYYY-MM-DD'));
+    #
+    # ngModelCtrl
+    #
+    ngModelCtrl.$render = ->
+      date = ngModelCtrl.$viewValue
+      if angular.isDefined(date) and date != null
+        $element.data('DateTimePicker').date moment(date, 'YYYY-MM-DD')
+      ngModelCtrl.$viewValue
 
+    ngModelCtrl.$parsers.push (data) ->
+      moment(data, 'DD-MM-YYYY').format('YYYY-MM-DD')
+
+    #
+    # BINDING
+    #
+    $element.bind 'dp.change', (data) ->
+      ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY'))
+
+    #
+    # WATCHERS
+    #
     $scope.$watch 'shStartDate', (newVal, oldVal) ->
       if newVal
         newVal = newVal || -Infinity
@@ -60,9 +80,6 @@ angular.module('sh.datepicker', []
       if newVal
         newVal = newVal || 0
         $element.data('DateTimePicker').maxDate(moment(newVal))
-
-    init()
-
 
 
 ]).directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
@@ -75,24 +92,47 @@ angular.module('sh.datepicker', []
     shEndDate:  '='
   require: '?ngModel'
   link: ($scope, $element, $attrs, ngModelCtrl) ->
-    init = ->
-      $element.datetimepicker
-        showTodayButton: true
-        format: 'DD-MM-YYYY, HH:mm'
-        icons:
-          time: 'fa fa-clock-o'
-          date: 'fa fa-calendar'
-          up: 'fa fa-chevron-up'
-          down: 'fa fa-chevron-down'
-          previous: 'fa fa-chevron-left'
-          next: 'fa fa-chevron-right'
-          today: 'fa fa-crosshairs'
-          clear: 'fa fa-trash'
-          close: 'fa fa-times'
+    #
+    # SETUP
+    #
+    $element.datetimepicker
+      showClose: true
+      showClear: true
+      showTodayButton: true
+      format: 'DD-MM-YYYY, HH:mm'
+      icons:
+        time: 'fa fa-clock-o'
+        date: 'fa fa-calendar'
+        up: 'fa fa-chevron-up'
+        down: 'fa fa-chevron-down'
+        previous: 'fa fa-chevron-left'
+        next: 'fa fa-chevron-right'
+        today: 'fa fa-crosshairs'
+        clear: 'fa fa-trash'
+        close: 'fa fa-times'
 
-    $element.bind 'dp.change', (aa) ->
-      ngModelCtrl.$setViewValue(aa.date.format('x'));
+    #
+    # ngModelCtrl
+    #
+    ngModelCtrl.$render = ->
+      date = ngModelCtrl.$viewValue
+      if angular.isDefined(date) and date != null
+        $element.data('DateTimePicker').date moment(date, 'x')
+      ngModelCtrl.$viewValue
 
+    ngModelCtrl.$parsers.push (data) ->
+      moment(data, 'DD-MM-YYYY, hh:mm').format('x')
+
+    #
+    # BINDING
+    #
+    $element.bind 'dp.change', (data) ->
+      if data.date
+        ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, hh:mm'))
+
+    #
+    # WATCHERS
+    #
     $scope.$watch 'shStartDate', (newVal, oldVal) ->
       if newVal
         newVal = newVal || -Infinity
@@ -102,6 +142,4 @@ angular.module('sh.datepicker', []
       if newVal
         newVal = newVal || 0
         $element.data('DateTimePicker').maxDate(moment(newVal))
-
-    init()
 ])
