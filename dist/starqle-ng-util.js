@@ -199,11 +199,11 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           return ngModelCtrl.$viewValue;
         };
         ngModelCtrl.$parsers.push(function(data) {
-          return moment(data, 'DD-MM-YYYY, hh:mm').format('x');
+          return moment(data, 'DD-MM-YYYY, HH:mm').format('x');
         });
         $element.bind('dp.change', function(data) {
           if (data.date) {
-            return ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, hh:mm'));
+            return ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, HH:mm'));
           }
         });
         $scope.$watch('shStartDate', function(newVal, oldVal) {

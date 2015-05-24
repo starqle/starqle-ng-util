@@ -121,14 +121,14 @@ angular.module('sh.datepicker', []
       ngModelCtrl.$viewValue
 
     ngModelCtrl.$parsers.push (data) ->
-      moment(data, 'DD-MM-YYYY, hh:mm').format('x')
+      moment(data, 'DD-MM-YYYY, HH:mm').format('x')
 
     #
     # BINDING
     #
     $element.bind 'dp.change', (data) ->
       if data.date
-        ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, hh:mm'))
+        ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, HH:mm'))
 
     #
     # WATCHERS
