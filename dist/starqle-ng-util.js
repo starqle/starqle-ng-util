@@ -992,11 +992,11 @@ angular.module('sh.modal.persistence', []).run([
             });
           }
         };
-        $scope.beforeEditEntity = function() {};
-        $scope.editEntitySuccess = function(response) {};
-        $scope.editEntitySuccessNotification = function(response) {};
-        $scope.editEntityFailure = function(response) {};
-        $scope.editEntityFailureNotification = function(response) {};
+        $scope.beforeEditEntity = function(id) {};
+        $scope.editEntitySuccess = function(response, id) {};
+        $scope.editEntitySuccessNotification = function(response, id) {};
+        $scope.editEntityFailure = function(response, id) {};
+        $scope.editEntityFailureNotification = function(response, id) {};
         $scope.beforeUpdateEntity = function($event) {};
         $scope.updateEntitySuccess = function(response, $event) {};
         $scope.updateEntitySuccessNotification = function(response, $event) {
@@ -1178,7 +1178,7 @@ angular.module('sh.modal.persistence', []).run([
         };
         $scope.fetchEditEntity = function(id) {
           $rootScope.spinningService.spin('modal');
-          $scope.beforeEditEntity();
+          $scope.beforeEditEntity(id);
           return $scope.resource.edit($.extend({
             id: id
           }, $scope.optParams)).$promise.then(function(success) {
@@ -1186,12 +1186,12 @@ angular.module('sh.modal.persistence', []).run([
             $scope.entity = success.data;
             $scope.localLookup = success.lookup;
             $scope.modalProperties.visible = true;
-            $scope.editEntitySuccess(success);
-            return $scope.editEntitySuccessNotification(success);
+            $scope.editEntitySuccess(success, id);
+            return $scope.editEntitySuccessNotification(success, id);
           }, function(error) {
             $rootScope.spinningService.stop('modal');
-            $scope.editEntityFailure(error);
-            return $scope.editEntityFailureNotification(error);
+            $scope.editEntityFailure(error, id);
+            return $scope.editEntityFailureNotification(error, id);
           });
         };
         $scope.closeEditEntityModal = function(elementStr, id) {
