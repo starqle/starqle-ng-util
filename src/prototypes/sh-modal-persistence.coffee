@@ -65,11 +65,11 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
 
     # =========================================================================
     # Edit callback methods
-    $scope.beforeEditEntity = () ->
-    $scope.editEntitySuccess = (response) ->
-    $scope.editEntitySuccessNotification = (response) ->
-    $scope.editEntityFailure = (response) ->
-    $scope.editEntityFailureNotification = (response) ->
+    $scope.beforeEditEntity = (id) ->
+    $scope.editEntitySuccess = (response, id) ->
+    $scope.editEntitySuccessNotification = (response, id) ->
+    $scope.editEntityFailure = (response, id) ->
+    $scope.editEntityFailureNotification = (response, id) ->
 
     # =========================================================================
     # Update callback methods
@@ -242,7 +242,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
 
     $scope.fetchEditEntity = (id) ->
       $rootScope.spinningService.spin('modal')
-      $scope.beforeEditEntity()
+      $scope.beforeEditEntity(id)
 
       # Fetch entity for editing
       $scope.resource.edit($.extend({id: id}, $scope.optParams)
@@ -251,12 +251,12 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         $scope.entity = success.data
         $scope.localLookup = success.lookup
         $scope.modalProperties.visible = true
-        $scope.editEntitySuccess(success)
-        $scope.editEntitySuccessNotification(success)
+        $scope.editEntitySuccess(success, id)
+        $scope.editEntitySuccessNotification(success, id)
       , (error) ->
         $rootScope.spinningService.stop('modal')
-        $scope.editEntityFailure(error)
-        $scope.editEntityFailureNotification(error)
+        $scope.editEntityFailure(error, id)
+        $scope.editEntityFailureNotification(error, id)
       )
 
     $scope.closeEditEntityModal = (elementStr, id) ->
