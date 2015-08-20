@@ -31,12 +31,15 @@ angular.module('sh.datepicker', []
     shEndDate:  '='
   require: '?ngModel'
   link: ($scope, $element, $attrs, ngModelCtrl) ->
+    initiation = true
+
     #
     # SETUP
     #
     $element.datetimepicker(
       showClear: true
       showTodayButton: true
+      useCurrent: false
       format: 'DD-MM-YYYY'
       icons:
         time: 'fa fa-clock-o'
@@ -66,8 +69,13 @@ angular.module('sh.datepicker', []
     # BINDING
     #
     $element.bind 'dp.change', (data) ->
+      ngModelCtrl.$pristine = false if initiation
       ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY'))
+      ngModelCtrl.$pristine = true if initiation
+      initiation = false
 
+    $element.bind 'dp.show', (data) ->
+      initiation = false if initiation
     #
     # WATCHERS
     #
@@ -92,12 +100,15 @@ angular.module('sh.datepicker', []
     shEndDate:  '='
   require: '?ngModel'
   link: ($scope, $element, $attrs, ngModelCtrl) ->
+    initiation = true
+
     #
     # SETUP
     #
     $element.datetimepicker
       showClose: true
       showClear: true
+      useCurrent: false
       showTodayButton: true
       format: 'DD-MM-YYYY, HH:mm'
       icons:
@@ -128,8 +139,15 @@ angular.module('sh.datepicker', []
     #
     $element.bind 'dp.change', (data) ->
       if data.date
+        ngModelCtrl.$pristine = false if initiation
         ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, HH:mm'))
+        ngModelCtrl.$pristine = true if initiation
+        initiation = false
 
+    $element.bind 'dp.show', (data) ->
+      initiation = false if initiation
+
+    #
     #
     # WATCHERS
     #

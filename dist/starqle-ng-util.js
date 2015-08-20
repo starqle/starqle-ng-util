@@ -118,9 +118,12 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
       },
       require: '?ngModel',
       link: function($scope, $element, $attrs, ngModelCtrl) {
+        var initiation;
+        initiation = true;
         $element.datetimepicker({
           showClear: true,
           showTodayButton: true,
+          useCurrent: false,
           format: 'DD-MM-YYYY',
           icons: {
             time: 'fa fa-clock-o',
@@ -146,7 +149,19 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           return moment(data, 'DD-MM-YYYY').format('YYYY-MM-DD');
         });
         $element.bind('dp.change', function(data) {
-          return ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY'));
+          if (initiation) {
+            ngModelCtrl.$pristine = false;
+          }
+          ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY'));
+          if (initiation) {
+            ngModelCtrl.$pristine = true;
+          }
+          return initiation = false;
+        });
+        $element.bind('dp.show', function(data) {
+          if (initiation) {
+            return initiation = false;
+          }
         });
         $scope.$watch('shStartDate', function(newVal, oldVal) {
           if (newVal) {
@@ -173,9 +188,12 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
       },
       require: '?ngModel',
       link: function($scope, $element, $attrs, ngModelCtrl) {
+        var initiation;
+        initiation = true;
         $element.datetimepicker({
           showClose: true,
           showClear: true,
+          useCurrent: false,
           showTodayButton: true,
           format: 'DD-MM-YYYY, HH:mm',
           icons: {
@@ -203,7 +221,19 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
         });
         $element.bind('dp.change', function(data) {
           if (data.date) {
-            return ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, HH:mm'));
+            if (initiation) {
+              ngModelCtrl.$pristine = false;
+            }
+            ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, HH:mm'));
+            if (initiation) {
+              ngModelCtrl.$pristine = true;
+            }
+            return initiation = false;
+          }
+        });
+        $element.bind('dp.show', function(data) {
+          if (initiation) {
+            return initiation = false;
           }
         });
         $scope.$watch('shStartDate', function(newVal, oldVal) {
