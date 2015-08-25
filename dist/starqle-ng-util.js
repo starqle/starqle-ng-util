@@ -113,8 +113,8 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
     return {
       restrict: 'A',
       scope: {
-        shStartDate: '=',
-        shEndDate: '='
+        shFromDate: '=',
+        shThruDate: '='
       },
       require: '?ngModel',
       link: function($scope, $element, $attrs, ngModelCtrl) {
@@ -163,13 +163,13 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
             return initiation = false;
           }
         });
-        $scope.$watch('shStartDate', function(newVal, oldVal) {
+        $scope.$watch('shFromDate', function(newVal, oldVal) {
           if (newVal) {
             newVal = newVal || -Infinity;
             return $element.data('DateTimePicker').minDate(moment(newVal));
           }
         });
-        return $scope.$watch('shEndDate', function(newVal, oldVal) {
+        return $scope.$watch('shThruDate', function(newVal, oldVal) {
           if (newVal) {
             newVal = newVal || 0;
             return $element.data('DateTimePicker').maxDate(moment(newVal));
@@ -183,8 +183,8 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
     return {
       restrict: 'A',
       scope: {
-        shStartDate: '=',
-        shEndDate: '='
+        shFromTime: '=',
+        shThruTime: '='
       },
       require: '?ngModel',
       link: function($scope, $element, $attrs, ngModelCtrl) {
@@ -236,16 +236,16 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
             return initiation = false;
           }
         });
-        $scope.$watch('shStartDate', function(newVal, oldVal) {
+        $scope.$watch('shFromTime', function(newVal, oldVal) {
           if (newVal) {
             newVal = newVal || -Infinity;
-            return $element.data('DateTimePicker').minDate(moment(newVal));
+            return $element.data('DateTimePicker').minDate(moment(newVal * 1));
           }
         });
-        return $scope.$watch('shEndDate', function(newVal, oldVal) {
+        return $scope.$watch('shThruTime', function(newVal, oldVal) {
           if (newVal) {
             newVal = newVal || 0;
-            return $element.data('DateTimePicker').maxDate(moment(newVal));
+            return $element.data('DateTimePicker').maxDate(moment(newVal * 1));
           }
         });
       }
@@ -1751,14 +1751,18 @@ angular.module('sh.notification', []).service("ShNotification", [
     };
     this.runInterval = function(self) {
       return $interval(function() {
-        var i, j, len, ref, results, toast;
+        var i, j, len, ref, ref1, results, toast;
         ref = self.toasts;
         results = [];
         for (i = j = 0, len = ref.length; j < len; i = ++j) {
           toast = ref[i];
           if (toast.alive && toast.deathtime < Date.now()) {
             toast.alive = false;
-            results.push(self.removeToast(i, 1));
+            if ((ref1 = toast.type) !== 'error' && ref1 !== 'danger') {
+              results.push(self.removeToast(i, 1));
+            } else {
+              results.push(void 0);
+            }
           } else {
             results.push(void 0);
           }
@@ -1812,7 +1816,7 @@ angular.module('sh.notification', []).service("ShNotification", [
       }, opts.duration);
     };
     this.toastByResponse = function(response, defaultToast) {
-      var j, len, n, ref, results;
+      var j, k, len, len1, n, ref, ref1, results, results1;
       if (response.notification) {
         ref = response.notification.notifications;
         results = [];
@@ -1822,14 +1826,41 @@ angular.module('sh.notification', []).service("ShNotification", [
             return function(n) {
               return _this.addToast({
                 type: n.type,
+                data: response,
                 message: n.message
               });
             };
           })(this)(n));
         }
         return results;
+      } else if (response.data && response.data.error) {
+        ref1 = response.data.error.errors;
+        results1 = [];
+        for (k = 0, len1 = ref1.length; k < len1; k++) {
+          n = ref1[k];
+          results1.push((function(_this) {
+            return function(n) {
+              return _this.addToast({
+                type: 'danger',
+                data: response,
+                message: n.message
+              });
+            };
+          })(this)(n));
+        }
+        return results1;
+      } else if (defaultToast) {
+        return this.addToast({
+          type: defaultToast.type,
+          data: response,
+          message: defaultToast.message
+        });
       } else {
-        return this.addToast(defaultToast);
+        return this.addToast({
+          type: 'danger',
+          data: response,
+          message: response.data
+        });
       }
     };
     this.runInterval(this);
