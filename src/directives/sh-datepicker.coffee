@@ -27,8 +27,8 @@ angular.module('sh.datepicker', []
   #
   restrict: 'A'
   scope:
-    shStartDate: '='
-    shEndDate:  '='
+    shFromDate: '='
+    shThruDate:  '='
   require: '?ngModel'
   link: ($scope, $element, $attrs, ngModelCtrl) ->
     initiation = true
@@ -79,12 +79,12 @@ angular.module('sh.datepicker', []
     #
     # WATCHERS
     #
-    $scope.$watch 'shStartDate', (newVal, oldVal) ->
+    $scope.$watch 'shFromDate', (newVal, oldVal) ->
       if newVal
         newVal = newVal || -Infinity
         $element.data('DateTimePicker').minDate(moment(newVal))
 
-    $scope.$watch 'shEndDate', (newVal, oldVal) ->
+    $scope.$watch 'shThruDate', (newVal, oldVal) ->
       if newVal
         newVal = newVal || 0
         $element.data('DateTimePicker').maxDate(moment(newVal))
@@ -96,8 +96,8 @@ angular.module('sh.datepicker', []
   #
   restrict: 'A'
   scope:
-    shStartDate: '='
-    shEndDate:  '='
+    shFromTime: '='
+    shThruTime:  '='
   require: '?ngModel'
   link: ($scope, $element, $attrs, ngModelCtrl) ->
     initiation = true
@@ -151,13 +151,13 @@ angular.module('sh.datepicker', []
     #
     # WATCHERS
     #
-    $scope.$watch 'shStartDate', (newVal, oldVal) ->
+    $scope.$watch 'shFromTime', (newVal, oldVal) ->
       if newVal
         newVal = newVal || -Infinity
-        $element.data('DateTimePicker').minDate(moment(newVal))
+        $element.data('DateTimePicker').minDate(moment(newVal * 1))
 
-    $scope.$watch 'shEndDate', (newVal, oldVal) ->
+    $scope.$watch 'shThruTime', (newVal, oldVal) ->
       if newVal
         newVal = newVal || 0
-        $element.data('DateTimePicker').maxDate(moment(newVal))
+        $element.data('DateTimePicker').maxDate(moment(newVal * 1))
 ])
