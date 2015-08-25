@@ -20,7 +20,7 @@
 "use strict";
 
 angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$interval', ($timeout, $interval) ->
-  
+
   defaultLifetime = 4000
   defaultDuration = 500
 
@@ -53,7 +53,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
       opts.toast = options
       opts.lifetime = lifetimeOpt if lifetimeOpt?
       opts.duration = durationOpt if durationOpt?
-      opts.toast.deathtime = Date.now() + opts.lifetime 
+      opts.toast.deathtime = Date.now() + opts.lifetime
       opts.toast.alive = true
     else
       angular.extend(opts, options)
@@ -63,7 +63,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
     opts.afterAdd.call this
 
   #
-  # Adding oldest toast
+  # Removing oldest toast
   #
   @removeOldestToast = () ->
     @removeToast(@toasts.length - 1)
@@ -117,7 +117,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
       for toast, i in self.toasts
         if toast.alive and toast.deathtime < Date.now()
           toast.alive = false
-          self.removeToast(i, 1)
+          self.removeToast(i, 1) unless toast.type in ['error', 'danger']
     , 500
     , 0
     , false
@@ -197,9 +197,25 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
         do (n) =>
           @addToast
             type: n.type
+            data: response
             message: n.message
+    else if response.data and response.data.error
+      for n in response.data.error.errors
+        do (n) =>
+          @addToast
+            type: 'danger'
+            data: response
+            message: n.message
+    else if defaultToast
+      @addToast
+        type: defaultToast.type
+        data: response
+        message: defaultToast.message
     else
-      @addToast defaultToast
+      @addToast
+        type: 'danger'
+        data: response
+        message: response.data
 
   #
   #
