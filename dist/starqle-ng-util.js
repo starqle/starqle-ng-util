@@ -705,7 +705,7 @@ angular.module('sh.remove.duplicates', []).filter("shRemoveDuplicates", [
         aggregateItems = {};
         for (i = 0, len = collection.length; i < len; i++) {
           item = collection[i];
-          newCollection[item[fieldName]] = $.extend({}, item);
+          newCollection[item[fieldName]] = angular.extend({}, item);
           newItem = newCollection[item[fieldName]];
           if (typeof callback === 'function') {
             callback(newItem, newItem[fieldName], aggregateItems);
@@ -892,7 +892,7 @@ angular.module('sh.init.ng.table', []).run([
             filter_params: {}
           };
           if ($scope.filterParams) {
-            $.extend(gridParams.filter_params, $scope.filterParams);
+            angular.extend(gridParams.filter_params, $scope.filterParams);
           }
           return gridParams;
         };
@@ -906,7 +906,7 @@ angular.module('sh.init.ng.table', []).run([
               params = $scope.tableParamsGetData.params;
               gridParams = $scope.generateGridParams();
               $scope.gridRefreshing = true;
-              return $scope.resource.get($.extend(gridParams, $scope.optParams)).$promise.then(function(success) {
+              return $scope.resource.get(angular.extend(gridParams, $scope.optParams)).$promise.then(function(success) {
                 params.total(success.data.total_server_items);
                 $defer.resolve(success.data.items);
                 $scope.tableParams.reload();
@@ -952,27 +952,6 @@ angular.module('sh.init.ng.table', []).run([
             newDirection = 'desc';
           }
           return $scope.tableParams.sorting(fieldName, newDirection);
-        };
-        $scope.exportToXls = function() {
-          var $defer, elementId, gridParams, params, xlsFullpath;
-          if ($scope.xlsPath) {
-            $defer = $scope.tableParamsGetData.defer;
-            params = $scope.tableParamsGetData.params;
-            gridParams = $scope.generateGridParams();
-            $.extend(gridParams, $scope.optParams);
-            $.extend(gridParams, {
-              username: $rootScope.currentUser.username,
-              authn_token: $rootScope.authToken
-            });
-            elementId = 'xls' + moment();
-            xlsFullpath = $scope.xlsPath + "?" + ($.param(gridParams));
-            $('body').append("<iframe id='" + elementId + "' style='display: none;' src='" + xlsFullpath + "'></iframe>");
-            $("#" + elementId).load(function() {
-              return setTimeout(function() {
-                return $("#" + elementId).remove();
-              }, 50);
-            });
-          }
         };
         $scope.getGeneratedPagesArray = function() {
           return $scope.tableParams.generatePagesArray($scope.tableParams.page(), $scope.tableParams.total(), $scope.tableParams.count());
@@ -1156,7 +1135,7 @@ angular.module('sh.modal.persistence', []).run([
         $scope.fetchNewEntity = function() {
           $rootScope.spinningService.spin('modal');
           $scope.beforeNewEntity();
-          return $scope.resource["new"]($.extend({}, $scope.optParams)).$promise.then(function(success) {
+          return $scope.resource["new"](angular.extend({}, $scope.optParams)).$promise.then(function(success) {
             $rootScope.spinningService.stop('modal');
             $scope.entity = success.data;
             $scope.localLookup = success.lookup;
@@ -1178,7 +1157,7 @@ angular.module('sh.modal.persistence', []).run([
           $scope.beforeCreateEntity($event);
           $event = ShButtonState.initializeEvent($event);
           ShButtonState.loading($event);
-          return $scope.resource.save($.extend({}, $scope.optParams), {
+          return $scope.resource.save(angular.extend({}, $scope.optParams), {
             data: $scope.entity
           }).$promise.then(function(success) {
             $scope.closeNewEntityModal(elementStr);
@@ -1209,7 +1188,7 @@ angular.module('sh.modal.persistence', []).run([
         $scope.fetchEditEntity = function(id) {
           $rootScope.spinningService.spin('modal');
           $scope.beforeEditEntity(id);
-          return $scope.resource.edit($.extend({
+          return $scope.resource.edit(angular.extend({
             id: id
           }, $scope.optParams)).$promise.then(function(success) {
             $rootScope.spinningService.stop('modal');
@@ -1233,7 +1212,7 @@ angular.module('sh.modal.persistence', []).run([
           $scope.beforeUpdateEntity($event);
           $event = ShButtonState.initializeEvent($event);
           ShButtonState.loading($event);
-          return $scope.resource.update($.extend({
+          return $scope.resource.update(angular.extend({
             id: $scope.entity.id
           }, $scope.optParams), {
             data: $scope.entity
@@ -1262,7 +1241,7 @@ angular.module('sh.modal.persistence', []).run([
           $event = ShButtonState.initializeEvent($event);
           ShButtonState.loading($event);
           $scope.beforeDestroyEntity($event);
-          return $scope.resource["delete"]($.extend({
+          return $scope.resource["delete"](angular.extend({
             id: id
           }, $scope.optParams)).$promise.then(function(success) {
             if ($scope.recentlyDeletedIds != null) {
@@ -1290,7 +1269,7 @@ angular.module('sh.modal.persistence', []).run([
             name = 'these entries';
           }
           $scope.beforeMultipleDestroyEntity();
-          return $scope.resource.multiple_delete($.extend({
+          return $scope.resource.multiple_delete(angular.extend({
             'ids[]': ids
           }, $scope.optParams)).$promise.then(function(success) {
             if ($scope.recentlyDeletedIds != null) {
@@ -1342,7 +1321,7 @@ angular.module('sh.ng.table.filter', []).run([
           return delete $scope.filterParams[navbarFilter + "_gteqdate"];
         };
         $scope.executeFilterDate = function() {
-          $.extend($scope.filterParams, dateParams);
+          angular.extend($scope.filterParams, dateParams);
           $scope.tableParamsGetData.params.$params.page = 1;
           return $scope.refreshGrid();
         };
@@ -1401,7 +1380,7 @@ angular.module('sh.ng.table.filter', []).run([
           return delete $scope.filterParams[navbarFilter + "_gteq"];
         };
         $scope.executeFilterNumber = function() {
-          $.extend($scope.filterParams, numberParams);
+          angular.extend($scope.filterParams, numberParams);
           $scope.tableParamsGetData.params.$params.page = 1;
           return $scope.refreshGrid();
         };
@@ -1442,7 +1421,7 @@ angular.module('sh.ng.table.filter', []).run([
           return $scope.refreshGrid();
         };
         $scope.isNoFilter = function() {
-          return $.isEmptyObject($scope.filterParams);
+          return angular.equals($scope.filterParams, {});
         };
       }
     ];
@@ -1521,7 +1500,7 @@ angular.module('sh.persistence', []).run([
           $scope.beforeCreateEntity($event);
           $event = ShButtonState.initializeEvent($event);
           ShButtonState.loading($event);
-          return $scope.resource.save($.extend({}, $scope.optParams), {
+          return $scope.resource.save(angular.extend({}, $scope.optParams), {
             data: $scope.entity
           }).$promise.then(function(success) {
             var params;
@@ -1542,7 +1521,7 @@ angular.module('sh.persistence', []).run([
           $event = ShButtonState.initializeEvent($event);
           ShButtonState.loading($event);
           $scope.saved = false;
-          return $scope.resource.update($.extend({
+          return $scope.resource.update(angular.extend({
             id: $scope.entity.id
           }, $scope.optParams), {
             data: $scope.entity
@@ -1575,7 +1554,7 @@ angular.module('sh.persistence', []).run([
             });
           } else {
             $scope.beforeEditEntity();
-            return $scope.resource.edit($.extend({
+            return $scope.resource.edit(angular.extend({
               id: $scope.id
             }, $scope.optParams)).$promise.then(function(success) {
               $scope.entity = success.data;
