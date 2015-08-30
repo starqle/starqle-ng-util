@@ -161,7 +161,8 @@ angular.module('sh.ng.table.filter', []).run ['$rootScope', '$filter', ($rootSco
 
     # Return true if there's no filter
     $scope.isNoFilter = () ->
-      $.isEmptyObject $scope.filterParams
+      # Angular way for checking whether an object is empty
+      angular.equals($scope.filterParams, {})
 
     return
   ]

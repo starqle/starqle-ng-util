@@ -27,7 +27,7 @@ angular.module('sh.remove.duplicates', []).filter "shRemoveDuplicates", [ ->
       aggregateItems = {}
 
       for item in collection
-        newCollection[item[fieldName]] = $.extend({}, item)
+        newCollection[item[fieldName]] = angular.extend({}, item)
         newItem = newCollection[item[fieldName]]
         callback(newItem, newItem[fieldName], aggregateItems) if typeof callback is 'function'
 
