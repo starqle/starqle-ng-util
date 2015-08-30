@@ -14,32 +14,10 @@
   "author": "Starqle Indonesia",
   "license": "Starqle Permissive License",
   "devDependencies": {
-    "connect-modrewrite": "^0.7.6",
     "gulp": "^3.8.6",
-    "gulp-autoprefixer": "^0.0.8",
-    "gulp-cached": "^1.0.1",
     "gulp-coffee": "^2.1.1",
-    "gulp-connect": "^2.0.6",
     "gulp-concat": "^2.3.3",
-    "gulp-filter": "^0.5.0",
-    "gulp-haml": "^0.0.8",
-    "gulp-imagemin": "^0.6.1",
-    "gulp-inject": "^0.4.1",
-    "gulp-jade": "^0.6.1",
-    "gulp-livereload": "^2.1.0",
-    "gulp-minify-css": "^0.3.6",
-    "gulp-minify-html": "^0.1.4",
-    "gulp-ng-html2js": "^0.1.7",
-    "gulp-notify": "^1.4.0",
-    "gulp-plumber": "^0.6.3",
-    "gulp-rev": "^0.4.2",
-    "gulp-rev-replace": "^0.2.1",
-    "gulp-sass": "^0.7.2",
-    "gulp-uglify": "^0.3.1",
-    "gulp-useref": "^0.5.0",
     "gulp-util": "^2.2.20",
-    "gulp-watch": "^0.6.8",
-    "rimraf": "^2.2.8",
-    "run-sequence": "^0.3.6"
+    "rimraf": "^2.2.8"
   }
 }
