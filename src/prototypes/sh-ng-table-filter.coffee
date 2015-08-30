@@ -31,7 +31,7 @@ angular.module('sh.ng.table.filter', []).run ['$rootScope', '$filter', ($rootSco
     # =========================================================================
 
     # $scope.filterDateAnyday = (navbarFilter) ->
-    #   $.extend $scope.filterParams,
+    #   angular.extend $scope.filterParams,
     #     navbarFilter
 
     dateParams = {}
@@ -44,7 +44,7 @@ angular.module('sh.ng.table.filter', []).run ['$rootScope', '$filter', ($rootSco
       delete $scope.filterParams[navbarFilter+"_gteqdate"]
 
     $scope.executeFilterDate = () ->
-      $.extend $scope.filterParams, dateParams
+      angular.extend $scope.filterParams, dateParams
       $scope.tableParamsGetData.params.$params.page = 1
       $scope.refreshGrid()
 
@@ -110,7 +110,7 @@ angular.module('sh.ng.table.filter', []).run ['$rootScope', '$filter', ($rootSco
       delete $scope.filterParams[navbarFilter+"_gteq"]
 
     $scope.executeFilterNumber = () ->
-      $.extend $scope.filterParams, numberParams
+      angular.extend $scope.filterParams, numberParams
       $scope.tableParamsGetData.params.$params.page = 1
       $scope.refreshGrid()
 

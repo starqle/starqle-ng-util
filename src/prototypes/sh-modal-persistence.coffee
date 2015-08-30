@@ -187,7 +187,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.beforeNewEntity()
 
       # Fetch blank entity
-      $scope.resource.new($.extend({}, $scope.optParams)
+      $scope.resource.new(angular.extend({}, $scope.optParams)
       ).$promise.then((success) ->
         $rootScope.spinningService.stop('modal')
         $scope.entity = success.data
@@ -213,7 +213,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       ShButtonState.loading $event
 
       # Persist entity into database
-      $scope.resource.save($.extend({}, $scope.optParams)
+      $scope.resource.save(angular.extend({}, $scope.optParams)
       , data: $scope.entity
       ).$promise.then((success) ->
         $scope.closeNewEntityModal(elementStr)
@@ -245,7 +245,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.beforeEditEntity(id)
 
       # Fetch entity for editing
-      $scope.resource.edit($.extend({id: id}, $scope.optParams)
+      $scope.resource.edit(angular.extend({id: id}, $scope.optParams)
       ).$promise.then((success) ->
         $rootScope.spinningService.stop('modal')
         $scope.entity = success.data
@@ -271,7 +271,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       ShButtonState.loading $event
 
       # Update entity into database
-      $scope.resource.update($.extend({id: $scope.entity.id}, $scope.optParams)
+      $scope.resource.update(angular.extend({id: $scope.entity.id}, $scope.optParams)
       , data: $scope.entity
       ).$promise.then((success) ->
         $scope.closeEditEntityModal(elementStr, $scope.entity.id)
@@ -298,7 +298,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.beforeDestroyEntity($event)
 
       # Delete entity from database
-      $scope.resource.delete($.extend({id: id}, $scope.optParams)
+      $scope.resource.delete(angular.extend({id: id}, $scope.optParams)
       ).$promise.then((success) ->
         $scope.recentlyDeletedIds.push success.data.id if $scope.recentlyDeletedIds?
         $scope.refreshGrid() if typeof $scope.getPagedDataAsync is 'function'
@@ -317,7 +317,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.beforeMultipleDestroyEntity()
 
       # Delete entity from database
-      $scope.resource.multiple_delete($.extend({'ids[]': ids}, $scope.optParams)
+      $scope.resource.multiple_delete(angular.extend({'ids[]': ids}, $scope.optParams)
       ).$promise.then((success) ->
         $scope.recentlyDeletedIds = ids if $scope.recentlyDeletedIds?
         $scope.selectedEntities = []

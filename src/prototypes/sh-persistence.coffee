@@ -118,7 +118,7 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
       ShButtonState.loading $event
 
       # Persist entity into database
-      $scope.resource.save($.extend({}, $scope.optParams)
+      $scope.resource.save(angular.extend({}, $scope.optParams)
       , data: $scope.entity
       ).$promise.then((success) ->
 
@@ -154,7 +154,7 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.saved = false
 
       # Update entity into database
-      $scope.resource.update($.extend({id: $scope.entity.id}, $scope.optParams)
+      $scope.resource.update(angular.extend({id: $scope.entity.id}, $scope.optParams)
       , data: $scope.entity
       ).$promise.then((success) ->
 
@@ -199,7 +199,7 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
         $scope.beforeEditEntity()
 
         # Fetch entity for editing
-        $scope.resource.edit($.extend({id: $scope.id}, $scope.optParams)
+        $scope.resource.edit(angular.extend({id: $scope.id}, $scope.optParams)
         ).$promise.then((success) ->
           $scope.entity = success.data
           $scope.localLookup = success.lookup

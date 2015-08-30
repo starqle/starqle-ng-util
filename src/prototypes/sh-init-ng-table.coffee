@@ -84,7 +84,7 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
         filter_params: {}
 
       if $scope.filterParams
-        $.extend gridParams.filter_params, $scope.filterParams
+        angular.extend gridParams.filter_params, $scope.filterParams
 
       return gridParams
 
@@ -100,7 +100,7 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
           $scope.gridRefreshing = true
 
           $scope.resource.get(
-            $.extend gridParams, $scope.optParams
+            angular.extend gridParams, $scope.optParams
           ).$promise.then((success) ->
 
             # Update table params
