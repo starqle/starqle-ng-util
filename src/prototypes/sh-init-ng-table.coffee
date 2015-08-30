@@ -160,27 +160,6 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
       newDirection = 'desc' if $scope.tableParams.isSortBy(fieldName, 'asc')
       $scope.tableParams.sorting(fieldName, newDirection)
 
-    $scope.exportToXls = ->
-      if $scope.xlsPath
-        $defer = $scope.tableParamsGetData.defer
-        params = $scope.tableParamsGetData.params
-        gridParams = $scope.generateGridParams()
-
-        $.extend gridParams, $scope.optParams
-        $.extend gridParams,
-          username: $rootScope.currentUser.username
-          authn_token: $rootScope.authToken
-
-        elementId = 'xls' + moment()
-        xlsFullpath = "#{$scope.xlsPath}?#{$.param gridParams}"
-        $('body').append("<iframe id='" + elementId + "' style='display: none;' src='" + xlsFullpath + "'></iframe>")
-        $("#" + elementId).load () ->
-          setTimeout () ->
-            $("#" + elementId).remove()
-          , 50
-
-      return
-
     # Method related to ng-table for generating pagination
     $scope.getGeneratedPagesArray = ->
       $scope.tableParams.generatePagesArray($scope.tableParams.page(), $scope.tableParams.total(), $scope.tableParams.count())
