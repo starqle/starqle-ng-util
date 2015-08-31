@@ -19,7 +19,7 @@
 
 "use strict"
 
-angular.module('sh.dialog', []).directive "shDialog", ['$compile', ($compile) ->
+angular.module('sh.dialog', []).directive "shDialog", ['$compile', '$templateCache', ($compile, $templateCache) ->
   restrict: 'E'
   transclude: true
   replace: true
@@ -27,12 +27,15 @@ angular.module('sh.dialog', []).directive "shDialog", ['$compile', ($compile) ->
     shDialogOk: '&'
     shDialogCancel: '&?'
     shDialogContent: '@?'
+    shDialogSrc: '@?'
+    shDialogClass: '@?'
     title: '@?'
   template: '''
       <span>
         <a title="{{getTitle()}}" ng-click="onHandleClick()" ng-transclude></a>
       </span>
     '''
+
   link: (scope, element, attrs) ->
     scope.getShDialogModal = ->
       element.find('#modal-sh-dialog')
@@ -48,7 +51,7 @@ angular.module('sh.dialog', []).directive "shDialog", ['$compile', ($compile) ->
         shDialogModal = angular.element(
           '''
             <div id="modal-sh-dialog" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">
-              <div class="modal-dialog modal-sm">
+              <div class="modal-dialog {{shDialogClass || 'modal-sm'}}">
                 <div class="modal-content">
                   <div class="modal-header">
                     <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
@@ -56,7 +59,7 @@ angular.module('sh.dialog', []).directive "shDialog", ['$compile', ($compile) ->
                   </div>
                   <div class="modal-body">
                     <div class="row">
-                      <div class="col-lg-12">{{getShDialogContent()}}</div>
+                      <div class="col-lg-12 sh-dialog-modal-content"></div>
                     </div>
                   </div>
                   <div class="modal-footer">
@@ -69,6 +72,15 @@ angular.module('sh.dialog', []).directive "shDialog", ['$compile', ($compile) ->
           '''
         )
         $compile(shDialogModal)(scope)
+
+        if scope.shDialogSrc
+          shDialogModalSrc = angular.element $templateCache.get(scope.shDialogSrc)
+          $compile(shDialogModalSrc)(scope.$parent)
+          shDialogModal.find('.sh-dialog-modal-content').append(shDialogModalSrc)
+
+        else
+          shDialogModal.find('.sh-dialog-modal-content').append(scope.getShDialogContent())
+
         element.append(shDialogModal)
 
       scope.getShDialogModal().modal('show')
