@@ -255,7 +255,7 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
 
 "use strict";
 angular.module('sh.dialog', []).directive("shDialog", [
-  '$compile', function($compile) {
+  '$compile', '$templateCache', function($compile, $templateCache) {
     return {
       restrict: 'E',
       transclude: true,
@@ -264,6 +264,8 @@ angular.module('sh.dialog', []).directive("shDialog", [
         shDialogOk: '&',
         shDialogCancel: '&?',
         shDialogContent: '@?',
+        shDialogSrc: '@?',
+        shDialogClass: '@?',
         title: '@?'
       },
       template: '<span>\n  <a title="{{getTitle()}}" ng-click="onHandleClick()" ng-transclude></a>\n</span>',
@@ -278,10 +280,17 @@ angular.module('sh.dialog', []).directive("shDialog", [
           return scope.title || element.text();
         };
         scope.onHandleClick = function() {
-          var shDialogModal;
+          var shDialogModal, shDialogModalSrc;
           if (!(scope.getShDialogModal().length > 0)) {
-            shDialogModal = angular.element('<div id="modal-sh-dialog" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">\n  <div class="modal-dialog modal-sm">\n    <div class="modal-content">\n      <div class="modal-header">\n        <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>\n        <div class="modal-title">&nbsp;</div>\n      </div>\n      <div class="modal-body">\n        <div class="row">\n          <div class="col-lg-12">{{getShDialogContent()}}</div>\n        </div>\n      </div>\n      <div class="modal-footer">\n        <button ng-click="onHandleModalOkClick()" class="btn btn-primary">OK</button>\n        <button data-dismiss="modal" class="btn btn-default">Cancel</button>\n      </div>\n    </div>\n  </div>\n</div>');
+            shDialogModal = angular.element('<div id="modal-sh-dialog" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">\n  <div class="modal-dialog {{shDialogClass || \'modal-sm\'}}">\n    <div class="modal-content">\n      <div class="modal-header">\n        <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>\n        <div class="modal-title">&nbsp;</div>\n      </div>\n      <div class="modal-body">\n        <div class="row">\n          <div class="col-lg-12 sh-dialog-modal-content"></div>\n        </div>\n      </div>\n      <div class="modal-footer">\n        <button ng-click="onHandleModalOkClick()" class="btn btn-primary">OK</button>\n        <button data-dismiss="modal" class="btn btn-default">Cancel</button>\n      </div>\n    </div>\n  </div>\n</div>');
             $compile(shDialogModal)(scope);
+            if (scope.shDialogSrc) {
+              shDialogModalSrc = angular.element($templateCache.get(scope.shDialogSrc));
+              $compile(shDialogModalSrc)(scope.$parent);
+              shDialogModal.find('.sh-dialog-modal-content').append(shDialogModalSrc);
+            } else {
+              shDialogModal.find('.sh-dialog-modal-content').append(scope.getShDialogContent());
+            }
             element.append(shDialogModal);
           }
           scope.getShDialogModal().modal('show');
