@@ -114,7 +114,8 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
       restrict: 'A',
       scope: {
         shFromDate: '=',
-        shThruDate: '='
+        shThruDate: '=',
+        widgetVerticalPosition: '@?'
       },
       require: '?ngModel',
       link: function($scope, $element, $attrs, ngModelCtrl) {
@@ -125,6 +126,9 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           showTodayButton: true,
           useCurrent: false,
           format: 'DD-MM-YYYY',
+          widgetPositioning: {
+            vertical: $scope.widgetVerticalPosition || 'auto'
+          },
           icons: {
             time: 'fa fa-clock-o',
             date: 'fa fa-calendar',
@@ -184,7 +188,8 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
       restrict: 'A',
       scope: {
         shFromTime: '=',
-        shThruTime: '='
+        shThruTime: '=',
+        widgetVerticalPosition: '@?'
       },
       require: '?ngModel',
       link: function($scope, $element, $attrs, ngModelCtrl) {
@@ -196,6 +201,9 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           useCurrent: false,
           showTodayButton: true,
           format: 'DD-MM-YYYY, HH:mm',
+          widgetPositioning: {
+            vertical: $scope.widgetVerticalPosition || 'auto'
+          },
           icons: {
             time: 'fa fa-clock-o',
             date: 'fa fa-calendar',
@@ -336,62 +344,95 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
     return {
       restrict: 'A',
       scope: {
+        shAllowZero: '@?',
         shMin: '@',
         shMax: '@',
+        shNumberInvalidMessage: '@?',
+        shNumberHint: '@?',
         ngModel: '='
       },
       require: '?ngModel',
       link: function(scope, element, attributes, ngModel) {
-        element.popover({
-          trigger: 'focus',
-          placement: 'top'
-        });
+        var shAllowZero, updatePopover;
+        shAllowZero = scope.shAllowZero === 'false' ? false : true;
+        updatePopover = function() {
+          var popoverContent, ref, ref1;
+          popoverContent = element.attr('data-content');
+          if (ngModel.$invalid) {
+            popoverContent = (ref = scope.shNumberInvalidMessage) != null ? ref : 'Invalid Number';
+          } else {
+            if (ngModel.$modelValue == null) {
+              popoverContent = (ref1 = scope.shNumberHint) != null ? ref1 : 'Insert valid number';
+            }
+          }
+          element.siblings('.popover').find('.popover-content').html(popoverContent);
+          return scope.applyValidity();
+        };
         ngModel.$formatters.push(function(value) {
-          return $filter('number')(parseInt(value), 0);
+          return $filter('number')(parseFloat(value));
         });
         ngModel.$parsers.push(function(value) {
           var number;
           number = String(value).replace('/\./g', '');
-          number = parseInt(number);
+          number = parseFloat(number);
           if (!number) {
             return 0;
           }
-          if ((scope.shMin != null) && number < parseInt(scope.shMin)) {
-            return parseInt(scope.shMin);
-          } else if ((scope.shMax != null) && number > parseInt(scope.shMax)) {
-            return parseInt(scope.shMax);
+          if ((scope.shMin != null) && number < parseFloat(scope.shMin)) {
+            return parseFloat(scope.shMin);
+          } else if ((scope.shMax != null) && number > parseFloat(scope.shMax)) {
+            return parseFloat(scope.shMax);
           }
           return number;
         });
+        ngModel.$viewChangeListeners.push(function() {
+          return ngModel.$invalid;
+        });
         scope.applyValidity = function() {
           var valid;
-          if (attributes.required) {
-            valid = scope.ngModel && +scope.ngModel > 0;
-            if (scope.shMin) {
+          if (attributes.required != null) {
+            valid = true;
+            if (scope.shMin != null) {
               valid = valid && +scope.ngModel >= scope.shMin;
             }
-            if (scope.shMax) {
+            if (scope.shMax != null) {
               valid = valid && +scope.ngModel <= scope.shMax;
+            }
+            if (!shAllowZero) {
+              valid = +scope.ngModel !== 0;
             }
             return ngModel.$setValidity('required', valid);
           }
         };
-        scope.applyValidity();
         element.on('focusout', function() {
-          ngModel.$viewValue = String($filter('number')(ngModel.$modelValue || 0, 0));
+          ngModel.$viewValue = ngModel.$modelValue != null ? String($filter('number')(ngModel.$modelValue)) : '';
           return ngModel.$render();
         });
         element.on('focusin', function() {
-          ngModel.$viewValue = String(ngModel.$modelValue || 0);
+          ngModel.$viewValue = ngModel.$modelValue;
           ngModel.$render();
           return element.select();
         });
         element.on('keyup', function() {
-          element.siblings('.popover').find('.popover-content').html(element.attr('data-content'));
+          return updatePopover();
+        });
+        element.on('keydown', function(e) {
+          var ref;
+          if ($.inArray(e.keyCode, [16, 17, 18, 46, 8, 9, 27, 13, 110, 173, 190, 189]) !== -1 || (e.keyCode >= 112 && e.keyCode <= 123) || ((ref = e.keyCode) === 65 || ref === 67 || ref === 86) && (e.ctrlKey === true || e.metaKey === true) || e.keyCode >= 35 && e.keyCode <= 40) {
+
+          } else if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
+            return e.preventDefault();
+          }
+        });
+        scope.$watch('ngModel', function(newValue, oldValue) {
           return scope.applyValidity();
         });
-        return scope.$watch('ngModel', function(newValue, oldValue) {
-          return scope.applyValidity();
+        element.popover({
+          trigger: 'focus',
+          placement: 'top'
+        });
+        return element.on('shown.bs.popover', function() {
+          return updatePopover();
         });
       }
     };
