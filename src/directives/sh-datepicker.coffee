@@ -29,6 +29,7 @@ angular.module('sh.datepicker', []
   scope:
     shFromDate: '='
     shThruDate:  '='
+    widgetVerticalPosition: '@?'
   require: '?ngModel'
   link: ($scope, $element, $attrs, ngModelCtrl) ->
     initiation = true
@@ -41,6 +42,8 @@ angular.module('sh.datepicker', []
       showTodayButton: true
       useCurrent: false
       format: 'DD-MM-YYYY'
+      widgetPositioning:
+        vertical: $scope.widgetVerticalPosition or 'auto'
       icons:
         time: 'fa fa-clock-o'
         date: 'fa fa-calendar'
@@ -98,6 +101,7 @@ angular.module('sh.datepicker', []
   scope:
     shFromTime: '='
     shThruTime:  '='
+    widgetVerticalPosition: '@?'
   require: '?ngModel'
   link: ($scope, $element, $attrs, ngModelCtrl) ->
     initiation = true
@@ -111,6 +115,8 @@ angular.module('sh.datepicker', []
       useCurrent: false
       showTodayButton: true
       format: 'DD-MM-YYYY, HH:mm'
+      widgetPositioning:
+        vertical: $scope.widgetVerticalPosition or 'auto'
       icons:
         time: 'fa fa-clock-o'
         date: 'fa fa-calendar'
