@@ -521,42 +521,15 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
       });
     }
   };
-}).directive("tableScrollHead", function() {
-  return {
-    restrict: 'C',
-    link: function(scope, elem, attrs) {
-      scope.__scrollHeadHeight = 0;
-      scope.$watch('__scrollHeadHeight', function(newVal, oldVal) {
-        return elem.next().css('top', newVal + 'px');
-      });
-      return $(window).resize(function() {
-        return scope.$apply(function() {
-          return scope.__scrollHeadHeight = elem.outerHeight();
-        });
-      });
-    }
-  };
-}).directive("tableScrollFoot", function() {
-  return {
-    restrict: 'C',
-    link: function(scope, elem, attrs) {
-      scope.__scrollFootHeight = 0;
-      scope.$watch('__scrollFootHeight', function(newVal, oldVal) {
-        return elem.prev().css('bottom', newVal + 'px');
-      });
-      return $(window).resize(function() {
-        return scope.$apply(function() {
-          return scope.__scrollFootHeight = elem.outerHeight();
-        });
-      });
-    }
-  };
 }).directive("shSegmentHead", function() {
   return {
     restrict: 'C',
     scope: {},
     link: function(scope, elem, attrs) {
       scope.height = 0;
+      scope.$watch(function() {
+        return scope.height = elem.outerHeight();
+      });
       scope.$watch('height', function(newVal, oldVal) {
         return elem.next().css('top', newVal + 'px');
       });
@@ -573,6 +546,9 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
     scope: {},
     link: function(scope, elem, attrs) {
       scope.height = 0;
+      scope.$watch(function() {
+        return scope.height = elem.outerHeight();
+      });
       scope.$watch('height', function(newVal, oldVal) {
         return elem.prev().css('bottom', newVal + 'px');
       });
