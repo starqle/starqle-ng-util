@@ -46,41 +46,6 @@ angular.module('sh.segment', []
 
 
 
-
-).directive("tableScrollHead", ->
-  #
-  #
-  #
-  restrict: 'C'
-  link: (scope, elem, attrs) ->
-    scope.__scrollHeadHeight = 0
-
-    scope.$watch '__scrollHeadHeight', (newVal, oldVal) ->
-      elem.next().css( 'top', newVal + 'px' )
-
-    $(window).resize ->
-      scope.$apply ->
-        scope.__scrollHeadHeight = elem.outerHeight()
-
-
-
-).directive("tableScrollFoot", ->
-  #
-  #
-  #
-  restrict: 'C'
-  link: (scope, elem, attrs) ->
-    scope.__scrollFootHeight = 0
-
-    scope.$watch '__scrollFootHeight', (newVal, oldVal) ->
-      elem.prev().css( 'bottom', newVal + 'px' )
-
-    $(window).resize ->
-      scope.$apply ->
-        scope.__scrollFootHeight = elem.outerHeight()
-
-
-
 ).directive("shSegmentHead", ->
   #
   #
@@ -89,6 +54,9 @@ angular.module('sh.segment', []
   scope: {}
   link: (scope, elem, attrs) ->
     scope.height = 0
+
+    scope.$watch ->
+      scope.height = elem.outerHeight()
 
     scope.$watch 'height', (newVal, oldVal) ->
       elem.next().css( 'top', newVal + 'px' )
@@ -107,6 +75,9 @@ angular.module('sh.segment', []
   scope: {}
   link: (scope, elem, attrs) ->
     scope.height = 0
+
+    scope.$watch ->
+      scope.height = elem.outerHeight()
 
     scope.$watch 'height', (newVal, oldVal) ->
       elem.prev().css( 'bottom', newVal + 'px' )
