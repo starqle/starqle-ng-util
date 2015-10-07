@@ -17,6 +17,66 @@ angular.module('on.root.scope', []).config([
   }
 ]);
 
+"use strict";
+angular.module('sh.bootstrap', []).directive('shBootstrapTooltip', [
+  function() {
+    return {
+      restrict: 'A',
+      link: function(scope, element, attrs) {
+        $(element).on('click', function() {
+          $(element).tooltip('hide');
+        }).on('mouseenter', function() {
+          $(element).tooltip('show');
+        }).on('mouseleave', function() {
+          $(element).tooltip('hide');
+        });
+      }
+    };
+  }
+]).directive('shBootstrapPopover', [
+  '$timeout', function($timeout) {
+    return {
+      restrict: 'A',
+      link: function(scope, element, attrs) {
+        var addTimeout, cancelTimeout, localAttrs;
+        localAttrs = {
+          popoverId: null,
+          timeoutFn: null,
+          addTimeout: function(element) {
+            return localAttrs.timeoutFn = $timeout(function() {
+              return $(element).popover('hide');
+            }, 100);
+          },
+          cancelTimeout: function() {
+            return $timeout.cancel(localAttrs.timeoutFn);
+          }
+        };
+        cancelTimeout = function() {
+          return localAttrs.cancelTimeout();
+        };
+        addTimeout = function() {
+          return localAttrs.addTimeout(element);
+        };
+        $(element).on('mouseenter', function() {
+          localAttrs.cancelTimeout();
+          if (angular.isUndefined($(element).attr('aria-describedby'))) {
+            $(element).popover('show');
+          }
+        }).on('mouseleave', function() {
+          return localAttrs.addTimeout(element);
+        }).on('shown.bs.popover', function() {
+          localAttrs.popoverId = $(element).attr('aria-describedby');
+          $('#' + localAttrs.popoverId).on('mouseenter', cancelTimeout);
+          return $('#' + localAttrs.popoverId).on('mouseleave', addTimeout);
+        }).on('hide.bs.popover', function() {
+          $('#' + localAttrs.popoverId).off('mouseenter', cancelTimeout);
+          return $('#' + localAttrs.popoverId).off('mouseleave', addTimeout);
+        });
+      }
+    };
+  }
+]);
+
 angular.module('sh.collapsible', []).directive("shCollapsible", function() {
   return {
     restrict: 'AEC',
@@ -466,9 +526,6 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
     restrict: 'C',
     link: function(scope, elem, attrs) {
       scope.__scrollHeadHeight = 0;
-      scope.$watch(function() {
-        return scope.__scrollHeadHeight = elem.outerHeight();
-      });
       scope.$watch('__scrollHeadHeight', function(newVal, oldVal) {
         return elem.next().css('top', newVal + 'px');
       });
@@ -484,9 +541,6 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
     restrict: 'C',
     link: function(scope, elem, attrs) {
       scope.__scrollFootHeight = 0;
-      scope.$watch(function() {
-        return scope.__scrollFootHeight = elem.outerHeight();
-      });
       scope.$watch('__scrollFootHeight', function(newVal, oldVal) {
         return elem.prev().css('bottom', newVal + 'px');
       });
@@ -503,9 +557,6 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
     scope: {},
     link: function(scope, elem, attrs) {
       scope.height = 0;
-      scope.$watch(function() {
-        return scope.height = elem.outerHeight();
-      });
       scope.$watch('height', function(newVal, oldVal) {
         return elem.next().css('top', newVal + 'px');
       });
@@ -522,9 +573,6 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
     scope: {},
     link: function(scope, elem, attrs) {
       scope.height = 0;
-      scope.$watch(function() {
-        return scope.height = elem.outerHeight();
-      });
       scope.$watch('height', function(newVal, oldVal) {
         return elem.prev().css('bottom', newVal + 'px');
       });
@@ -655,20 +703,6 @@ angular.module('sh.submit', []).directive('shSubmit', [
     };
   }
 ]);
-
-"use strict";
-angular.module('sh.tooltip', []).directive("shTooltip", function() {
-  return {
-    restrict: "A",
-    link: function(scope, element, attrs) {
-      $(element).tooltip({
-        title: attrs.shTooltip,
-        placement: "top",
-        html: true
-      });
-    }
-  };
-});
 
 "use strict";
 angular.module('auth.token.handler', []).factory("AuthTokenHandler", [
@@ -1856,7 +1890,8 @@ angular.module('sh.notification', []).service("ShNotification", [
               return _this.addToast({
                 type: n.type,
                 data: response,
-                message: n.message
+                message: n.message,
+                field: n.field
               });
             };
           })(this)(n));
@@ -1872,7 +1907,8 @@ angular.module('sh.notification', []).service("ShNotification", [
               return _this.addToast({
                 type: 'danger',
                 data: response,
-                message: n.message
+                message: n.message,
+                field: n.field
               });
             };
           })(this)(n));
@@ -1882,7 +1918,8 @@ angular.module('sh.notification', []).service("ShNotification", [
         return this.addToast({
           type: defaultToast.type,
           data: response,
-          message: defaultToast.message
+          message: defaultToast.message,
+          field: defaultToast.field
         });
       } else {
         return this.addToast({
@@ -1947,4 +1984,4 @@ angular.module('sh.spinning.service', []).service("ShSpinningService", function(
 });
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.spinning', 'sh.submit', 'sh.segment', 'sh.tooltip', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.spinning', 'sh.submit', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);
