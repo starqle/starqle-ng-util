@@ -55,9 +55,6 @@ angular.module('sh.segment', []
   link: (scope, elem, attrs) ->
     scope.__scrollHeadHeight = 0
 
-    scope.$watch ->
-      scope.__scrollHeadHeight = elem.outerHeight()
-
     scope.$watch '__scrollHeadHeight', (newVal, oldVal) ->
       elem.next().css( 'top', newVal + 'px' )
 
@@ -74,9 +71,6 @@ angular.module('sh.segment', []
   restrict: 'C'
   link: (scope, elem, attrs) ->
     scope.__scrollFootHeight = 0
-
-    scope.$watch ->
-      scope.__scrollFootHeight = elem.outerHeight()
 
     scope.$watch '__scrollFootHeight', (newVal, oldVal) ->
       elem.prev().css( 'bottom', newVal + 'px' )
@@ -96,9 +90,6 @@ angular.module('sh.segment', []
   link: (scope, elem, attrs) ->
     scope.height = 0
 
-    scope.$watch ->
-      scope.height = elem.outerHeight()
-
     scope.$watch 'height', (newVal, oldVal) ->
       elem.next().css( 'top', newVal + 'px' )
 
@@ -116,9 +107,6 @@ angular.module('sh.segment', []
   scope: {}
   link: (scope, elem, attrs) ->
     scope.height = 0
-
-    scope.$watch ->
-      scope.height = elem.outerHeight()
 
     scope.$watch 'height', (newVal, oldVal) ->
       elem.prev().css( 'bottom', newVal + 'px' )
