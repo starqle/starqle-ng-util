@@ -199,6 +199,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
             type: n.type
             data: response
             message: n.message
+            field: n.field
     else if response.data and response.data.error
       for n in response.data.error.errors
         do (n) =>
@@ -206,11 +207,13 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
             type: 'danger'
             data: response
             message: n.message
+            field: n.field
     else if defaultToast
       @addToast
         type: defaultToast.type
         data: response
         message: defaultToast.message
+        field: defaultToast.field
     else
       @addToast
         type: 'danger'
