@@ -24,15 +24,15 @@ angular.module 'starqle.ng.util', [
   'on.root.scope',
 
   # directives
+  'sh.bootstrap',
   'sh.collapsible',
   'sh.datepicker',
   'sh.dialog',
   'sh.focus',
   'sh.number.format',
+  'sh.segment',
   'sh.spinning',
   'sh.submit',
-  'sh.segment',
-  'sh.tooltip',
 
   # factories
   'auth.token.handler',
