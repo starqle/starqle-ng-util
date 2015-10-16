@@ -31,19 +31,19 @@ angular.module('sh.datepicker', []
     shThruDate:  '='
     widgetVerticalPosition: '@?'
   require: '?ngModel'
-  link: ($scope, $element, $attrs, ngModelCtrl) ->
+  link: (scope, element, attrs, ngModelCtrl) ->
     initiation = true
 
     #
     # SETUP
     #
-    $element.datetimepicker(
+    element.datetimepicker(
       showClear: true
       showTodayButton: true
       useCurrent: false
       format: 'DD-MM-YYYY'
       widgetPositioning:
-        vertical: $scope.widgetVerticalPosition or 'auto'
+        vertical: scope.widgetVerticalPosition or 'auto'
       icons:
         time: 'fa fa-clock-o'
         date: 'fa fa-calendar'
@@ -62,7 +62,7 @@ angular.module('sh.datepicker', []
     ngModelCtrl.$render = ->
       date = ngModelCtrl.$viewValue
       if angular.isDefined(date) and date != null
-        $element.data('DateTimePicker').date moment(date, 'YYYY-MM-DD')
+        element.data('DateTimePicker').date moment(date, 'YYYY-MM-DD')
       ngModelCtrl.$viewValue
 
     ngModelCtrl.$parsers.push (data) ->
@@ -71,26 +71,34 @@ angular.module('sh.datepicker', []
     #
     # BINDING
     #
-    $element.bind 'dp.change', (data) ->
+    element.bind 'dp.change', (data) ->
       ngModelCtrl.$pristine = false if initiation
-      ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY'))
+
+      if data.date
+        ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY'))
+      else
+        ngModelCtrl.$setViewValue(null)
+
       ngModelCtrl.$pristine = true if initiation
       initiation = false
 
-    $element.bind 'dp.show', (data) ->
+    element.bind 'dp.show', (data) ->
       initiation = false if initiation
     #
     # WATCHERS
     #
-    $scope.$watch 'shFromDate', (newVal, oldVal) ->
+    scope.$watch 'shFromDate', (newVal, oldVal) ->
       if newVal
         newVal = newVal || -Infinity
-        $element.data('DateTimePicker').minDate(moment(newVal))
+        element.data('DateTimePicker').minDate(moment(newVal))
 
-    $scope.$watch 'shThruDate', (newVal, oldVal) ->
+    scope.$watch 'shThruDate', (newVal, oldVal) ->
       if newVal
-        newVal = newVal || 0
-        $element.data('DateTimePicker').maxDate(moment(newVal))
+        newVal = scope.shFromDate if scope.shFromDate? and newVal < scope.shFromDate
+        element.data('DateTimePicker').maxDate(moment(newVal))
+
+      if oldVal and not newVal
+        element.data('DateTimePicker').maxDate(false)
 
 
 ]).directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
@@ -103,20 +111,20 @@ angular.module('sh.datepicker', []
     shThruTime:  '='
     widgetVerticalPosition: '@?'
   require: '?ngModel'
-  link: ($scope, $element, $attrs, ngModelCtrl) ->
+  link: (scope, element, attrs, ngModelCtrl) ->
     initiation = true
 
     #
     # SETUP
     #
-    $element.datetimepicker
+    element.datetimepicker
       showClose: true
       showClear: true
       useCurrent: false
       showTodayButton: true
       format: 'DD-MM-YYYY, HH:mm'
       widgetPositioning:
-        vertical: $scope.widgetVerticalPosition or 'auto'
+        vertical: scope.widgetVerticalPosition or 'auto'
       icons:
         time: 'fa fa-clock-o'
         date: 'fa fa-calendar'
@@ -134,7 +142,7 @@ angular.module('sh.datepicker', []
     ngModelCtrl.$render = ->
       date = ngModelCtrl.$viewValue
       if angular.isDefined(date) and date != null
-        $element.data('DateTimePicker').date moment(date, 'x')
+        element.data('DateTimePicker').date moment(date, 'x')
       ngModelCtrl.$viewValue
 
     ngModelCtrl.$parsers.push (data) ->
@@ -143,27 +151,34 @@ angular.module('sh.datepicker', []
     #
     # BINDING
     #
-    $element.bind 'dp.change', (data) ->
-      if data.date
-        ngModelCtrl.$pristine = false if initiation
-        ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, HH:mm'))
-        ngModelCtrl.$pristine = true if initiation
-        initiation = false
+    element.bind 'dp.change', (data) ->
+      ngModelCtrl.$pristine = false if initiation
 
-    $element.bind 'dp.show', (data) ->
+      if data.date
+        ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, HH:mm'))
+      else
+        ngModelCtrl.$setViewValue(null)
+
+      ngModelCtrl.$pristine = true if initiation
+      initiation = false
+
+    element.bind 'dp.show', (data) ->
       initiation = false if initiation
 
     #
     #
     # WATCHERS
     #
-    $scope.$watch 'shFromTime', (newVal, oldVal) ->
+    scope.$watch 'shFromTime', (newVal, oldVal) ->
       if newVal
         newVal = newVal || -Infinity
-        $element.data('DateTimePicker').minDate(moment(newVal * 1))
+        element.data('DateTimePicker').minDate(moment(newVal * 1))
 
-    $scope.$watch 'shThruTime', (newVal, oldVal) ->
+    scope.$watch 'shThruTime', (newVal, oldVal) ->
       if newVal
-        newVal = newVal || 0
-        $element.data('DateTimePicker').maxDate(moment(newVal * 1))
+        newVal = scope.shFromTime if scope.shFromTime? and newVal < scope.shFromTime
+        element.data('DateTimePicker').maxDate(moment(newVal * 1))
+
+      if oldVal and not newVal
+        element.data('DateTimePicker').maxDate(false)
 ])
