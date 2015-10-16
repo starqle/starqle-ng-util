@@ -61,11 +61,6 @@ angular.module('sh.segment', []
     scope.$watch 'height', (newVal, oldVal) ->
       elem.next().css( 'top', newVal + 'px' )
 
-    $(window).resize ->
-      scope.$apply ->
-        scope.height = elem.outerHeight()
-
-
 
 ).directive("shSegmentFoot", ->
   #
@@ -81,11 +76,6 @@ angular.module('sh.segment', []
 
     scope.$watch 'height', (newVal, oldVal) ->
       elem.prev().css( 'bottom', newVal + 'px' )
-
-    $(window).resize ->
-      scope.$apply ->
-        scope.height = elem.outerHeight()
-
 
 
 )
