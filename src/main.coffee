@@ -33,6 +33,7 @@ angular.module 'starqle.ng.util', [
   'sh.segment',
   'sh.spinning',
   'sh.submit',
+  'sh.view.helper',
 
   # factories
   'auth.token.handler',
