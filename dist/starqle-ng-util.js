@@ -178,16 +178,16 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
         widgetVerticalPosition: '@?'
       },
       require: '?ngModel',
-      link: function($scope, $element, $attrs, ngModelCtrl) {
+      link: function(scope, element, attrs, ngModelCtrl) {
         var initiation;
         initiation = true;
-        $element.datetimepicker({
+        element.datetimepicker({
           showClear: true,
           showTodayButton: true,
           useCurrent: false,
           format: 'DD-MM-YYYY',
           widgetPositioning: {
-            vertical: $scope.widgetVerticalPosition || 'auto'
+            vertical: scope.widgetVerticalPosition || 'auto'
           },
           icons: {
             time: 'fa fa-clock-o',
@@ -205,38 +205,47 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           var date;
           date = ngModelCtrl.$viewValue;
           if (angular.isDefined(date) && date !== null) {
-            $element.data('DateTimePicker').date(moment(date, 'YYYY-MM-DD'));
+            element.data('DateTimePicker').date(moment(date, 'YYYY-MM-DD'));
           }
           return ngModelCtrl.$viewValue;
         };
         ngModelCtrl.$parsers.push(function(data) {
           return moment(data, 'DD-MM-YYYY').format('YYYY-MM-DD');
         });
-        $element.bind('dp.change', function(data) {
+        element.bind('dp.change', function(data) {
           if (initiation) {
             ngModelCtrl.$pristine = false;
           }
-          ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY'));
+          if (data.date) {
+            ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY'));
+          } else {
+            ngModelCtrl.$setViewValue(null);
+          }
           if (initiation) {
             ngModelCtrl.$pristine = true;
           }
           return initiation = false;
         });
-        $element.bind('dp.show', function(data) {
+        element.bind('dp.show', function(data) {
           if (initiation) {
             return initiation = false;
           }
         });
-        $scope.$watch('shFromDate', function(newVal, oldVal) {
+        scope.$watch('shFromDate', function(newVal, oldVal) {
           if (newVal) {
             newVal = newVal || -Infinity;
-            return $element.data('DateTimePicker').minDate(moment(newVal));
+            return element.data('DateTimePicker').minDate(moment(newVal));
           }
         });
-        return $scope.$watch('shThruDate', function(newVal, oldVal) {
+        return scope.$watch('shThruDate', function(newVal, oldVal) {
           if (newVal) {
-            newVal = newVal || 0;
-            return $element.data('DateTimePicker').maxDate(moment(newVal));
+            if ((scope.shFromDate != null) && newVal < scope.shFromDate) {
+              newVal = scope.shFromDate;
+            }
+            element.data('DateTimePicker').maxDate(moment(newVal));
+          }
+          if (oldVal && !newVal) {
+            return element.data('DateTimePicker').maxDate(false);
           }
         });
       }
@@ -252,17 +261,17 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
         widgetVerticalPosition: '@?'
       },
       require: '?ngModel',
-      link: function($scope, $element, $attrs, ngModelCtrl) {
+      link: function(scope, element, attrs, ngModelCtrl) {
         var initiation;
         initiation = true;
-        $element.datetimepicker({
+        element.datetimepicker({
           showClose: true,
           showClear: true,
           useCurrent: false,
           showTodayButton: true,
           format: 'DD-MM-YYYY, HH:mm',
           widgetPositioning: {
-            vertical: $scope.widgetVerticalPosition || 'auto'
+            vertical: scope.widgetVerticalPosition || 'auto'
           },
           icons: {
             time: 'fa fa-clock-o',
@@ -280,40 +289,47 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           var date;
           date = ngModelCtrl.$viewValue;
           if (angular.isDefined(date) && date !== null) {
-            $element.data('DateTimePicker').date(moment(date, 'x'));
+            element.data('DateTimePicker').date(moment(date, 'x'));
           }
           return ngModelCtrl.$viewValue;
         };
         ngModelCtrl.$parsers.push(function(data) {
           return moment(data, 'DD-MM-YYYY, HH:mm').format('x');
         });
-        $element.bind('dp.change', function(data) {
-          if (data.date) {
-            if (initiation) {
-              ngModelCtrl.$pristine = false;
-            }
-            ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, HH:mm'));
-            if (initiation) {
-              ngModelCtrl.$pristine = true;
-            }
-            return initiation = false;
+        element.bind('dp.change', function(data) {
+          if (initiation) {
+            ngModelCtrl.$pristine = false;
           }
+          if (data.date) {
+            ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, HH:mm'));
+          } else {
+            ngModelCtrl.$setViewValue(null);
+          }
+          if (initiation) {
+            ngModelCtrl.$pristine = true;
+          }
+          return initiation = false;
         });
-        $element.bind('dp.show', function(data) {
+        element.bind('dp.show', function(data) {
           if (initiation) {
             return initiation = false;
           }
         });
-        $scope.$watch('shFromTime', function(newVal, oldVal) {
+        scope.$watch('shFromTime', function(newVal, oldVal) {
           if (newVal) {
             newVal = newVal || -Infinity;
-            return $element.data('DateTimePicker').minDate(moment(newVal * 1));
+            return element.data('DateTimePicker').minDate(moment(newVal * 1));
           }
         });
-        return $scope.$watch('shThruTime', function(newVal, oldVal) {
+        return scope.$watch('shThruTime', function(newVal, oldVal) {
           if (newVal) {
-            newVal = newVal || 0;
-            return $element.data('DateTimePicker').maxDate(moment(newVal * 1));
+            if ((scope.shFromTime != null) && newVal < scope.shFromTime) {
+              newVal = scope.shFromTime;
+            }
+            element.data('DateTimePicker').maxDate(moment(newVal * 1));
+          }
+          if (oldVal && !newVal) {
+            return element.data('DateTimePicker').maxDate(false);
           }
         });
       }
@@ -530,13 +546,8 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
       scope.$watch(function() {
         return scope.height = elem.outerHeight();
       });
-      scope.$watch('height', function(newVal, oldVal) {
+      return scope.$watch('height', function(newVal, oldVal) {
         return elem.next().css('top', newVal + 'px');
-      });
-      return $(window).resize(function() {
-        return scope.$apply(function() {
-          return scope.height = elem.outerHeight();
-        });
       });
     }
   };
@@ -549,17 +560,103 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
       scope.$watch(function() {
         return scope.height = elem.outerHeight();
       });
-      scope.$watch('height', function(newVal, oldVal) {
+      return scope.$watch('height', function(newVal, oldVal) {
         return elem.prev().css('bottom', newVal + 'px');
-      });
-      return $(window).resize(function() {
-        return scope.$apply(function() {
-          return scope.height = elem.outerHeight();
-        });
       });
     }
   };
-});
+}).directive("tableScrollBody", [
+  '$timeout', function($timeout) {
+    return {
+      restrict: 'C',
+      scope: {},
+      link: function(scope, element, attrs) {
+        var assignBaseCss, assignShadowCss, refreshFreezedPane;
+        assignBaseCss = function(elmt, left) {
+          var outerHeight, paddingBottom, paddingLeft, paddingRight, paddingTop, parent;
+          parent = $(elmt).parent();
+          paddingTop = parent.css('padding-top');
+          paddingLeft = parent.css('padding-left');
+          paddingRight = parent.css('padding-right');
+          paddingBottom = parent.css('padding-bottom');
+          outerHeight = parent.outerHeight();
+          return $(elmt).css({
+            top: 0,
+            left: left,
+            marginTop: '-' + paddingTop,
+            marginLeft: '-' + paddingLeft,
+            marginRight: '-' + paddingRight,
+            marginBottom: '-' + paddingBottom,
+            paddingTop: paddingTop,
+            paddingLeft: paddingLeft,
+            paddingRight: paddingRight,
+            paddingBottom: paddingBottom,
+            minHeight: outerHeight - 2
+          });
+        };
+        assignShadowCss = function(elmt, scrollSize, shadowDirection) {
+          var paddingRight, parent;
+          parent = $(elmt).parent();
+          paddingRight = parent.css('padding-right');
+          if (shadowDirection > 0) {
+            if (!parent.next().hasClass('td-fixed')) {
+              if (scrollSize > 0) {
+                return $(elmt).css({
+                  boxShadow: '1px 0 0 rgba(0, 0, 0, 0.05), -1px 0 0 rgba(0, 0, 0, 0.1), ' + (shadowDirection * 5) + 'px 0px 0px 0px rgba(0, 0, 0, 0.03)',
+                  borderColor: 'rgba(0, 0, 0, 0.1)'
+                });
+              } else {
+                return $(elmt).css({
+                  boxShadow: '1px 0 0 rgba(0, 0, 0, 0.05), -1px 0 0 rgba(0, 0, 0, 0.05)',
+                  borderColor: 'rgba(0, 0, 0, 0.05)'
+                });
+              }
+            }
+          } else {
+            if (!parent.prev().hasClass('td-fixed')) {
+              if (scrollSize > 0) {
+                return $(elmt).css({
+                  boxShadow: '-1px 0 0 rgba(0, 0, 0, 0.1), ' + (shadowDirection * 5) + 'px 0px 0px 0px rgba(0, 0, 0, 0.03)',
+                  borderColor: 'rgba(0, 0, 0, 0.1)'
+                });
+              } else {
+                return $(elmt).css({
+                  boxShadow: 'none',
+                  borderColor: 'rgba(0, 0, 0, 0.05)'
+                });
+              }
+            }
+          }
+        };
+        refreshFreezedPane = function() {
+          var elementParent, left, scrollLeft, tableWidth, width;
+          elementParent = $(element).parent();
+          scrollLeft = $(element).scrollLeft();
+          width = $(element)[0].clientWidth;
+          tableWidth = $(element).find('table.table').width();
+          left = (width - tableWidth) + scrollLeft;
+          elementParent.find('.td-fixed > .td-fixed-body.td-fixed-body-left').each(function() {
+            assignBaseCss(this, scrollLeft);
+            return assignShadowCss(this, scrollLeft, 1);
+          });
+          return elementParent.find('.td-fixed > .td-fixed-body.td-fixed-body-right').each(function() {
+            assignBaseCss(this, left);
+            return assignShadowCss(this, -left, -1);
+          });
+        };
+        $(element).on('scroll', function() {
+          refreshFreezedPane();
+        });
+        $(window).on('resize', function() {
+          refreshFreezedPane();
+        });
+        return scope.$watch(function() {
+          refreshFreezedPane();
+        });
+      }
+    };
+  }
+]);
 
 "use strict";
 angular.module('sh.spinning', []).directive("shSpinning", [
@@ -679,6 +776,29 @@ angular.module('sh.submit', []).directive('shSubmit', [
     };
   }
 ]);
+
+angular.module('sh.view.helper', []).directive('yesNo', function() {
+  return {
+    restrict: 'A',
+    scope: {
+      yesNo: '='
+    },
+    template: function(element, attrs) {
+      return '<span ng-if="yesNo == true" class="text-success"><i class="fa fa-left fa-check"></i>{{"LABEL_YES" | translate}}</span>\n<span ng-if="yesNo == false" class="text-danger"><i class="fa fa-left fa-times"></i>{{"LABEL_NO" | translate}}</span>\n<span ng-if="yesNo == null || yesNo == undefined" class="text-muted"><i class="fa fa-left fa-dash"></i></span>';
+    }
+  };
+}).directive('codeName', function() {
+  return {
+    restrict: 'EA',
+    scope: {
+      codeNameCode: '=?',
+      codeNameName: '=?'
+    },
+    template: function(element, attrs) {
+      return '<span title="{{codeNameCode}} ({{codeNameName}})">\n  {{codeNameCode}} <small class="text-muted">({{codeNameName}})</small>\n</span>';
+    }
+  };
+});
 
 "use strict";
 angular.module('auth.token.handler', []).factory("AuthTokenHandler", [
@@ -1960,4 +2080,4 @@ angular.module('sh.spinning.service', []).service("ShSpinningService", function(
 });
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.spinning', 'sh.submit', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.spinning', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);
