@@ -97,6 +97,9 @@ angular.module('sh.segment', []
       paddingBottom = parent.css('padding-bottom')
       outerHeight = parent.outerHeight()
 
+      reduction = 2
+      reduction = 6 if parent.parents('.table-nested').length
+
       $(elmt).css
         top: 0
         left: left
@@ -108,7 +111,7 @@ angular.module('sh.segment', []
         paddingLeft: paddingLeft
         paddingRight: paddingRight
         paddingBottom: paddingBottom
-        minHeight: outerHeight-2
+        minHeight: outerHeight - reduction
 
 
     assignShadowCss = (elmt, scrollSize, shadowDirection) ->

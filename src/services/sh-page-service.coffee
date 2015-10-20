@@ -43,6 +43,7 @@ angular.module("sh.page.service", []).service "ShPageService", ['$window', ($win
   # App Name
   @setAppName = (appName) ->
     _appName = appName
+    $window.document.title = @getAppName() + ' - ' + @getPageTitle()
     @getAppName()
 
   @getAppName = () ->
