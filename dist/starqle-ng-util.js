@@ -573,13 +573,17 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
       link: function(scope, element, attrs) {
         var assignBaseCss, assignShadowCss, refreshFreezedPane;
         assignBaseCss = function(elmt, left) {
-          var outerHeight, paddingBottom, paddingLeft, paddingRight, paddingTop, parent;
+          var outerHeight, paddingBottom, paddingLeft, paddingRight, paddingTop, parent, reduction;
           parent = $(elmt).parent();
           paddingTop = parent.css('padding-top');
           paddingLeft = parent.css('padding-left');
           paddingRight = parent.css('padding-right');
           paddingBottom = parent.css('padding-bottom');
           outerHeight = parent.outerHeight();
+          reduction = 2;
+          if (parent.parents('.table-nested').length) {
+            reduction = 6;
+          }
           return $(elmt).css({
             top: 0,
             left: left,
@@ -591,7 +595,7 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
             paddingLeft: paddingLeft,
             paddingRight: paddingRight,
             paddingBottom: paddingBottom,
-            minHeight: outerHeight - 2
+            minHeight: outerHeight - reduction
           });
         };
         assignShadowCss = function(elmt, scrollSize, shadowDirection) {
@@ -2046,6 +2050,7 @@ angular.module("sh.page.service", []).service("ShPageService", [
     };
     this.setAppName = function(appName) {
       _appName = appName;
+      $window.document.title = this.getAppName() + ' - ' + this.getPageTitle();
       return this.getAppName();
     };
     this.getAppName = function() {
