@@ -144,6 +144,7 @@ angular.module('sh.segment', []
 
     refreshFreezedPane = () ->
       elementParent = $(element).parent()
+      scrollTop = $(element).scrollTop()
       scrollLeft = $(element).scrollLeft()
 
       width = $(element)[0].clientWidth
@@ -159,6 +160,13 @@ angular.module('sh.segment', []
       elementParent.find('.td-fixed > .td-fixed-body.td-fixed-body-right').each ->
         assignBaseCss(this, left)
         assignShadowCss(this, -left, -1)
+
+      # Reposition Loading Overlay
+      elementParent.find('.loading-container').css
+        left: scrollLeft
+        right: -scrollLeft
+        top: scrollTop
+        bottom: -scrollTop
 
 
     $(element).on('scroll', ->
