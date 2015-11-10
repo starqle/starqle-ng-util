@@ -734,8 +734,10 @@ angular.module('sh.spinning', []).directive("shSpinning", [
           return ShSpinningService.isSpinning(scope.shSpinning);
         }), function(newVal) {
           if (ShSpinningService.isSpinning(scope.shSpinning)) {
+            angular.element(element).addClass('sh-spinning-spin');
             scope.spinner.spin(element[0]);
           } else {
+            angular.element(element).removeClass('sh-spinning-spin');
             scope.spinner.stop();
           }
         });
