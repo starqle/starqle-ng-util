@@ -81,8 +81,10 @@ angular.module('sh.spinning', []).directive "shSpinning", ['ShSpinningService', 
       ShSpinningService.isSpinning(scope.shSpinning)
     ), (newVal) ->
       if ShSpinningService.isSpinning(scope.shSpinning)
+        angular.element(element).addClass('sh-spinning-spin')
         scope.spinner.spin(element[0])
       else
+        angular.element(element).removeClass('sh-spinning-spin')
         scope.spinner.stop()
       return
 
