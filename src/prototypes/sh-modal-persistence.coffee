@@ -25,7 +25,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
   # modalPersistence Prototype
   # ===========================================================================
 
-  $rootScope.modalPersistence = ['$scope', '$timeout', 'ShNotification', 'ShButtonState', ($scope, $timeout, ShNotification, ShButtonState) ->
+  $rootScope.modalPersistence = ['$scope', '$q', '$timeout', 'ShNotification', 'ShButtonState', ($scope, $q, $timeout, ShNotification, ShButtonState) ->
     $scope.entity = {}
     $scope.errors = []
     $scope.localLookup = {}
@@ -183,6 +183,8 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.fetchNewEntity()
 
     $scope.fetchNewEntity = ->
+      deferred = $q.defer()
+
       $rootScope.spinningService.spin('modal')
       $scope.beforeNewEntity()
 
@@ -195,11 +197,15 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         $scope.modalProperties.visible = true
         $scope.newEntitySuccess(success)
         $scope.newEntitySuccessNotification(success)
+        deferred.resolve(success)
       , (error) ->
         $rootScope.spinningService.stop('modal')
         $scope.newEntityFailure(error)
         $scope.newEntityFailureNotification(error)
+        deferred.reject(error)
       )
+
+      deferred.promise
 
     $scope.closeNewEntityModal = (elementStr) ->
       angular.element("##{elementStr}").modal('hide')
@@ -241,6 +247,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.fetchEditEntity(id)
 
     $scope.fetchEditEntity = (id) ->
+      deferred = $q.defer()
       $rootScope.spinningService.spin('modal')
       $scope.beforeEditEntity(id)
 
@@ -253,11 +260,14 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         $scope.modalProperties.visible = true
         $scope.editEntitySuccess(success, id)
         $scope.editEntitySuccessNotification(success, id)
+        deferred.resolve(success)
       , (error) ->
         $rootScope.spinningService.stop('modal')
         $scope.editEntityFailure(error, id)
         $scope.editEntityFailureNotification(error, id)
+        deferred.reject(error)
       )
+      deferred.promise
 
     $scope.closeEditEntityModal = (elementStr, id) ->
       angular.element("##{elementStr}").modal('hide')
@@ -291,7 +301,9 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
     # Destroy
     # =========================================================================
 
-    $scope.destroyEntity = (id, name='this entry', $event) ->
+    $scope.destroyEntity = (id, $event) ->
+      deferred = $q.defer()
+
       $event = ShButtonState.initializeEvent $event
       ShButtonState.loading $event
 
@@ -304,16 +316,21 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         $scope.refreshGrid() if typeof $scope.getPagedDataAsync is 'function'
         $scope.destroyEntitySuccess(success, $event)
         $scope.destroyEntitySuccessNotification(success, $event)
+        angular.element('.modal').modal('hide')
+        deferred.resolve success
       , (error) ->
         $scope.destroyEntityFailure(error, $event)
         $scope.destroyEntityFailureNotification(error, $event)
         ShButtonState.enable $event
+        deferred.reject error
       )
 
-    $scope.deleteEntity = (id, name='this entry', $event) ->
-      $scope.destroyEntity(id, name, $event)
+      deferred.promise
 
-    $scope.multipleDestroyEntity = (ids, name='these entries') ->
+    $scope.deleteEntity = (id, $event) ->
+      $scope.destroyEntity(id, $event)
+
+    $scope.multipleDestroyEntity = (ids) ->
       $scope.beforeMultipleDestroyEntity()
 
       # Delete entity from database

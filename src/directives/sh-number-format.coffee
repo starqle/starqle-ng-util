@@ -45,7 +45,7 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
       return $filter('number') parseFloat(value)
 
     ngModel.$parsers.push (value) ->
-      number = String(value).replace('/\./g', '')
+      number = String(value).replace(/\,/g, '')
       number = parseFloat number
       if !number
         return 0
