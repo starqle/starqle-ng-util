@@ -90,15 +90,15 @@ angular.module('sh.segment', []
 
     assignBaseCss = (elmt, left) ->
       parent = $(elmt).parent()
+      parentRow = parent.parents('tr')
 
       paddingTop = parent.css('padding-top')
       paddingLeft = parent.css('padding-left')
       paddingRight = parent.css('padding-right')
       paddingBottom = parent.css('padding-bottom')
-      outerHeight = parent.outerHeight()
+      outerHeight = parentRow.outerHeight()
 
-      reduction = 2
-      reduction = 6 if parent.parents('.table-nested').length
+      reduction = 1
 
       $(elmt).css
         top: 0
@@ -170,11 +170,6 @@ angular.module('sh.segment', []
 
 
     $(element).on('scroll', ->
-      refreshFreezedPane()
-      return
-    )
-
-    $(window).on('resize', ->
       refreshFreezedPane()
       return
     )

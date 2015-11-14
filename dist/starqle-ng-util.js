@@ -449,7 +449,7 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
         });
         ngModel.$parsers.push(function(value) {
           var number;
-          number = String(value).replace('/\./g', '');
+          number = String(value).replace(/\,/g, '');
           number = parseFloat(number);
           if (!number) {
             return 0;
@@ -633,8 +633,9 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
           }
         };
         refreshFreezedPane = function() {
-          var elementParent, left, scrollLeft, tableWidth, width;
+          var elementParent, left, scrollLeft, scrollTop, tableWidth, width;
           elementParent = $(element).parent();
+          scrollTop = $(element).scrollTop();
           scrollLeft = $(element).scrollLeft();
           width = $(element)[0].clientWidth;
           tableWidth = $(element).find('table.table').width();
@@ -643,9 +644,15 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
             assignBaseCss(this, scrollLeft);
             return assignShadowCss(this, scrollLeft, 1);
           });
-          return elementParent.find('.td-fixed > .td-fixed-body.td-fixed-body-right').each(function() {
+          elementParent.find('.td-fixed > .td-fixed-body.td-fixed-body-right').each(function() {
             assignBaseCss(this, left);
             return assignShadowCss(this, -left, -1);
+          });
+          return elementParent.find('.loading-container').css({
+            left: scrollLeft,
+            right: -scrollLeft,
+            top: scrollTop,
+            bottom: -scrollTop
           });
         };
         $(element).on('scroll', function() {
@@ -727,8 +734,10 @@ angular.module('sh.spinning', []).directive("shSpinning", [
           return ShSpinningService.isSpinning(scope.shSpinning);
         }), function(newVal) {
           if (ShSpinningService.isSpinning(scope.shSpinning)) {
+            angular.element(element).addClass('sh-spinning-spin');
             scope.spinner.spin(element[0]);
           } else {
+            angular.element(element).removeClass('sh-spinning-spin');
             scope.spinner.stop();
           }
         });
@@ -1153,7 +1162,7 @@ angular.module('sh.init.ng.table', []).run([
 angular.module('sh.modal.persistence', []).run([
   '$rootScope', function($rootScope) {
     return $rootScope.modalPersistence = [
-      '$scope', '$timeout', 'ShNotification', 'ShButtonState', function($scope, $timeout, ShNotification, ShButtonState) {
+      '$scope', '$q', '$timeout', 'ShNotification', 'ShButtonState', function($scope, $q, $timeout, ShNotification, ShButtonState) {
         $scope.entity = {};
         $scope.errors = [];
         $scope.localLookup = {};
@@ -1317,20 +1326,25 @@ angular.module('sh.modal.persistence', []).run([
           return $scope.fetchNewEntity();
         };
         $scope.fetchNewEntity = function() {
+          var deferred;
+          deferred = $q.defer();
           $rootScope.spinningService.spin('modal');
           $scope.beforeNewEntity();
-          return $scope.resource["new"](angular.extend({}, $scope.optParams)).$promise.then(function(success) {
+          $scope.resource["new"](angular.extend({}, $scope.optParams)).$promise.then(function(success) {
             $rootScope.spinningService.stop('modal');
             $scope.entity = success.data;
             $scope.localLookup = success.lookup;
             $scope.modalProperties.visible = true;
             $scope.newEntitySuccess(success);
-            return $scope.newEntitySuccessNotification(success);
+            $scope.newEntitySuccessNotification(success);
+            return deferred.resolve(success);
           }, function(error) {
             $rootScope.spinningService.stop('modal');
             $scope.newEntityFailure(error);
-            return $scope.newEntityFailureNotification(error);
+            $scope.newEntityFailureNotification(error);
+            return deferred.reject(error);
           });
+          return deferred.promise;
         };
         $scope.closeNewEntityModal = function(elementStr) {
           angular.element("#" + elementStr).modal('hide');
@@ -1370,9 +1384,11 @@ angular.module('sh.modal.persistence', []).run([
           return $scope.fetchEditEntity(id);
         };
         $scope.fetchEditEntity = function(id) {
+          var deferred;
+          deferred = $q.defer();
           $rootScope.spinningService.spin('modal');
           $scope.beforeEditEntity(id);
-          return $scope.resource.edit(angular.extend({
+          $scope.resource.edit(angular.extend({
             id: id
           }, $scope.optParams)).$promise.then(function(success) {
             $rootScope.spinningService.stop('modal');
@@ -1380,12 +1396,15 @@ angular.module('sh.modal.persistence', []).run([
             $scope.localLookup = success.lookup;
             $scope.modalProperties.visible = true;
             $scope.editEntitySuccess(success, id);
-            return $scope.editEntitySuccessNotification(success, id);
+            $scope.editEntitySuccessNotification(success, id);
+            return deferred.resolve(success);
           }, function(error) {
             $rootScope.spinningService.stop('modal');
             $scope.editEntityFailure(error, id);
-            return $scope.editEntityFailureNotification(error, id);
+            $scope.editEntityFailureNotification(error, id);
+            return deferred.reject(error);
           });
+          return deferred.promise;
         };
         $scope.closeEditEntityModal = function(elementStr, id) {
           angular.element("#" + elementStr).modal('hide');
@@ -1418,14 +1437,13 @@ angular.module('sh.modal.persistence', []).run([
             return $scope.updateEntityFailureNotification(error, $event);
           });
         };
-        $scope.destroyEntity = function(id, name, $event) {
-          if (name == null) {
-            name = 'this entry';
-          }
+        $scope.destroyEntity = function(id, $event) {
+          var deferred;
+          deferred = $q.defer();
           $event = ShButtonState.initializeEvent($event);
           ShButtonState.loading($event);
           $scope.beforeDestroyEntity($event);
-          return $scope.resource["delete"](angular.extend({
+          $scope.resource["delete"](angular.extend({
             id: id
           }, $scope.optParams)).$promise.then(function(success) {
             if ($scope.recentlyDeletedIds != null) {
@@ -1435,23 +1453,21 @@ angular.module('sh.modal.persistence', []).run([
               $scope.refreshGrid();
             }
             $scope.destroyEntitySuccess(success, $event);
-            return $scope.destroyEntitySuccessNotification(success, $event);
+            $scope.destroyEntitySuccessNotification(success, $event);
+            angular.element('.modal').modal('hide');
+            return deferred.resolve(success);
           }, function(error) {
             $scope.destroyEntityFailure(error, $event);
             $scope.destroyEntityFailureNotification(error, $event);
-            return ShButtonState.enable($event);
+            ShButtonState.enable($event);
+            return deferred.reject(error);
           });
+          return deferred.promise;
         };
-        $scope.deleteEntity = function(id, name, $event) {
-          if (name == null) {
-            name = 'this entry';
-          }
-          return $scope.destroyEntity(id, name, $event);
+        $scope.deleteEntity = function(id, $event) {
+          return $scope.destroyEntity(id, $event);
         };
-        $scope.multipleDestroyEntity = function(ids, name) {
-          if (name == null) {
-            name = 'these entries';
-          }
+        $scope.multipleDestroyEntity = function(ids) {
           $scope.beforeMultipleDestroyEntity();
           return $scope.resource.multiple_delete(angular.extend({
             'ids[]': ids
