@@ -573,17 +573,15 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
       link: function(scope, element, attrs) {
         var assignBaseCss, assignShadowCss, refreshFreezedPane;
         assignBaseCss = function(elmt, left) {
-          var outerHeight, paddingBottom, paddingLeft, paddingRight, paddingTop, parent, reduction;
+          var outerHeight, paddingBottom, paddingLeft, paddingRight, paddingTop, parent, parentRow, reduction;
           parent = $(elmt).parent();
+          parentRow = parent.parents('tr');
           paddingTop = parent.css('padding-top');
           paddingLeft = parent.css('padding-left');
           paddingRight = parent.css('padding-right');
           paddingBottom = parent.css('padding-bottom');
-          outerHeight = parent.outerHeight();
-          reduction = 2;
-          if (parent.parents('.table-nested').length) {
-            reduction = 6;
-          }
+          outerHeight = parentRow.outerHeight();
+          reduction = 1;
           return $(elmt).css({
             top: 0,
             left: left,
@@ -656,9 +654,6 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
           });
         };
         $(element).on('scroll', function() {
-          refreshFreezedPane();
-        });
-        $(window).on('resize', function() {
           refreshFreezedPane();
         });
         return scope.$watch(function() {
@@ -863,6 +858,254 @@ angular.module('auth.token.handler', []).factory("AuthTokenHandler", [
     return authTokenHandler;
   }
 ]);
+
+"use strict";
+
+/**
+ * @ngdoc module
+ * @name shTable
+ *
+ * @description
+ * shTable module
+ */
+var shTableModule;
+
+shTableModule = angular.module('sh.table', []);
+
+
+/**
+ * @ngdoc object
+ * @name ShTableParams
+ *
+ * @description
+ * ShTableParams factory
+ *
+ */
+
+shTableModule.factory('ShTableParams', [
+  '$q', function($q) {
+
+    /**
+     * @ngdoc method
+     * @name reload
+     *
+     * @param {}
+     *
+     * @returns ShTableParams
+     *
+     * @description
+     * ShTableParams self object
+     *
+     */
+    var ShTableParams;
+    ShTableParams = function(params) {
+      var ref, ref1, ref2;
+      this.$params = {
+        pageNumber: (ref = params.pageNumber) != null ? ref : 1,
+        perPage: (ref1 = params.perPage) != null ? ref1 : 10,
+        sortInfo: params.sortInfo,
+        sorting: params.sorting,
+        autoload: (ref2 = params.autoload) != null ? ref2 : true
+      };
+      this.$initialized = false;
+      this.$totalCount = 0;
+      this.$loading = false;
+      this.getData = params.getData;
+      this.$data = [];
+      this.$pagination = [];
+
+      /**
+       * @ngdoc method
+       * @name initialize
+       *
+       * @param {}
+       *
+       * @returns promise
+       *
+       * @description
+       * ShTableParams factory
+       *
+       */
+      this.initialize = function() {
+        this.reload();
+        return this.$initialized = true;
+      };
+
+      /**
+       * @ngdoc method
+       * @name reload
+       *
+       * @param {}
+       *
+       * @returns promise
+       *
+       * @description
+       * ShTableParams factory
+       *
+       */
+      this.reload = function() {
+        var deferred, self;
+        deferred = $q.defer();
+        self = this;
+        self.$loading = true;
+        self.getData().then(function(success) {
+          self.$data = success.items;
+          self.$totalCount = success.totalCount;
+          self.$pagination = self.generatePagination(self.$params.pageNumber, self.$params.perPage, self.$totalCount);
+          self.$loading = false;
+          return deferred.resolve(success);
+        }, function(error) {
+          self.$loading = false;
+          return deferred.reject(error);
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name isSortBy
+       *
+       * @param {}
+       *
+       * @returns promise
+       *
+       * @description
+       * ShTableParams factory
+       *
+       */
+      this.isSortBy = function(field, direction) {
+        return angular.isDefined(this.$params.sorting[field]) && this.$params.sorting[field] === direction;
+      };
+
+      /**
+       * @ngdoc method
+       * @name sortData
+       *
+       * @param {}
+       *
+       * @returns promise
+       *
+       * @description
+       * ShTableParams factory
+       *
+       */
+      this.sortData = function(field, direction) {
+        this.$params.sorting = {};
+        this.$params.sorting[field] = direction;
+        return this.reload();
+      };
+
+      /**
+       * @ngdoc method
+       * @name generatePagination
+       *
+       * @param {}
+       *
+       * @description
+       * ShTableParams factory
+       *
+       */
+      this.generatePagination = function(pageNumber, perPage, totalCount) {
+        var currentPage, currentPageCount, deltaCurrent, fromNumber, i, maxPagesDisplayed, number, pageCount, pages, ref3, ref4, thruNumber;
+        pages = [];
+        currentPage = pageNumber;
+        perPage = perPage;
+        totalCount = totalCount;
+        pageCount = Math.ceil(totalCount / perPage);
+        currentPageCount = pageCount === 0 || pageCount === currentPage ? totalCount - perPage * (currentPage - 1) : perPage;
+        maxPagesDisplayed = pageCount > 5 ? 5 : pageCount;
+        deltaCurrent = currentPage - Math.ceil(maxPagesDisplayed / 2);
+        if (deltaCurrent < 0) {
+          deltaCurrent = 0;
+        } else if ((deltaCurrent + maxPagesDisplayed) > pageCount) {
+          deltaCurrent = pageCount - maxPagesDisplayed;
+        }
+        if (pageCount > 1) {
+          fromNumber = deltaCurrent + 1;
+          thruNumber = deltaCurrent + maxPagesDisplayed;
+          for (number = i = ref3 = fromNumber, ref4 = thruNumber; ref3 <= ref4 ? i <= ref4 : i >= ref4; number = ref3 <= ref4 ? ++i : --i) {
+            pages.push({
+              type: 'PAGE',
+              disabled: number === currentPage,
+              number: number
+            });
+          }
+          if (fromNumber > 1) {
+            pages.unshift({
+              type: 'MORE',
+              disabled: true
+            });
+          }
+          if (thruNumber < pageCount) {
+            pages.push({
+              type: 'MORE',
+              disabled: true
+            });
+          }
+          pages.unshift({
+            type: 'PREV',
+            disabled: currentPage === 1,
+            number: currentPage - 1
+          });
+          pages.push({
+            type: 'NEXT',
+            disabled: currentPage === pageCount,
+            number: currentPage + 1
+          });
+          pages.unshift({
+            type: 'FIRST',
+            disabled: currentPage === 1,
+            number: 1
+          });
+          pages.push({
+            type: 'LAST',
+            disabled: currentPage === pageCount,
+            number: pageCount
+          });
+        }
+        return {
+          pages: pages,
+          currentPage: currentPage,
+          perPage: perPage,
+          totalCount: totalCount,
+          pageCount: pageCount,
+          currentPageCount: currentPageCount
+        };
+      };
+      return this;
+    };
+    return ShTableParams;
+  }
+]);
+
+
+/**
+ * @ngdoc directive
+ * @name shTable
+ *
+ * @description
+ * directive
+ */
+
+shTableModule.directive("shTablePagination", function() {
+  return {
+    restrict: 'A',
+    transclude: true,
+    scope: {
+      shTablePagination: '=',
+      shTablePaginationAction: '&'
+    },
+    template: '<div ng-if="shTablePagination.totalCount > 10" class="pagination form-inline pull-left">\n  <select ng-model=\'perPage\' ng-change="shTablePaginationAction({pageNumber: 1, perPage: perPage})" ng-options="perPage for perPage in getPerPages()" class="form-control text-right"></select>&nbsp;\n  &nbsp;\n  &nbsp;\n</div>\n\n<ul class="pagination pull-left">\n  <li ng-class="{\'disabled\': page.disabled}" ng-repeat="page in shTablePagination.pages" ng-switch="page.type">\n    <a ng-switch-when="FIRST" ng-click="shTablePaginationAction({pageNumber: page.number})">«</a>\n    <a ng-switch-when="PREV" ng-click="shTablePaginationAction({pageNumber: page.number})">&lt;</a>\n    <a ng-switch-when="PAGE" ng-click="shTablePaginationAction({pageNumber: page.number})">\n      <span ng-bind="page.number"></span>\n    </a>\n    <a ng-switch-when="MORE">…</a>\n    <a ng-switch-when="NEXT" ng-click="shTablePaginationAction({pageNumber: page.number})">&gt;</a>\n    <a ng-switch-when="LAST" ng-click="shTablePaginationAction({pageNumber: page.number})">»</a>\n  </li>\n</ul>\n\n<div class="pagination pull-left">\n  <div class="btn disabled">\n    <span class="page-count">\n      &nbsp;{{shTablePagination.currentPageCount}}&nbsp;\n    </span>\n    <span>\n      <em translate="LABEL_OF"></em>\n    </span>\n    <span class="page-total">\n      &nbsp;{{shTablePagination.totalCount}}&nbsp;\n    </span>\n  </div>\n</div>\n\n<div class="pagination pull-left">\n  <div ng-click="shTablePaginationAction()" class="btn">\n    <i class="fa fa-refresh"></i>\n  </div>\n</div>',
+    controller: [
+      '$scope', function($scope) {
+        $scope.perPage = 10;
+        $scope.getPerPages = function() {
+          return [10, 20, 50, 100];
+        };
+      }
+    ]
+  };
+});
 
 "use strict";
 angular.module('sh.filter.collection', []).filter("shFilterCollection", [
@@ -1153,6 +1396,252 @@ angular.module('sh.init.ng.table', []).run([
         return $scope.$on('ngTableAfterReloadData', function() {
           return $scope.pages = $scope.getGeneratedPagesArray();
         }, true);
+      }
+    ];
+  }
+]);
+
+"use strict";
+angular.module('sh.init.table', []).run([
+  '$rootScope', function($rootScope) {
+    return $rootScope.initShTable = [
+      '$q', '$scope', 'ShTableParams', function($q, $scope, ShTableParams) {
+        var self;
+        this.errors = [];
+        this.localLookup = {};
+        this.callbackOptions = {};
+        this.entity = {};
+        this.recentlyCreatedIds = [];
+        this.recentlyUpdatedIds = [];
+        this.recentlyDeletedIds = [];
+        if (this.sorting == null) {
+          this.sorting = {
+            id: "desc"
+          };
+        }
+        self = this;
+        this.tableParams = new ShTableParams({
+          pageNumber: 1,
+          perPage: 10,
+          sortInfo: 'this is sort info',
+          sorting: this.sorting,
+          getData: function() {
+            return self.getPagedDataAsync();
+          }
+        });
+        this.goToPage = function(pageNumber, perPage) {
+          if (pageNumber != null) {
+            this.tableParams.$params.perPage = perPage || this.tableParams.$params.perPage;
+            this.tableParams.$params.pageNumber = pageNumber;
+          }
+          return this.refreshGrid();
+        };
+        this.refreshGrid = function() {
+          return this.tableParams.reload();
+        };
+        this.generateGridParams = function() {
+          var directions, fields, gridParams, params, property;
+          params = this.tableParams.$params;
+          fields = [];
+          directions = [];
+          for (property in params.sorting) {
+            fields.push(property);
+            directions.push(params.sorting[property]);
+          }
+          gridParams = {
+            column_defs: JSON.stringify(this.getProcessedColumnDefs(this.columnDefs)),
+            page: params.pageNumber,
+            per_page: params.perPage,
+            sort_info: JSON.stringify({
+              fields: fields,
+              directions: directions
+            }),
+            filter_params: {}
+          };
+          if (this.filterParams) {
+            angular.extend(gridParams.filter_params, this.filterParams);
+          }
+          return gridParams;
+        };
+        this.getPagedDataAsync = function() {
+          var deferred, gridParams, params;
+          deferred = $q.defer();
+          this.beforeGetPagedData();
+          params = this.tableParams.$params;
+          gridParams = this.generateGridParams();
+          this.resource.get(angular.extend(gridParams, this.optParams)).$promise.then(function(success) {
+            deferred.resolve({
+              items: success.data.items,
+              totalCount: success.data.total_server_items
+            });
+            if ((self.getPagedDataAsyncSuccess != null) && typeof self.getPagedDataAsyncSuccess === 'function') {
+              return self.getPagedDataAsyncSuccess(success);
+            }
+          }, function(error) {
+            return deferred.reject(error);
+          })["finally"](function() {
+
+            /* */
+          });
+          return deferred.promise;
+        };
+        this.getProcessedColumnDefs = function(columnDefs) {
+          var columnDef, i, len, processedColumnDefs;
+          processedColumnDefs = [];
+          for (i = 0, len = columnDefs.length; i < len; i++) {
+            columnDef = columnDefs[i];
+            if (columnDef.field !== '') {
+              processedColumnDefs.push({
+                field: columnDef.field
+              });
+            }
+          }
+          return processedColumnDefs;
+        };
+        this.getPagedDataAsyncSuccess = function(response) {};
+        this.beforeGetPagedData = function() {
+
+          /* Befor Get PAge Data Callback */
+        };
+        this.sortableClass = function(fieldName) {
+          if (this.tableParams.isSortBy(fieldName, 'asc')) {
+            return 'sortable sort-asc';
+          } else if (this.tableParams.isSortBy(fieldName, 'desc')) {
+            return 'sortable sort-desc';
+          } else {
+            return 'sortable';
+          }
+        };
+        this.sortableClick = function(fieldName) {
+          var newDirection;
+          newDirection = 'asc';
+          if (this.tableParams.isSortBy(fieldName, 'asc')) {
+            newDirection = 'desc';
+          }
+          return this.tableParams.sortData(fieldName, newDirection);
+        };
+        this.saveEntity = function(entity) {
+          (this.callbackOptions.beforeSaveEntity || angular.noop)();
+          if (entity.id != null) {
+            return this.updateEntity(entity);
+          } else {
+            return this.createEntity(entity);
+          }
+        };
+        this.fetchNewEntity = function() {
+          var deferred;
+          deferred = $q.defer();
+          (this.callbackOptions.beforeNewEntity || angular.noop)();
+          this.clearEntity();
+          this.resource["new"](angular.extend({}, this.optParams)).$promise.then(function(success) {
+            self.setEntity(success.data);
+            self.localLookup = success.lookup;
+            (self.newEntitySuccess || angular.noop)(success);
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+        this.createEntity = function(entity) {
+          var deferred;
+          deferred = $q.defer();
+          (this.beforeCreateEntity || angular.noop)();
+          this.resource.save(angular.extend({}, this.optParams), {
+            data: entity
+          }).$promise.then(function(success) {
+            self.recentlyCreatedIds.push(success.data.id);
+            self.setEntity(success.data);
+            self.refreshGrid();
+            (self.createEntitySuccess || angular.noop)(success);
+            return deferred.resolve(success);
+          }, function(error) {
+            this.errors = error.data.error.errors;
+            (self.createEntityFailure || angular.noop)(error);
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+        this.fetchEditEntity = function(id) {
+          var deferred;
+          deferred = $q.defer();
+          this.clearEntity();
+          this.resource.edit(angular.extend({
+            id: id
+          }, this.optParams)).$promise.then(function(success) {
+            self.setEntity(success.data);
+            self.localLookup = success.lookup;
+            (self.editEntitySuccess || angular.noop)(success, id);
+            return deferred.resolve(success);
+          }, function(error) {
+            (self.editEntityFailure || angular.noop)(error, id);
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+        this.updateEntity = function(entity) {
+          var deferred;
+          deferred = $q.defer();
+          (this.beforeUpdateEntity || angular.noop)();
+          this.resource.update(angular.extend({
+            id: entity.id
+          }, this.optParams), {
+            data: entity
+          }).$promise.then(function(success) {
+            self.recentlyUpdatedIds.push(success.data.id);
+            self.setEntity(success.data);
+            self.refreshGrid();
+            (self.updateEntitySuccess || angular.noop)(success);
+            return deferred.resolve(success);
+          }, function(error) {
+            (self.updateEntityFailure || angular.noop)(error);
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+        this.destroyEntity = function(id, name) {
+          var deferred;
+          if (name == null) {
+            name = 'this entry';
+          }
+          deferred = $q.defer();
+          (this.beforeDestroyEntity || angular.noop)();
+          this.resource["delete"](angular.extend({
+            id: id
+          }, this.optParams)).$promise.then(function(success) {
+            self.recentlyDeletedIds.push(id);
+            (self.destroyEntitySuccess || angular.noop)(success);
+            return deferred.resolve(success);
+          }, function(error) {
+            (self.destroyEntityFailure || angular.noop)(error);
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+        this.deleteEntity = function(id, name) {
+          if (name == null) {
+            name = 'this entry';
+          }
+          return this.destroyEntity(id, name);
+        };
+        this.setEntity = function(entity) {
+          return this.entity = angular.copy(entity, {});
+        };
+        this.clearEntity = function() {
+          return this.setEntity({});
+        };
+        this.rowEvent = function(entity) {
+          if (this.recentlyDeletedIds.indexOf(entity.id) >= 0) {
+            return 'recently-deleted';
+          } else if (this.recentlyUpdatedIds.indexOf(entity.id) >= 0) {
+            return 'recently-updated';
+          } else if (this.recentlyCreatedIds.indexOf(entity.id) >= 0) {
+            return 'recently-created';
+          } else {
+            return 'else';
+          }
+        };
+        return this.tableParams.initialize();
       }
     ];
   }
@@ -2101,4 +2590,4 @@ angular.module('sh.spinning.service', []).service("ShSpinningService", function(
 });
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.spinning', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.spinning', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.ng.table.filter', 'sh.persistence', 'sh.table', 'sh.init.table', 'sh.button.state', 'sh.element.finder', 'sh.notification', 'sh.page.service', 'sh.priv', 'sh.spinning.service']);
