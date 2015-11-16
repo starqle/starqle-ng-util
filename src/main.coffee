@@ -53,6 +53,9 @@ angular.module 'starqle.ng.util', [
   'sh.ng.table.filter',
   'sh.persistence',
 
+  'sh.table',
+  'sh.init.table',
+
   # services
   'sh.button.state',
   'sh.element.finder',
