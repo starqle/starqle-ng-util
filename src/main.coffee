@@ -31,7 +31,6 @@ angular.module 'starqle.ng.util', [
   'sh.focus',
   'sh.number.format',
   'sh.segment',
-  'sh.spinning',
   'sh.submit',
   'sh.view.helper',
 
@@ -53,14 +52,15 @@ angular.module 'starqle.ng.util', [
   'sh.ng.table.filter',
   'sh.persistence',
 
+  # modules
   'sh.table',
   'sh.init.table',
+  'sh.spinning.module',
 
   # services
   'sh.button.state',
   'sh.element.finder',
   'sh.notification',
   'sh.page.service',
-  'sh.priv',
-  'sh.spinning.service'
+  'sh.priv'
 ]

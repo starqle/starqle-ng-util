@@ -19,7 +19,7 @@
 
 "use strict"
 
-angular.module('sh.spinning', []).directive "shSpinning", ['ShSpinningService', (ShSpinningService) ->
+shSpinningModule.directive "shSpinning", ['ShSpinningService', (ShSpinningService) ->
   restrict: 'A'
   scope:
     shSpinning: '@'

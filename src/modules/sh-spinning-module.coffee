@@ -1,5 +1,5 @@
 # =============================================================================
-# Copyright (c) 2014 All Right Reserved, http://starqle.com/
+# Copyright (c) 2015 All Right Reserved, http://starqle.com/
 #
 # This source is subject to the Starqle Permissive License.
 # Please see the License.txt file for more information.
@@ -10,30 +10,21 @@
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
 # PARTICULAR PURPOSE.
 #
-# @file_name src/services/sh-spinning-service.coffee
+# @file_name src/modules/sh-spinning-module.coffee
 # @author Raymond Ralibi
 # @email ralibi@starqle.com
 # @company PT. Starqle Indonesia
-# @note This file contains ShSpinningService service.
+# @note This file contains module variable that will be used as a root for others shSpinning derivatives
 # =============================================================================
 
-"use strict";
+"use strict"
 
-shSpinningModule.service "ShSpinningService", ->
+###*
+# @ngdoc module
+# @name shSpinningModule
+#
+# @description
+# shSpinningModule
+###
 
-  spinningStates = {}
-
-  @spin = (key, action) ->
-    action = true unless action?
-    if action
-      spinningStates[key] = true
-    else
-      @stop(key)
-
-  @stop = (key) ->
-    delete spinningStates[key]
-
-  @isSpinning = (key) ->
-    spinningStates[key] == true
-
-  return this
+shSpinningModule = angular.module 'sh.spinning.module', []
