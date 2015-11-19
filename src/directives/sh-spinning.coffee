@@ -21,41 +21,24 @@
 
 shSpinningModule.directive "shSpinning", ['ShSpinningService', (ShSpinningService) ->
   restrict: 'A'
-  scope:
-    shSpinning: '@'
-    shSpinningLines: '@?'
-    shSpinningLength: '@?'
-    shSpinningWidth: '@?'
-    shSpinningRadius: '@?'
-    shSpinningCorners: '@?'
-    shSpinningRotate: '@?'
-    shSpinningDirection: '@?'
-    shSpinningColor: '@?'
-    shSpinningSpeed: '@?'
-    shSpinningTrail: '@?'
-    shSpinningShadow: '@?'
-    shSpinningHwaccel: '@?'
-    shSpinningClassName: '@?'
-    shSpinningZIndex: '@?'
-    shSpinningTop: '@?'
-    shSpinningLeft: '@?'
+  scope: true # Child scope
   link: (scope, element, attrs) ->
-    scope.shSpinningLines = +scope.shSpinningLines or 13 # The number of lines to draw
-    scope.shSpinningLength = +scope.shSpinningLength or 30 # The length of each line
-    scope.shSpinningWidth = +scope.shSpinningWidth or 10 # The line thickness
-    scope.shSpinningRadius = +scope.shSpinningRadius or 38 # The radius of the inner circle
-    scope.shSpinningCorners = +scope.shSpinningCorners or 1 # Corner roundness (0..1)
-    scope.shSpinningRotate = +scope.shSpinningRotate or 0 # The rotation offset
-    scope.shSpinningDirection = +scope.shSpinningDirection or 1 # 1: clockwise, -1: counterclockwise
-    scope.shSpinningColor = scope.shSpinningColor or '#000' # #rgb or #rrggbb or array of colors
-    scope.shSpinningSpeed = +scope.shSpinningSpeed or 2.2 # Rounds per second
-    scope.shSpinningTrail = +scope.shSpinningTrail or 100 # Afterglow percentage
-    scope.shSpinningShadow = scope.shSpinningShadow or false # Whether to render a shadow
-    scope.shSpinningHwaccel = scope.shSpinningHwaccel or false # Whether to use hardware acceleration
-    scope.shSpinningClassName = scope.shSpinningClassName or 'spinner' # The CSS class to assign to the spinner
-    scope.shSpinningZIndex = +scope.shSpinningZIndex or 2e9 # The z-index (defaults to 2000000000)
-    scope.shSpinningTop = scope.shSpinningTop or '45%' # Top position relative to parent
-    scope.shSpinningLeft = scope.shSpinningLeft or '50%' # Left position relative to parent
+    scope.shSpinningLines = +attrs.shSpinningLines or 13 # The number of lines to draw
+    scope.shSpinningLength = +attrs.shSpinningLength or 30 # The length of each line
+    scope.shSpinningWidth = +attrs.shSpinningWidth or 10 # The line thickness
+    scope.shSpinningRadius = +attrs.shSpinningRadius or 38 # The radius of the inner circle
+    scope.shSpinningCorners = +attrs.shSpinningCorners or 1 # Corner roundness (0..1)
+    scope.shSpinningRotate = +attrs.shSpinningRotate or 0 # The rotation offset
+    scope.shSpinningDirection = +attrs.shSpinningDirection or 1 # 1: clockwise, -1: counterclockwise
+    scope.shSpinningColor = attrs.shSpinningColor or '#000' # #rgb or #rrggbb or array of colors
+    scope.shSpinningSpeed = +attrs.shSpinningSpeed or 2.2 # Rounds per second
+    scope.shSpinningTrail = +attrs.shSpinningTrail or 100 # Afterglow percentage
+    scope.shSpinningShadow = attrs.shSpinningShadow or false # Whether to render a shadow
+    scope.shSpinningHwaccel = attrs.shSpinningHwaccel or false # Whether to use hardware acceleration
+    scope.shSpinningClassName = attrs.shSpinningClassName or 'spinner' # The CSS class to assign to the spinner
+    scope.shSpinningZIndex = +attrs.shSpinningZIndex or 2e9 # The z-index (defaults to 2000000000)
+    scope.shSpinningTop = attrs.shSpinningTop or '45%' # Top position relative to parent
+    scope.shSpinningLeft = attrs.shSpinningLeft or '50%' # Left position relative to parent
 
     opts =
       lines: scope.shSpinningLines
@@ -77,16 +60,19 @@ shSpinningModule.directive "shSpinning", ['ShSpinningService', (ShSpinningServic
 
     scope.spinner = new Spinner(opts)
 
-    scope.$watch (->
-      ShSpinningService.isSpinning(scope.shSpinning)
-    ), (newVal) ->
-      if ShSpinningService.isSpinning(scope.shSpinning)
-        angular.element(element).addClass('sh-spinning-spin')
-        scope.spinner.spin(element[0])
-      else
-        angular.element(element).removeClass('sh-spinning-spin')
-        scope.spinner.stop()
-      return
+    scope.$watch (
+      () ->
+        ShSpinningService.isSpinning(attrs.shSpinning)
+
+      (newVal, oldVal) ->
+        if ShSpinningService.isSpinning(attrs.shSpinning)
+          angular.element(element).addClass('sh-spinning-spin')
+          scope.spinner.spin(element[0])
+        else
+          angular.element(element).removeClass('sh-spinning-spin')
+          scope.spinner.stop()
+        return
+    )
 
     return
 ]
