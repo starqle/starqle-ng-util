@@ -10,7 +10,7 @@
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
 # PARTICULAR PURPOSE.
 #
-# @file_name src/services/sh-element-finder.coffee
+# @file_name src/services/sh-helper/sh-element-finder.coffee
 # @author Raymond Ralibi
 # @email ralibi@starqle.com
 # @company PT. Starqle Indonesia
@@ -19,7 +19,7 @@
 
 "use strict"
 
-angular.module("sh.element.finder", []).service "shElementFinder", ->
+shHelperModule.service "shElementFinder", ->
 
   # find within array of hash (object)
   # by id

@@ -52,12 +52,12 @@ angular.module 'starqle.ng.util', [
   'sh.persistence',
 
   # modules
+  'sh.helper.module',
   'sh.table',
   'sh.spinning.module',
 
   # services
   'sh.button.state',
-  'sh.element.finder',
   'sh.notification',
   'sh.page.service',
   'sh.priv'
