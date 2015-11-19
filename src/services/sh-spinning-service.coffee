@@ -23,16 +23,54 @@ shSpinningModule.service "ShSpinningService", ->
 
   spinningStates = {}
 
-  @spin = (key, action) ->
-    action = true unless action?
-    if action
+
+  ###*
+  # @ngdoc method
+  # @name spin
+  #
+  # @description
+  # Get CSS class based on sortable state
+  #
+  # @param {String} key shSpinning directive value that used as a key
+  # @param {Boolean=} spinning `true` to spin or `false` to stop. default is `true`
+  #
+  # @returns {*}
+  ###
+  @spin = (key, spinning) ->
+    spinning = true unless spinning?
+    if spinning
       spinningStates[key] = true
     else
       @stop(key)
 
+
+  ###*
+  # @ngdoc method
+  # @name stop
+  #
+  # @description
+  # Stopping spinner.
+  # Call `ShSpinningService.stop('some-key')` is equals to `ShSpinningService.spin('some-key', false)`.
+  #
+  # @param {String} key shSpinning directive value that used as a key
+  #
+  # @returns {*} class for CSS usage
+  ###
   @stop = (key) ->
     delete spinningStates[key]
 
+
+  ###*
+  # @ngdoc method
+  # @name isSpinning
+  #
+  # @description
+  # Check whether a loading spinner is on spinning state
+  #
+  # @param {String} key shSpinning directive value that used as a key
+  #
+  # @returns {Boolean}
+  ###
   @isSpinning = (key) ->
     spinningStates[key] == true
 
