@@ -22,8 +22,12 @@
 angular.module('sh.spinning.service',[]).service "ShSpinningService", ->
   spinningStates = {}
 
-  @spin = (key) ->
-    spinningStates[key] = true
+  @spin = (key, action) ->
+    action = true unless action?
+    if action
+      spinningStates[key] = true
+    else
+      @stop(key)
 
   @stop = (key) ->
     delete spinningStates[key]
