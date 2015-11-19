@@ -53,8 +53,8 @@ angular.module 'starqle.ng.util', [
 
   # modules
   'sh.helper.module',
-  'sh.table',
   'sh.spinning.module',
+  'sh.table.module',
 
   # services
   'sh.button.state',

@@ -10,7 +10,7 @@
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
 # PARTICULAR PURPOSE.
 #
-# @file_name src/factories/sh-table.coffee
+# @file_name src/factories/sh-table-params.coffee
 # @author Raymond Ralibi
 # @email ralibi@starqle.com
 # @company PT. Starqle Indonesia
@@ -18,17 +18,6 @@
 # =============================================================================
 
 "use strict"
-
-###*
-# @ngdoc module
-# @name shTable
-#
-# @description
-# shTable module
-###
-
-shTableModule = angular.module('sh.table', [])
-
 
 ###*
 # @ngdoc object
@@ -270,98 +259,4 @@ shTableModule.factory(
   ]
 )
 
-# ###*
-# # @ngdoc directive
-# # @name shTable
-# #
-# # @description
-# # directive
-# ###
 
-# shTableModule.directive("shTable", ->
-#   restrict: 'A'
-#   scope:
-#     shTable: '='
-#   controller: ['$scope', ($scope) ->
-#     $scope.$watch(
-#       'params'
-#       (newVal) ->
-#         console.log 'newVal', newVal
-#         if newVal? and not newVal
-#           $scope.params.initialize()
-#       true
-#     )
-#     return
-#   ]
-#   controllerAs: 'shTableController'
-#   compile: (element) ->
-#     (scope, element, attrs) ->
-#       console.log 'scope.shTable', scope.shTable
-#       scope.params = scope.shTable
-#       return
-# )
-
-
-
-###*
-# @ngdoc directive
-# @name shTable
-#
-# @description
-# directive
-###
-
-shTableModule.directive("shTablePagination", ->
-  restrict: 'A'
-  transclude: true
-  scope:
-    shTablePagination: '='
-    shTablePaginationAction: '&'
-  template: '''
-      <div ng-if="shTablePagination.totalCount > 10" class="pagination form-inline pull-left">
-        <select ng-model='perPage' ng-change="shTablePaginationAction({pageNumber: 1, perPage: perPage})" ng-options="perPage for perPage in getPerPages()" class="form-control text-right"></select>&nbsp;
-        &nbsp;
-        &nbsp;
-      </div>
-
-      <ul class="pagination pull-left">
-        <li ng-class="{'disabled': page.disabled}" ng-repeat="page in shTablePagination.pages" ng-switch="page.type">
-          <a ng-switch-when="FIRST" ng-click="shTablePaginationAction({pageNumber: page.number})">«</a>
-          <a ng-switch-when="PREV" ng-click="shTablePaginationAction({pageNumber: page.number})">&lt;</a>
-          <a ng-switch-when="PAGE" ng-click="shTablePaginationAction({pageNumber: page.number})">
-            <span ng-bind="page.number"></span>
-          </a>
-          <a ng-switch-when="MORE">…</a>
-          <a ng-switch-when="NEXT" ng-click="shTablePaginationAction({pageNumber: page.number})">&gt;</a>
-          <a ng-switch-when="LAST" ng-click="shTablePaginationAction({pageNumber: page.number})">»</a>
-        </li>
-      </ul>
-
-      <div class="pagination pull-left">
-        <div class="btn disabled">
-          <span class="page-count">
-            &nbsp;{{shTablePagination.currentPageCount}}&nbsp;
-          </span>
-          <span>
-            <em translate="LABEL_OF"></em>
-          </span>
-          <span class="page-total">
-            &nbsp;{{shTablePagination.totalCount}}&nbsp;
-          </span>
-        </div>
-      </div>
-
-      <div class="pagination pull-left">
-        <div ng-click="shTablePaginationAction()" class="btn">
-          <i class="fa fa-refresh"></i>
-        </div>
-      </div>
-    '''
-  controller: ['$scope', ($scope) ->
-    $scope.perPage = 10
-    $scope.getPerPages = () ->
-      [10, 20, 50, 100]
-    return
-  ]
-
-)
