@@ -49,12 +49,10 @@ angular.module 'starqle.ng.util', [
   'sh.bulk.helper',
   'sh.init.ng.table',
   'sh.modal.persistence',
-  'sh.ng.table.filter',
   'sh.persistence',
 
   # modules
   'sh.table',
-  'sh.init.table',
   'sh.spinning.module',
 
   # services
