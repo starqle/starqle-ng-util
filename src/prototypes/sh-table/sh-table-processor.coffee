@@ -125,7 +125,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         gridParams = @generateGridParams()
 
         # Merge gridParams to @optParams
-        angular.merge(@optParams, gridParams)
+        angular.extend(@optParams, gridParams)
 
         @getEntities().then(
           (success) ->

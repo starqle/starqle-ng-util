@@ -2551,7 +2551,7 @@ shTableModule.run([
           deferred = $q.defer();
           params = this.tableParams.$params;
           gridParams = this.generateGridParams();
-          angular.merge(this.optParams, gridParams);
+          angular.extend(this.optParams, gridParams);
           this.getEntities().then(function(success) {
             return deferred.resolve({
               items: success.data.items,
