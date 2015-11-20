@@ -2267,6 +2267,9 @@ shTableModule.run([
         if (this.entity == null) {
           this.entity = {};
         }
+        if (this.optParams == null) {
+          this.optParams = {};
+        }
         this.сreatedIds = [];
         this.updatedIds = [];
         this.deletedIds = [];
@@ -2283,17 +2286,15 @@ shTableModule.run([
          * @name getEntities
          *
          * @description
-         * Get list of entities based on params
-         *
-         * @param {Object} params Parameter objects
+         * Get list of entities based on `optParams`
          *
          * @returns {promise}
          */
-        this.getEntities = function(params) {
+        this.getEntities = function() {
           var deferred;
           (self.beforeGetEntitiesHook || angular.noop)();
           deferred = $q.defer();
-          this.resource.get(params).$promise.then(function(success) {
+          this.shTableRest.getEntities(this.optParams).then(function(success) {
             (self.getEntitiesSuccessHook || angular.noop)(success);
             return deferred.resolve(success);
           }, function(error) {
@@ -2316,9 +2317,9 @@ shTableModule.run([
          */
         this.newEntity = function() {
           var deferred;
-          (self.beforeDeleteEntityHook || angular.noop)();
+          (self.beforeNewEntityHook || angular.noop)();
           deferred = $q.defer();
-          this.resource["new"](this.optParams).$promise.then(function(success) {
+          this.shTableRest.newEntity(this.optParams).then(function(success) {
             self.entity = success.data;
             (self.newEntitySuccessHook || angular.noop)(success);
             return deferred.resolve(success);
@@ -2326,7 +2327,7 @@ shTableModule.run([
             (self.newEntityErrorHook || angular.noop)(error);
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterDeleteEntityHook || angular.noop)();
+            return (self.afterNewEntityHook || angular.noop)();
           });
           return deferred.promise;
         };
@@ -2344,11 +2345,9 @@ shTableModule.run([
          */
         this.createEntity = function(entity) {
           var deferred;
-          (self.beforeDeleteEntityHook || angular.noop)();
+          (self.beforeCreateEntityHook || angular.noop)();
           deferred = $q.defer();
-          this.resource.save(this.optParams, {
-            data: entity
-          }).$promise.then(function(success) {
+          this.shTableRest.createEntity(this.optParams, entity).then(function(success) {
             self.сreatedIds.push(success.data.id);
             self.entity = success.data;
             self.refreshGrid();
@@ -2358,7 +2357,7 @@ shTableModule.run([
             (self.createEntityErrorHook || angular.noop)(error);
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterDeleteEntityHook || angular.noop)();
+            return (self.afterCreateEntityHook || angular.noop)();
           });
           return deferred.promise;
         };
@@ -2371,17 +2370,14 @@ shTableModule.run([
          * Edit an entity
          *
          * @param {String} id Entity id in string or UUID
-         * @param {Object} params Parameter objects
          *
          * @returns {promise}
          */
-        this.editEntity = function(id, params) {
+        this.editEntity = function(id) {
           var deferred;
-          (self.beforeDeleteEntityHook || angular.noop)();
+          (self.beforeEditEntityHook || angular.noop)();
           deferred = $q.defer();
-          this.resource.edit(angular.extend({
-            id: id
-          }, params)).$promise.then(function(success) {
+          this.shTableRest.editEntity(id, this.optParams).then(function(success) {
             self.entity = success.data;
             (self.editEntitySuccessHook || angular.noop)(success);
             return deferred.resolve(success);
@@ -2389,7 +2385,7 @@ shTableModule.run([
             (self.editEntityErrorHook || angular.noop)(error);
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterDeleteEntityHook || angular.noop)();
+            return (self.afterEditEntityHook || angular.noop)();
           });
           return deferred.promise;
         };
@@ -2402,20 +2398,15 @@ shTableModule.run([
          * Update an entity
          *
          * @param {String} id Entity id in string or UUID
-         * @param {Object} params Parameter objects
          * @param {Object} entity Entity object which should contain an id
          *
          * @returns {promise}
          */
-        this.updateEntity = function(id, params, entity) {
+        this.updateEntity = function(id, entity) {
           var deferred;
-          (self.beforeDeleteEntityHook || angular.noop)();
+          (self.beforeUpdateEntityHook || angular.noop)();
           deferred = $q.defer();
-          this.resource.update(angular.extend({
-            id: id
-          }, params), {
-            data: entity
-          }).$promise.then(function(success) {
+          this.shTableRest.updateEntity(id, this.optParams, entity).then(function(success) {
             self.updatedIds.push(success.data.id);
             self.entity = success.data;
             self.refreshGrid();
@@ -2425,7 +2416,7 @@ shTableModule.run([
             (self.updateEntityErrorHook || angular.noop)(error);
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterDeleteEntityHook || angular.noop)();
+            return (self.afterUpdateEntityHook || angular.noop)();
           });
           return deferred.promise;
         };
@@ -2437,18 +2428,15 @@ shTableModule.run([
          * @description
          * Delete an entity
          *
-         * @param {String} name Entity id in string or UUID
-         * @param {Object} params Parameter objects
+         * @param {String} id Entity id in string or UUID
          *
          * @returns {promise}
          */
-        return this.deleteEntity = function(id, params) {
+        return this.deleteEntity = function(id) {
           var deferred;
           (self.beforeDeleteEntityHook || angular.noop)();
           deferred = $q.defer();
-          this.shTableRest.deleteEntity(angular.extend({
-            id: id
-          }, params)).$promise.then(function(success) {
+          this.shTableRest.deleteEntity(id, this.optParams).then(function(success) {
             self.deletedIds.push(id);
             self.refreshGrid();
             (self.deleteEntitySuccessHook || angular.noop)(success);
@@ -2563,7 +2551,8 @@ shTableModule.run([
           deferred = $q.defer();
           params = this.tableParams.$params;
           gridParams = this.generateGridParams();
-          this.getEntities(angular.extend(gridParams, this.optParams)).then(function(success) {
+          angular.merge(this.optParams, gridParams);
+          this.getEntities().then(function(success) {
             return deferred.resolve({
               items: success.data.items,
               totalCount: success.data.total_server_items
@@ -2747,7 +2736,7 @@ shTableModule.run([
          * @description
          * Delete an entity
          *
-         * @param {String} name Entity id in string or UUID
+         * @param {String} id Entity id in string or UUID
          * @param {Object} params Parameter objects
          *
          * @returns {promise}
