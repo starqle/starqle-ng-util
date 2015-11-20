@@ -41,6 +41,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
       @resource = null unless @resource?
       @entity = {} unless @entity?
+      @optParams = {} unless @optParams?
 
       @сreatedIds = []
       @updatedIds = []
@@ -62,20 +63,18 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @name getEntities
       #
       # @description
-      # Get list of entities based on params
-      #
-      # @param {Object} params Parameter objects
+      # Get list of entities based on `optParams`
       #
       # @returns {promise}
       ###
-      @getEntities = (params) ->
+      @getEntities = () ->
         (self.beforeGetEntitiesHook or angular.noop)()
         deferred = $q.defer()
 
         # GEt the entities
-        @resource.get(
-          params
-        ).$promise.then(
+        @shTableRest.getEntities(
+          @optParams
+        ).then(
           (success) ->
             (self.getEntitiesSuccessHook or angular.noop)(success)
             deferred.resolve success
@@ -106,9 +105,9 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Fetch blank entity
-        @resource.new(
+        @shTableRest.newEntity(
           @optParams
-        ).$promise.then(
+        ).then(
           (success) ->
             self.entity = success.data
 
@@ -142,10 +141,10 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Persist an entity into database
-        @resource.save(
+        @shTableRest.createEntity(
           @optParams
-          data: entity
-        ).$promise.then(
+          entity
+        ).then(
           (success) ->
             self.сreatedIds.push success.data.id
             self.entity = success.data
@@ -174,18 +173,18 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # Edit an entity
       #
       # @param {String} id Entity id in string or UUID
-      # @param {Object} params Parameter objects
       #
       # @returns {promise}
       ###
-      @editEntity = (id, params) ->
+      @editEntity = (id) ->
         (self.beforeEditEntityHook or angular.noop)()
         deferred = $q.defer()
 
         # Fetch entity for editing
-        @resource.edit(
-          angular.extend({id: id}, params)
-        ).$promise.then(
+        @shTableRest.editEntity(
+          id
+          @optParams
+        ).then(
           (success) ->
             self.entity = success.data
 
@@ -212,20 +211,20 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # Update an entity
       #
       # @param {String} id Entity id in string or UUID
-      # @param {Object} params Parameter objects
       # @param {Object} entity Entity object which should contain an id
       #
       # @returns {promise}
       ###
-      @updateEntity = (id, params, entity) ->
+      @updateEntity = (id, entity) ->
         (self.beforeUpdateEntityHook or angular.noop)()
         deferred = $q.defer()
 
         # Update entity into database
-        @resource.update(
-          angular.extend({id: id}, params)
-          data: entity
-        ).$promise.then(
+        @shTableRest.updateEntity(
+          id
+          @optParams
+          entity
+        ).then(
           (success) ->
             self.updatedIds.push success.data.id
             self.entity = success.data
@@ -253,19 +252,19 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @description
       # Delete an entity
       #
-      # @param {String} name Entity id in string or UUID
-      # @param {Object} params Parameter objects
+      # @param {String} id Entity id in string or UUID
       #
       # @returns {promise}
       ###
-      @deleteEntity = (id, params) ->
+      @deleteEntity = (id) ->
         (self.beforeDeleteEntityHook or angular.noop)()
         deferred = $q.defer()
 
         # Delete entity from database
         @shTableRest.deleteEntity(
-          angular.extend({id: id}, params)
-        ).$promise.then(
+          id
+          @optParams
+        ).then(
           (success) ->
             self.deletedIds.push id
             self.refreshGrid()
