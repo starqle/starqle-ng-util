@@ -49,6 +49,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @resource = null unless @resource?
       @localLookup = {}
       @sorting = id: "desc" unless @sorting?
+      @autoload = true unless @autoload?
 
       #
       $injector.invoke $rootScope.shTableProcessor, this
@@ -67,7 +68,8 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       #
       # Initialization
       #
-      @tableParams.initialize()
+
+      @tableParams.initialize() if @autoload
   ]
 
 

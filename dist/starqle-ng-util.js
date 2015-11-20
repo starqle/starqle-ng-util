@@ -2643,6 +2643,7 @@ shTableModule.run([
         this.newEntity = function(params) {
           var deferred;
           deferred = $q.defer();
+          console.log('called rest');
           this.resource["new"](params).$promise.then(function(success) {
             return deferred.resolve(success);
           }, function(error) {
@@ -2783,6 +2784,9 @@ shTableModule.run([
             id: "desc"
           };
         }
+        if (this.autoload == null) {
+          this.autoload = true;
+        }
         $injector.invoke($rootScope.shTableProcessor, this);
         this.tableParams = new ShTableParams({
           pageNumber: 1,
@@ -2793,7 +2797,9 @@ shTableModule.run([
             return self.getPagedDataAsync();
           }
         });
-        return this.tableParams.initialize();
+        if (this.autoload) {
+          return this.tableParams.initialize();
+        }
       }
     ];
   }
