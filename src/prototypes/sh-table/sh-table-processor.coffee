@@ -124,9 +124,10 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         params = @tableParams.$params
         gridParams = @generateGridParams()
 
-        @getEntities(
-          angular.extend(gridParams, @optParams)
-        ).then(
+        # Merge gridParams to @optParams
+        angular.merge(@optParams, gridParams)
+
+        @getEntities().then(
           (success) ->
             deferred.resolve
               items: success.data.items
