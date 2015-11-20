@@ -189,7 +189,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @description
       # Delete an entity
       #
-      # @param {String} name Entity id in string or UUID
+      # @param {String} id Entity id in string or UUID
       # @param {Object} params Parameter objects
       #
       # @returns {promise}
