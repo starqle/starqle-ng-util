@@ -102,7 +102,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @newEntity = () ->
-        (self.beforeDeleteEntityHook or angular.noop)()
+        (self.beforeNewEntityHook or angular.noop)()
         deferred = $q.defer()
 
         # Fetch blank entity
@@ -121,7 +121,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
         ).finally(
           () ->
-            (self.afterDeleteEntityHook or angular.noop)()
+            (self.afterNewEntityHook or angular.noop)()
         )
         deferred.promise
 
@@ -138,7 +138,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @createEntity = (entity) ->
-        (self.beforeDeleteEntityHook or angular.noop)()
+        (self.beforeCreateEntityHook or angular.noop)()
         deferred = $q.defer()
 
         # Persist an entity into database
@@ -160,7 +160,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
         ).finally(
           () ->
-            (self.afterDeleteEntityHook or angular.noop)()
+            (self.afterCreateEntityHook or angular.noop)()
         )
         deferred.promise
 
@@ -179,7 +179,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @editEntity = (id, params) ->
-        (self.beforeDeleteEntityHook or angular.noop)()
+        (self.beforeEditEntityHook or angular.noop)()
         deferred = $q.defer()
 
         # Fetch entity for editing
@@ -198,7 +198,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
         ).finally(
           () ->
-            (self.afterDeleteEntityHook or angular.noop)()
+            (self.afterEditEntityHook or angular.noop)()
         )
         deferred.promise
 
@@ -218,7 +218,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @updateEntity = (id, params, entity) ->
-        (self.beforeDeleteEntityHook or angular.noop)()
+        (self.beforeUpdateEntityHook or angular.noop)()
         deferred = $q.defer()
 
         # Update entity into database
@@ -240,7 +240,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
         ).finally(
           () ->
-            (self.afterDeleteEntityHook or angular.noop)()
+            (self.afterUpdateEntityHook or angular.noop)()
         )
         deferred.promise
 
