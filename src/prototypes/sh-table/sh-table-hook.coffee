@@ -41,6 +41,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
       @resource = null unless @resource?
       @entity = {} unless @entity?
+      @lookup = {} unless @lookup?
       @optParams = {} unless @optParams?
 
       @сreatedIds = []
@@ -105,6 +106,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         ).then(
           (success) ->
             self.entity = success.data
+            self.lookup = success.lookup if success.lookup?
 
             (self.newEntitySuccessHook or angular.noop)(success)
             deferred.resolve success
@@ -143,6 +145,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
           (success) ->
             self.сreatedIds.push success.data.id
             self.entity = success.data
+            self.lookup = success.lookup if success.lookup?
             self.refreshGrid()
 
             (self.createEntitySuccessHook or angular.noop)(success)
@@ -182,6 +185,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         ).then(
           (success) ->
             self.entity = success.data
+            self.lookup = success.lookup if success.lookup?
 
             (self.editEntitySuccessHook or angular.noop)(success)
             deferred.resolve(success)
@@ -223,6 +227,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
           (success) ->
             self.updatedIds.push success.data.id
             self.entity = success.data
+            self.lookup = success.lookup if success.lookup?
             self.refreshGrid()
 
             (self.updateEntitySuccessHook or angular.noop)(success)
@@ -276,6 +281,24 @@ shTableModule.run ['$rootScope', ($rootScope) ->
             (self.afterDeleteEntityHook or angular.noop)()
         )
         deferred.promise
+
+
+
+      ###*
+      # @ngdoc method
+      # @name getLookup
+      #
+      # @description
+      # Return an array of objects
+      #
+      # @param {String} key The expected local lookups key
+      #
+      # @returns {Object|Array} Reference to `obj`.
+      ###
+      @getLookup = (key) ->
+        self.lookup?[key]
+
+
   ]
 
 
