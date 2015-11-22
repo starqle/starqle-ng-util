@@ -52,8 +52,9 @@ angular.module 'starqle.ng.util', [
   'sh.persistence',
 
   # modules
-  'sh.helper.module',
   'sh.api.module',
+  'sh.helper.module',
+  'sh.persistence.module',
   'sh.spinning.module',
   'sh.table.module',
 
