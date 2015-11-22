@@ -53,6 +53,7 @@ angular.module 'starqle.ng.util', [
 
   # modules
   'sh.helper.module',
+  'sh.api.module',
   'sh.spinning.module',
   'sh.table.module',
 

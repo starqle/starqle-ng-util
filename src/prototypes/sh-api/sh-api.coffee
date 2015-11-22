@@ -10,7 +10,7 @@
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
 # PARTICULAR PURPOSE.
 #
-# @file_name src/prototypes/sh-table/sh-table-rest.coffee
+# @file_name src/prototypes/sh-api/sh-api.coffee
 # @author Raymond Ralibi
 # @email ralibi@starqle.com
 # @company PT. Starqle Indonesia
@@ -19,23 +19,22 @@
 
 "use strict"
 
-shTableModule.run ['$rootScope', ($rootScope) ->
+
+shApiModule.run ['$rootScope', ($rootScope) ->
 
 
   ###*
   # @ngdoc factory
-  # @name shTableRest
+  # @name shApi
   #
   # @description
   # ShTableRest
   ###
-  $rootScope.shTableRest = [
+  $rootScope.shApi = [
     '$q'
     (
       $q
     ) ->
-
-      self = this
 
       @resource = null unless @resource?
 

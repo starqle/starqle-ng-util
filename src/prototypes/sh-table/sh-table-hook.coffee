@@ -48,15 +48,10 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @deletedIds = []
 
 
-      @shTableRest =
+      @shApi =
         resource: self.resource
 
-
-
-      @shTableRest =
-        resource: self.resource
-
-      $injector.invoke $rootScope.shTableRest, @shTableRest
+      $injector.invoke $rootScope.shApi, @shApi
 
       ###*
       # @ngdoc method
@@ -72,7 +67,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # GEt the entities
-        @shTableRest.getEntities(
+        @shApi.getEntities(
           @optParams
         ).then(
           (success) ->
@@ -105,7 +100,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Fetch blank entity
-        @shTableRest.newEntity(
+        @shApi.newEntity(
           @optParams
         ).then(
           (success) ->
@@ -141,7 +136,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Persist an entity into database
-        @shTableRest.createEntity(
+        @shApi.createEntity(
           @optParams
           entity
         ).then(
@@ -181,7 +176,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Fetch entity for editing
-        @shTableRest.editEntity(
+        @shApi.editEntity(
           id
           @optParams
         ).then(
@@ -220,7 +215,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Update entity into database
-        @shTableRest.updateEntity(
+        @shApi.updateEntity(
           id
           @optParams
           entity
@@ -261,7 +256,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Delete entity from database
-        @shTableRest.deleteEntity(
+        @shApi.deleteEntity(
           id
           @optParams
         ).then(
