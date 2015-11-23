@@ -21,6 +21,19 @@ angular.module('on.root.scope', []).config([
 
 /**
  * @ngdoc module
+ * @name shApiModule
+ *
+ * @description
+ * shApiModule
+ */
+var shApiModule;
+
+shApiModule = angular.module('sh.api.module', []);
+
+"use strict";
+
+/**
+ * @ngdoc module
  * @name shHelperModule
  *
  * @description
@@ -29,6 +42,19 @@ angular.module('on.root.scope', []).config([
 var shHelperModule;
 
 shHelperModule = angular.module('sh.helper.module', []);
+
+"use strict";
+
+/**
+ * @ngdoc module
+ * @name shPersistenceModule
+ *
+ * @description
+ * shPersistenceModule
+ */
+var shPersistenceModule;
+
+shPersistenceModule = angular.module('sh.persistence.module', []);
 
 "use strict";
 
@@ -1902,6 +1928,399 @@ angular.module('sh.persistence', []).run([
 ]);
 
 "use strict";
+shApiModule.run([
+  '$rootScope', function($rootScope) {
+
+    /**
+     * @ngdoc factory
+     * @name shApi
+     *
+     * @description
+     * ShTableRest
+     */
+    return $rootScope.shApi = [
+      '$q', function($q) {
+        if (this.resource == null) {
+          this.resource = null;
+        }
+
+        /**
+         * @ngdoc method
+         * @name getEntities
+         *
+         * @description
+         * Get list of entities based on params
+         *
+         * @param {Object} params Parameter objects
+         *
+         * @returns {promise}
+         */
+        this.getEntities = function(params) {
+          var deferred;
+          deferred = $q.defer();
+          this.resource.get(params).$promise.then(function(success) {
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name newEntity
+         *
+         * @description
+         * New an entity
+         *
+         * @returns {promise}
+         */
+        this.newEntity = function(params) {
+          var deferred;
+          deferred = $q.defer();
+          this.resource["new"](params).$promise.then(function(success) {
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name createEntity
+         *
+         * @description
+         * Create/persist an entity to database
+         *
+         * @param {Object} params Parameter objects
+         * @param {Object} entity Entity object which should not contain an id
+         *
+         * @returns {promise}
+         */
+        this.createEntity = function(params, entity) {
+          var deferred;
+          deferred = $q.defer();
+          this.resource.save(params, {
+            data: entity
+          }).$promise.then(function(success) {
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name editEntity
+         *
+         * @description
+         * Edit an entity
+         *
+         * @param {String} id Entity id in string or UUID
+         * @param {Object} params Parameter objects
+         *
+         * @returns {promise}
+         */
+        this.editEntity = function(id, params) {
+          var deferred;
+          deferred = $q.defer();
+          this.resource.edit(angular.extend({
+            id: id
+          }, params)).$promise.then(function(success) {
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name updateEntity
+         *
+         * @description
+         * Update an entity
+         *
+         * @param {String} id Entity id in string or UUID
+         * @param {Object} params Parameter objects
+         * @param {Object} entity Entity object which should contain an id
+         *
+         * @returns {promise}
+         */
+        this.updateEntity = function(id, params, entity) {
+          var deferred;
+          deferred = $q.defer();
+          this.resource.update(angular.extend({
+            id: id
+          }, params), {
+            data: entity
+          }).$promise.then(function(success) {
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name deleteEntity
+         *
+         * @description
+         * Delete an entity
+         *
+         * @param {String} id Entity id in string or UUID
+         * @param {Object} params Parameter objects
+         *
+         * @returns {promise}
+         */
+        return this.deleteEntity = function(id, params) {
+          var deferred;
+          deferred = $q.defer();
+          this.resource["delete"](angular.extend({
+            id: id
+          }, params)).$promise.then(function(success) {
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+      }
+    ];
+  }
+]);
+
+"use strict";
+shPersistenceModule.run([
+  '$rootScope', function($rootScope) {
+
+    /**
+     * @ngdoc factory
+     * @name shTableHook
+     *
+     * @description
+     * ShTableRest
+     */
+    return $rootScope.shPersistenceHook = [
+      '$q', '$injector', function($q, $injector) {
+        var self;
+        self = this;
+        if (this.id == null) {
+          this.id = null;
+        }
+        if (this.resource == null) {
+          this.resource = null;
+        }
+        if (this.entity == null) {
+          this.entity = {};
+        }
+        if (this.lookup == null) {
+          this.lookup = {};
+        }
+        if (this.optParams == null) {
+          this.optParams = {};
+        }
+        this.shApi = {
+          resource: self.resource
+        };
+        $injector.invoke($rootScope.shApi, this.shApi);
+
+        /**
+         * @ngdoc method
+         * @name newEntity
+         *
+         * @description
+         * New an entity
+         *
+         * @returns {promise}
+         */
+        this.newEntity = function() {
+          var deferred;
+          (self.beforeNewEntityHook || angular.noop)();
+          deferred = $q.defer();
+          this.shApi.newEntity(this.optParams).then(function(success) {
+            self.entity = success.data;
+            if (success.lookup != null) {
+              self.lookup = success.lookup;
+            }
+            (self.newEntitySuccessHook || angular.noop)(success);
+            return deferred.resolve(success);
+          }, function(error) {
+            (self.newEntityErrorHook || angular.noop)(error);
+            return deferred.reject(error);
+          })["finally"](function() {
+            return (self.afterNewEntityHook || angular.noop)();
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name createEntity
+         *
+         * @description
+         * Create/persist an entity to database
+         *
+         * @param {Object} entity Entity object which should not contain an id
+         *
+         * @returns {promise}
+         */
+        this.createEntity = function(entity) {
+          var deferred;
+          (self.beforeCreateEntityHook || angular.noop)();
+          deferred = $q.defer();
+          this.shApi.createEntity(this.optParams, entity).then(function(success) {
+            self.entity = success.data;
+            if (success.lookup != null) {
+              self.lookup = success.lookup;
+            }
+            (self.createEntitySuccessHook || angular.noop)(success);
+            return deferred.resolve(success);
+          }, function(error) {
+            (self.createEntityErrorHook || angular.noop)(error);
+            return deferred.reject(error);
+          })["finally"](function() {
+            return (self.afterCreateEntityHook || angular.noop)();
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name editEntity
+         *
+         * @description
+         * Edit an entity
+         *
+         * @param {String} id Entity id in string or UUID
+         *
+         * @returns {promise}
+         */
+        this.editEntity = function(id) {
+          var deferred;
+          (self.beforeEditEntityHook || angular.noop)();
+          deferred = $q.defer();
+          this.shApi.editEntity(id, this.optParams).then(function(success) {
+            self.entity = success.data;
+            if (success.lookup != null) {
+              self.lookup = success.lookup;
+            }
+            (self.editEntitySuccessHook || angular.noop)(success);
+            return deferred.resolve(success);
+          }, function(error) {
+            (self.editEntityErrorHook || angular.noop)(error);
+            return deferred.reject(error);
+          })["finally"](function() {
+            return (self.afterEditEntityHook || angular.noop)();
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name updateEntity
+         *
+         * @description
+         * Update an entity
+         *
+         * @param {String} id Entity id in string or UUID
+         * @param {Object} entity Entity object which should contain an id
+         *
+         * @returns {promise}
+         */
+        this.updateEntity = function(id, entity) {
+          var deferred;
+          (self.beforeUpdateEntityHook || angular.noop)();
+          deferred = $q.defer();
+          this.shApi.updateEntity(id, this.optParams, entity).then(function(success) {
+            self.entity = success.data;
+            if (success.lookup != null) {
+              self.lookup = success.lookup;
+            }
+            (self.updateEntitySuccessHook || angular.noop)(success);
+            return deferred.resolve(success);
+          }, function(error) {
+            (self.updateEntityErrorHook || angular.noop)(error);
+            return deferred.reject(error);
+          })["finally"](function() {
+            return (self.afterUpdateEntityHook || angular.noop)();
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name initEntity
+         *
+         * @description
+         * Update an entity
+         *
+         * @param {String} id Entity id in string or UUID
+         * @param {Object} entity Entity object which should contain an id
+         *
+         * @returns {promise}
+         */
+        return this.initEntity = function() {
+          var deferred;
+          (self.beforeInitEntityHook || angular.noop)();
+          deferred = $q.defer();
+          $q.when(self.id != null ? this.editEntity(self.id) : this.newEntity()).then(function(success) {
+            (self.initEntitySuccessHook || angular.noop)(success);
+            return deferred.resolve(success);
+          }, function(error) {
+            (self.initEntityErrorHook || angular.noop)(error);
+            return deferred.reject(error);
+          })["finally"](function() {
+            return (self.afterInitEntityHook || angular.noop)();
+          });
+          return deferred.promise;
+        };
+      }
+    ];
+  }
+]);
+
+"use strict";
+shPersistenceModule.run([
+  '$rootScope', function($rootScope) {
+
+    /**
+     * @ngdoc factory
+     * @name shTable
+     *
+     * @description
+     * shTable
+     */
+    return $rootScope.shPersistence = [
+      '$injector', '$q', function($injector, $q) {
+        var self;
+        self = this;
+        this.entity = {};
+        if (this.resource == null) {
+          this.resource = null;
+        }
+        this.localLookup = {};
+        if (this.sorting == null) {
+          this.sorting = {
+            id: "desc"
+          };
+        }
+        if (this.autoload == null) {
+          this.autoload = true;
+        }
+        $injector.invoke($rootScope.shPersistenceHook, this);
+        if (this.autoload) {
+          return this.initEntity();
+        }
+      }
+    ];
+  }
+]);
+
+"use strict";
 shTableModule.run([
   '$rootScope', function($rootScope) {
 
@@ -2267,19 +2686,19 @@ shTableModule.run([
         if (this.entity == null) {
           this.entity = {};
         }
+        if (this.lookup == null) {
+          this.lookup = {};
+        }
         if (this.optParams == null) {
           this.optParams = {};
         }
         this.сreatedIds = [];
         this.updatedIds = [];
         this.deletedIds = [];
-        this.shTableRest = {
+        this.shApi = {
           resource: self.resource
         };
-        this.shTableRest = {
-          resource: self.resource
-        };
-        $injector.invoke($rootScope.shTableRest, this.shTableRest);
+        $injector.invoke($rootScope.shApi, this.shApi);
 
         /**
          * @ngdoc method
@@ -2294,7 +2713,7 @@ shTableModule.run([
           var deferred;
           (self.beforeGetEntitiesHook || angular.noop)();
           deferred = $q.defer();
-          this.shTableRest.getEntities(this.optParams).then(function(success) {
+          this.shApi.getEntities(this.optParams).then(function(success) {
             (self.getEntitiesSuccessHook || angular.noop)(success);
             return deferred.resolve(success);
           }, function(error) {
@@ -2319,8 +2738,11 @@ shTableModule.run([
           var deferred;
           (self.beforeNewEntityHook || angular.noop)();
           deferred = $q.defer();
-          this.shTableRest.newEntity(this.optParams).then(function(success) {
+          this.shApi.newEntity(this.optParams).then(function(success) {
             self.entity = success.data;
+            if (success.lookup != null) {
+              self.lookup = success.lookup;
+            }
             (self.newEntitySuccessHook || angular.noop)(success);
             return deferred.resolve(success);
           }, function(error) {
@@ -2347,9 +2769,12 @@ shTableModule.run([
           var deferred;
           (self.beforeCreateEntityHook || angular.noop)();
           deferred = $q.defer();
-          this.shTableRest.createEntity(this.optParams, entity).then(function(success) {
+          this.shApi.createEntity(this.optParams, entity).then(function(success) {
             self.сreatedIds.push(success.data.id);
             self.entity = success.data;
+            if (success.lookup != null) {
+              self.lookup = success.lookup;
+            }
             self.refreshGrid();
             (self.createEntitySuccessHook || angular.noop)(success);
             return deferred.resolve(success);
@@ -2377,8 +2802,11 @@ shTableModule.run([
           var deferred;
           (self.beforeEditEntityHook || angular.noop)();
           deferred = $q.defer();
-          this.shTableRest.editEntity(id, this.optParams).then(function(success) {
+          this.shApi.editEntity(id, this.optParams).then(function(success) {
             self.entity = success.data;
+            if (success.lookup != null) {
+              self.lookup = success.lookup;
+            }
             (self.editEntitySuccessHook || angular.noop)(success);
             return deferred.resolve(success);
           }, function(error) {
@@ -2406,9 +2834,12 @@ shTableModule.run([
           var deferred;
           (self.beforeUpdateEntityHook || angular.noop)();
           deferred = $q.defer();
-          this.shTableRest.updateEntity(id, this.optParams, entity).then(function(success) {
+          this.shApi.updateEntity(id, this.optParams, entity).then(function(success) {
             self.updatedIds.push(success.data.id);
             self.entity = success.data;
+            if (success.lookup != null) {
+              self.lookup = success.lookup;
+            }
             self.refreshGrid();
             (self.updateEntitySuccessHook || angular.noop)(success);
             return deferred.resolve(success);
@@ -2432,11 +2863,11 @@ shTableModule.run([
          *
          * @returns {promise}
          */
-        return this.deleteEntity = function(id) {
+        this.deleteEntity = function(id) {
           var deferred;
           (self.beforeDeleteEntityHook || angular.noop)();
           deferred = $q.defer();
-          this.shTableRest.deleteEntity(id, this.optParams).then(function(success) {
+          this.shApi.deleteEntity(id, this.optParams).then(function(success) {
             self.deletedIds.push(id);
             self.refreshGrid();
             (self.deleteEntitySuccessHook || angular.noop)(success);
@@ -2448,6 +2879,22 @@ shTableModule.run([
             return (self.afterDeleteEntityHook || angular.noop)();
           });
           return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name getLookup
+         *
+         * @description
+         * Return an array of objects
+         *
+         * @param {String} key The expected local lookups key
+         *
+         * @returns {Object|Array} Reference to `obj`.
+         */
+        return this.getLookup = function(key) {
+          var ref;
+          return (ref = self.lookup) != null ? ref[key] : void 0;
         };
       }
     ];
@@ -2584,175 +3031,6 @@ shTableModule.run([
             }
           }
           return processedColumnDefs;
-        };
-      }
-    ];
-  }
-]);
-
-"use strict";
-shTableModule.run([
-  '$rootScope', function($rootScope) {
-
-    /**
-     * @ngdoc factory
-     * @name shTableRest
-     *
-     * @description
-     * ShTableRest
-     */
-    return $rootScope.shTableRest = [
-      '$q', function($q) {
-        var self;
-        self = this;
-        if (this.resource == null) {
-          this.resource = null;
-        }
-
-        /**
-         * @ngdoc method
-         * @name getEntities
-         *
-         * @description
-         * Get list of entities based on params
-         *
-         * @param {Object} params Parameter objects
-         *
-         * @returns {promise}
-         */
-        this.getEntities = function(params) {
-          var deferred;
-          deferred = $q.defer();
-          this.resource.get(params).$promise.then(function(success) {
-            return deferred.resolve(success);
-          }, function(error) {
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-
-        /**
-         * @ngdoc method
-         * @name newEntity
-         *
-         * @description
-         * New an entity
-         *
-         * @returns {promise}
-         */
-        this.newEntity = function(params) {
-          var deferred;
-          deferred = $q.defer();
-          console.log('called rest');
-          this.resource["new"](params).$promise.then(function(success) {
-            return deferred.resolve(success);
-          }, function(error) {
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-
-        /**
-         * @ngdoc method
-         * @name createEntity
-         *
-         * @description
-         * Create/persist an entity to database
-         *
-         * @param {Object} params Parameter objects
-         * @param {Object} entity Entity object which should not contain an id
-         *
-         * @returns {promise}
-         */
-        this.createEntity = function(params, entity) {
-          var deferred;
-          deferred = $q.defer();
-          this.resource.save(params, {
-            data: entity
-          }).$promise.then(function(success) {
-            return deferred.resolve(success);
-          }, function(error) {
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-
-        /**
-         * @ngdoc method
-         * @name editEntity
-         *
-         * @description
-         * Edit an entity
-         *
-         * @param {String} id Entity id in string or UUID
-         * @param {Object} params Parameter objects
-         *
-         * @returns {promise}
-         */
-        this.editEntity = function(id, params) {
-          var deferred;
-          deferred = $q.defer();
-          this.resource.edit(angular.extend({
-            id: id
-          }, params)).$promise.then(function(success) {
-            return deferred.resolve(success);
-          }, function(error) {
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-
-        /**
-         * @ngdoc method
-         * @name updateEntity
-         *
-         * @description
-         * Update an entity
-         *
-         * @param {String} id Entity id in string or UUID
-         * @param {Object} params Parameter objects
-         * @param {Object} entity Entity object which should contain an id
-         *
-         * @returns {promise}
-         */
-        this.updateEntity = function(id, params, entity) {
-          var deferred;
-          deferred = $q.defer();
-          this.resource.update(angular.extend({
-            id: id
-          }, params), {
-            data: entity
-          }).$promise.then(function(success) {
-            return deferred.resolve(success);
-          }, function(error) {
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-
-        /**
-         * @ngdoc method
-         * @name deleteEntity
-         *
-         * @description
-         * Delete an entity
-         *
-         * @param {String} id Entity id in string or UUID
-         * @param {Object} params Parameter objects
-         *
-         * @returns {promise}
-         */
-        return this.deleteEntity = function(id, params) {
-          var deferred;
-          deferred = $q.defer();
-          this.resource["delete"](angular.extend({
-            id: id
-          }, params)).$promise.then(function(success) {
-            return deferred.resolve(success);
-          }, function(error) {
-            return deferred.reject(error);
-          });
-          return deferred.promise;
         };
       }
     ];
@@ -3256,4 +3534,4 @@ shHelperModule.service("HelperService", [
 ]);
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.persistence', 'sh.helper.module', 'sh.spinning.module', 'sh.table.module', 'sh.button.state', 'sh.notification', 'sh.page.service', 'sh.priv']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.persistence', 'sh.api.module', 'sh.helper.module', 'sh.persistence.module', 'sh.spinning.module', 'sh.table.module', 'sh.button.state', 'sh.notification', 'sh.page.service', 'sh.priv']);
