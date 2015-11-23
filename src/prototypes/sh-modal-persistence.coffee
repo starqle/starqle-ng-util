@@ -156,7 +156,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         entityForm.removeClass('sh-highlight-required')
         entityFormName = entityForm.attr('name')
         if entityFormName? and $scope[entityFormName] isnt null
-          $scope[entityFormName].$setPristine()
+          $scope[entityFormName]?.$setPristine()
 
     $scope.closeEntityModal = (elementStr) ->
       angular.element("##{elementStr}").modal('hide')

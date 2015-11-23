@@ -1565,7 +1565,7 @@ angular.module('sh.modal.persistence', []).run([
           }
         };
         $scope.resetEntityModal = function(elementStr) {
-          var entityForm, entityFormName;
+          var entityForm, entityFormName, ref;
           if (elementStr == null) {
             elementStr = null;
           }
@@ -1577,7 +1577,7 @@ angular.module('sh.modal.persistence', []).run([
             entityForm.removeClass('sh-highlight-required');
             entityFormName = entityForm.attr('name');
             if ((entityFormName != null) && $scope[entityFormName] !== null) {
-              return $scope[entityFormName].$setPristine();
+              return (ref = $scope[entityFormName]) != null ? ref.$setPristine() : void 0;
             }
           }
         };
