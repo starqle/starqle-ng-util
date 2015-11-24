@@ -23,10 +23,42 @@ shSpinningModule.directive "shSpinning", ['ShSpinningService', (ShSpinningServic
   restrict: 'A'
   scope: true # Child scope
   link: (scope, element, attrs) ->
-    scope.shSpinningLines = +attrs.shSpinningLines or 13 # The number of lines to draw
-    scope.shSpinningLength = +attrs.shSpinningLength or 30 # The length of each line
-    scope.shSpinningWidth = +attrs.shSpinningWidth or 10 # The line thickness
-    scope.shSpinningRadius = +attrs.shSpinningRadius or 38 # The radius of the inner circle
+    lines = 13
+    length = 30
+    width = 10
+    radius = 38
+
+    if attrs.shSpinningSize? # xs | sm | md | lg
+      switch attrs.shSpinningSize
+        when 'xs'
+          lines = 9
+          length = 4
+          width = 2
+          radius = 5
+
+        when 'sm'
+          lines = 9
+          length = 10
+          width = 4
+          radius = 12
+
+        when 'md'
+          lines = 11
+          length = 20
+          width = 7
+          radius = 25
+
+        when 'lg'
+          lines = 13
+          length = 30
+          width = 10
+          radius = 38
+
+    scope.shSpinningLines = +attrs.shSpinningLines or lines # The number of lines to draw
+    scope.shSpinningLength = +attrs.shSpinningLength or length # The length of each line
+    scope.shSpinningWidth = +attrs.shSpinningWidth or width # The line thickness
+    scope.shSpinningRadius = +attrs.shSpinningRadius or radius # The radius of the inner circle
+
     scope.shSpinningCorners = +attrs.shSpinningCorners or 1 # Corner roundness (0..1)
     scope.shSpinningRotate = +attrs.shSpinningRotate or 0 # The rotation offset
     scope.shSpinningDirection = +attrs.shSpinningDirection or 1 # 1: clockwise, -1: counterclockwise
@@ -39,6 +71,8 @@ shSpinningModule.directive "shSpinning", ['ShSpinningService', (ShSpinningServic
     scope.shSpinningZIndex = +attrs.shSpinningZIndex or 2e9 # The z-index (defaults to 2000000000)
     scope.shSpinningTop = attrs.shSpinningTop or '45%' # Top position relative to parent
     scope.shSpinningLeft = attrs.shSpinningLeft or '50%' # Left position relative to parent
+
+
 
     opts =
       lines: scope.shSpinningLines
@@ -57,6 +91,7 @@ shSpinningModule.directive "shSpinning", ['ShSpinningService', (ShSpinningServic
       zIndex: scope.shSpinningZIndex
       top: scope.shSpinningTop
       left: scope.shSpinningLeft
+
 
     scope.spinner = new Spinner(opts)
 
