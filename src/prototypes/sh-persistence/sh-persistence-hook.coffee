@@ -243,6 +243,22 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
         deferred.promise
 
 
+
+      ###*
+      # @ngdoc method
+      # @name getLookup
+      #
+      # @description
+      # Return an array of objects
+      #
+      # @param {String} key The expected local lookups key
+      #
+      # @returns {Object|Array} Reference to `obj`.
+      ###
+      @getLookup = (key) ->
+        self.lookup?[key]
+
+
   ]
 
 
