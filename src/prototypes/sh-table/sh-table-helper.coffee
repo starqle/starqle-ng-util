@@ -78,20 +78,65 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       #
       # @description
       # Get CSS class based on state
+      # Priority is important. `'recently-deleted'` must come first, then `'recently-updated'` and `'recently-created'`
       #
-      # @param {Object} entity Entity object
+      # @param {Object} entity Entity object or string `UUID`
       #
       # @returns {String} class for CSS usage
       ###
-      @rowRestEventClass = (entity) ->
-        if @deletedIds.indexOf(entity.id) >= 0
-          'recently-deleted'
-        else if @updatedIds.indexOf(entity.id) >= 0
-          'recently-updated'
-        else if @сreatedIds.indexOf(entity.id) >= 0
-          'recently-created'
-        else
-          ''
+      @rowRestEventClass = (obj) ->
+        return 'recently-deleted' if @isRecentlyDeleted(obj)
+        return 'recently-updated' if @isRecentlyUpdated(obj)
+        return 'recently-created' if @isRecentlyCreated(obj)
+        return ''
+
+
+      ###*
+      # @ngdoc method
+      # @name isRecentlyCreated
+      #
+      # @description
+      # Return true if given object/entity/entity-id is recently created (found in сreatedIds)
+      #
+      # @param {Object} entity Entity object or string `UUID`
+      #
+      # @returns {Boolean}
+      ###
+      @isRecentlyCreated = (obj) ->
+        @сreatedIds.indexOf(obj?.id or obj) >= 0
+
+
+
+      ###*
+      # @ngdoc method
+      # @name isRecentlyUpdated
+      #
+      # @description
+      # Return true if given object/entity/entity-id is recently updated (found in updatedIds)
+      #
+      # @param {Object} entity Entity object or string `UUID`
+      #
+      # @returns {Boolean}
+      ###
+      @isRecentlyUpdated = (obj) ->
+        @updatedIds.indexOf(obj?.id or obj) >= 0
+
+
+
+      ###*
+      # @ngdoc method
+      # @name isRecentlyDeleted
+      #
+      # @description
+      # Return true if given object/entity/entity-id is recently deleted (found in deletedIds)
+      #
+      # @param {Object} entity Entity object or string `UUID`
+      #
+      # @returns {Boolean}
+      ###
+      @isRecentlyDeleted = (obj) ->
+        @deletedIds.indexOf(obj?.id or obj) >= 0
+
   ]
 
 
