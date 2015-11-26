@@ -365,6 +365,7 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
       scope: {
         shFromTime: '=',
         shThruTime: '=',
+        shTimezone: '@',
         widgetVerticalPosition: '@?'
       },
       require: '?ngModel',
@@ -372,11 +373,12 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
         var initiation;
         initiation = true;
         element.datetimepicker({
+          timeZone: scope.shTimezone,
           showClose: true,
           showClear: true,
           useCurrent: false,
-          showTodayButton: true,
-          format: 'DD-MM-YYYY, HH:mm',
+          showTodayButton: false,
+          format: 'DD-MM-YYYY, HH:mm (z)',
           widgetPositioning: {
             vertical: scope.widgetVerticalPosition || 'auto'
           },
@@ -396,19 +398,18 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           var date;
           date = ngModelCtrl.$viewValue;
           if (angular.isDefined(date) && date !== null) {
-            element.data('DateTimePicker').date(moment(date, 'x'));
+            return element.data('DateTimePicker').date(moment.tz(moment(+date).format(), scope.shTimezone));
           }
-          return ngModelCtrl.$viewValue;
         };
         ngModelCtrl.$parsers.push(function(data) {
-          return moment(data, 'DD-MM-YYYY, HH:mm').format('x');
+          return moment.tz(data, 'DD-MM-YYYY, HH:mm', scope.shTimezone).format('x');
         });
         element.bind('dp.change', function(data) {
           if (initiation) {
             ngModelCtrl.$pristine = false;
           }
           if (data.date) {
-            ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, HH:mm'));
+            ngModelCtrl.$setViewValue(data.date.tz(scope.shTimezone).format('DD-MM-YYYY, HH:mm (z)'));
           } else {
             ngModelCtrl.$setViewValue(null);
           }
@@ -425,18 +426,27 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
         scope.$watch('shFromTime', function(newVal, oldVal) {
           if (newVal) {
             newVal = newVal || -Infinity;
-            return element.data('DateTimePicker').minDate(moment(newVal * 1));
+            return element.data('DateTimePicker').minDate(moment.tz(newVal * 1, scope.shTimezone));
           }
         });
-        return scope.$watch('shThruTime', function(newVal, oldVal) {
+        scope.$watch('shThruTime', function(newVal, oldVal) {
           if (newVal) {
             if ((scope.shFromTime != null) && newVal < scope.shFromTime) {
               newVal = scope.shFromTime;
             }
-            element.data('DateTimePicker').maxDate(moment(newVal * 1));
+            element.data('DateTimePicker').maxDate(moment.tz(newVal * 1, scope.shTimezone));
           }
           if (oldVal && !newVal) {
             return element.data('DateTimePicker').maxDate(false);
+          }
+        });
+        return scope.$watch('shTimezone', function(newVal, oldVal) {
+          var date;
+          if (newVal != null) {
+            date = ngModelCtrl.$modelValue;
+            if (angular.isDefined(date) && date !== null) {
+              return element.data('DateTimePicker').date(moment.tz(moment(+date).format(), scope.shTimezone));
+            }
           }
         });
       }
