@@ -108,7 +108,8 @@ angular.module('sh.datepicker', []
   restrict: 'A'
   scope:
     shFromTime: '='
-    shThruTime:  '='
+    shThruTime: '='
+    shTimezone: '@'
     widgetVerticalPosition: '@?'
   require: '?ngModel'
   link: (scope, element, attrs, ngModelCtrl) ->
@@ -118,11 +119,12 @@ angular.module('sh.datepicker', []
     # SETUP
     #
     element.datetimepicker
+      timeZone: scope.shTimezone
       showClose: true
       showClear: true
       useCurrent: false
-      showTodayButton: true
-      format: 'DD-MM-YYYY, HH:mm'
+      showTodayButton: false
+      format: 'DD-MM-YYYY, HH:mm (z)'
       widgetPositioning:
         vertical: scope.widgetVerticalPosition or 'auto'
       icons:
@@ -142,11 +144,10 @@ angular.module('sh.datepicker', []
     ngModelCtrl.$render = ->
       date = ngModelCtrl.$viewValue
       if angular.isDefined(date) and date != null
-        element.data('DateTimePicker').date moment(date, 'x')
-      ngModelCtrl.$viewValue
+        element.data('DateTimePicker').date moment.tz(moment(+date).format(), scope.shTimezone)
 
     ngModelCtrl.$parsers.push (data) ->
-      moment(data, 'DD-MM-YYYY, HH:mm').format('x')
+      moment.tz(data, 'DD-MM-YYYY, HH:mm', scope.shTimezone).format('x')
 
     #
     # BINDING
@@ -155,7 +156,7 @@ angular.module('sh.datepicker', []
       ngModelCtrl.$pristine = false if initiation
 
       if data.date
-        ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY, HH:mm'))
+        ngModelCtrl.$setViewValue(data.date.tz(scope.shTimezone).format('DD-MM-YYYY, HH:mm (z)'))
       else
         ngModelCtrl.$setViewValue(null)
 
@@ -172,13 +173,19 @@ angular.module('sh.datepicker', []
     scope.$watch 'shFromTime', (newVal, oldVal) ->
       if newVal
         newVal = newVal || -Infinity
-        element.data('DateTimePicker').minDate(moment(newVal * 1))
+        element.data('DateTimePicker').minDate(moment.tz(newVal * 1, scope.shTimezone))
 
     scope.$watch 'shThruTime', (newVal, oldVal) ->
       if newVal
         newVal = scope.shFromTime if scope.shFromTime? and newVal < scope.shFromTime
-        element.data('DateTimePicker').maxDate(moment(newVal * 1))
+        element.data('DateTimePicker').maxDate(moment.tz(newVal * 1, scope.shTimezone))
 
       if oldVal and not newVal
         element.data('DateTimePicker').maxDate(false)
+
+    scope.$watch 'shTimezone', (newVal, oldVal) ->
+      if newVal?
+        date = ngModelCtrl.$modelValue
+        if angular.isDefined(date) and date != null
+          element.data('DateTimePicker').date moment.tz(moment(+date).format(), scope.shTimezone)
 ])
