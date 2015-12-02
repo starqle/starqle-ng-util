@@ -29,6 +29,7 @@ angular.module('sh.datepicker', []
   scope:
     shFromDate: '='
     shThruDate:  '='
+    shTimezone: '@'
     widgetVerticalPosition: '@?'
   require: '?ngModel'
   link: (scope, element, attrs, ngModelCtrl) ->
@@ -38,6 +39,7 @@ angular.module('sh.datepicker', []
     # SETUP
     #
     element.datetimepicker(
+      timeZone: scope.shTimezone
       showClear: true
       showTodayButton: true
       useCurrent: false
