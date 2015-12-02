@@ -27,8 +27,8 @@ angular.module('sh.datepicker', []
   #
   restrict: 'A'
   scope:
-    shFromDate: '='
-    shThruDate:  '='
+    shFromDate: '=?'
+    shThruDate: '=?'
     shTimezone: '@'
     widgetVerticalPosition: '@?'
   require: '?ngModel'
@@ -68,7 +68,11 @@ angular.module('sh.datepicker', []
       ngModelCtrl.$viewValue
 
     ngModelCtrl.$parsers.push (data) ->
-      moment(data, 'DD-MM-YYYY').format('YYYY-MM-DD')
+      if moment(data, 'DD-MM-YYYY').isValid()
+        moment(data, 'DD-MM-YYYY').format('YYYY-MM-DD')
+      else
+        data = null
+        undefined
 
     #
     # BINDING
@@ -84,22 +88,31 @@ angular.module('sh.datepicker', []
       ngModelCtrl.$pristine = true if initiation
       initiation = false
 
+
     element.bind 'dp.show', (data) ->
       initiation = false if initiation
+
+
+    element.bind 'dp.hide', (data) ->
+      unless moment(ngModelCtrl.$viewValue, 'DD-MM-YYYY').isValid()
+        ngModelCtrl.$setViewValue(null)
+        element.data('DateTimePicker').date(null)
+
     #
     # WATCHERS
     #
     scope.$watch 'shFromDate', (newVal, oldVal) ->
-      if newVal
-        newVal = newVal || -Infinity
-        element.data('DateTimePicker').minDate(moment(newVal))
+      if newVal?
+        if moment(new Date(newVal)).isValid()
+          element.data('DateTimePicker').minDate(moment(new Date(newVal)))
+      else
+        element.data('DateTimePicker').minDate(false)
 
     scope.$watch 'shThruDate', (newVal, oldVal) ->
-      if newVal
-        newVal = scope.shFromDate if scope.shFromDate? and newVal < scope.shFromDate
-        element.data('DateTimePicker').maxDate(moment(newVal))
-
-      if oldVal and not newVal
+      if newVal?
+        if moment(new Date(newVal)).isValid()
+          element.data('DateTimePicker').maxDate(moment(new Date(newVal)))
+      else
         element.data('DateTimePicker').maxDate(false)
 
 
@@ -109,8 +122,8 @@ angular.module('sh.datepicker', []
   #
   restrict: 'A'
   scope:
-    shFromTime: '='
-    shThruTime: '='
+    shFromTime: '=?'
+    shThruTime: '=?'
     shTimezone: '@'
     widgetVerticalPosition: '@?'
   require: '?ngModel'
@@ -149,8 +162,10 @@ angular.module('sh.datepicker', []
         element.data('DateTimePicker').date moment.tz(moment(+date).format(), scope.shTimezone)
 
     ngModelCtrl.$parsers.push (data) ->
-      moment.tz(data, 'DD-MM-YYYY, HH:mm', scope.shTimezone).format('x')
-
+      if moment.tz(data, 'DD-MM-YYYY, HH:mm', scope.shTimezone).isValid()
+        moment.tz(data, 'DD-MM-YYYY, HH:mm', scope.shTimezone).format('x')
+      else
+        undefined
     #
     # BINDING
     #
@@ -165,24 +180,28 @@ angular.module('sh.datepicker', []
       ngModelCtrl.$pristine = true if initiation
       initiation = false
 
+
     element.bind 'dp.show', (data) ->
       initiation = false if initiation
 
+    element.bind 'dp.hide', (data) ->
+      unless moment(ngModelCtrl.$viewValue, 'DD-MM-YYYY, HH:mm (z)').isValid()
+        ngModelCtrl.$setViewValue(null)
+        element.data('DateTimePicker').date(null)
     #
     #
     # WATCHERS
     #
     scope.$watch 'shFromTime', (newVal, oldVal) ->
-      if newVal
-        newVal = newVal || -Infinity
+      if newVal?
         element.data('DateTimePicker').minDate(moment.tz(newVal * 1, scope.shTimezone))
+      else
+        element.data('DateTimePicker').minDate(false)
 
     scope.$watch 'shThruTime', (newVal, oldVal) ->
-      if newVal
-        newVal = scope.shFromTime if scope.shFromTime? and newVal < scope.shFromTime
+      if newVal?
         element.data('DateTimePicker').maxDate(moment.tz(newVal * 1, scope.shTimezone))
-
-      if oldVal and not newVal
+      else
         element.data('DateTimePicker').maxDate(false)
 
     scope.$watch 'shTimezone', (newVal, oldVal) ->
