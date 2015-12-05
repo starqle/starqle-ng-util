@@ -10,11 +10,11 @@
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
 # PARTICULAR PURPOSE.
 #
-# @file_name src/prototypes/sh-table/sh-table-hook.coffee
+# @file_name src/prototypes/sh-persistence/sh-persistence-hook.coffee
 # @author Raymond Ralibi
 # @email ralibi@starqle.com
 # @company PT. Starqle Indonesia
-# @note This file contains prototype for controlling api request on table-like data.
+# @note This file contains prototype for controlling api request on persistence-like data.
 # =============================================================================
 
 "use strict"
@@ -49,8 +49,32 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       @shApi =
         resource: self.resource
 
+      # Hooks Variables
 
-      $injector.invoke $rootScope.shApi, @shApi
+      @beforeNewEntityHooks = []
+      @newEntitySuccessHooks = []
+      @newEntityErrorHooks = []
+      @afterNewEntityHooks = []
+
+      @beforeCreateEntityHooks = []
+      @createEntitySuccessHooks = []
+      @createEntityErrorHooks = []
+      @afterCreateEntityHooks = []
+
+      @beforeEditEntityHooks = []
+      @editEntitySuccessHooks = []
+      @editEntityErrorHooks = []
+      @afterEditEntityHooks = []
+
+      @beforeUpdateEntityHooks = []
+      @updateEntitySuccessHooks = []
+      @updateEntityErrorHooks = []
+      @afterUpdateEntityHooks = []
+
+      @beforeInitEntityHooks = []
+      @initEntitySuccessHooks = []
+      @initEntityErrorHooks = []
+      @afterInitEntityHooks = []
 
 
       ###*
@@ -63,7 +87,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @newEntity = () ->
-        (self.beforeNewEntityHook or angular.noop)()
+        hook() for hook in self.beforeNewEntityHooks
         deferred = $q.defer()
 
         # Fetch blank entity
@@ -74,16 +98,16 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
             self.entity = success.data
             self.lookup = success.lookup if success.lookup?
 
-            (self.newEntitySuccessHook or angular.noop)(success)
+            hook(success) for hook in self.newEntitySuccessHooks
             deferred.resolve success
 
           (error) ->
-            (self.newEntityErrorHook or angular.noop)(error)
+            hook(error) for hook in self.newEntityErrorHooks
             deferred.reject error
 
         ).finally(
           () ->
-            (self.afterNewEntityHook or angular.noop)()
+            hook() for hook in self.afterNewEntityHooks
         )
         deferred.promise
 
@@ -100,7 +124,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @createEntity = (entity) ->
-        (self.beforeCreateEntityHook or angular.noop)()
+        hook() for hook in self.beforeCreateEntityHooks
         deferred = $q.defer()
 
         # Persist an entity into database
@@ -112,16 +136,16 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
             self.entity = success.data
             self.lookup = success.lookup if success.lookup?
 
-            (self.createEntitySuccessHook or angular.noop)(success)
+            hook(success) for hook in self.createEntitySuccessHooks
             deferred.resolve(success)
 
           (error) ->
-            (self.createEntityErrorHook or angular.noop)(error)
+            hook(error) for hook in self.createEntityErrorHooks
             deferred.reject(error)
 
         ).finally(
           () ->
-            (self.afterCreateEntityHook or angular.noop)()
+            hook() for hook in self.afterCreateEntityHooks
         )
         deferred.promise
 
@@ -139,7 +163,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @editEntity = (id) ->
-        (self.beforeEditEntityHook or angular.noop)()
+        hook() for hook in self.beforeEditEntityHooks
         deferred = $q.defer()
 
         # Fetch entity for editing
@@ -151,16 +175,16 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
             self.entity = success.data
             self.lookup = success.lookup if success.lookup?
 
-            (self.editEntitySuccessHook or angular.noop)(success)
+            hook(success) for hook in self.editEntitySuccessHooks
             deferred.resolve(success)
 
           (error) ->
-            (self.editEntityErrorHook or angular.noop)(error)
+            hook(error) for hook in self.editEntityErrorHooks
             deferred.reject(error)
 
         ).finally(
           () ->
-            (self.afterEditEntityHook or angular.noop)()
+            hook() for hook in self.afterEditEntityHooks
         )
         deferred.promise
 
@@ -179,7 +203,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @updateEntity = (id, entity) ->
-        (self.beforeUpdateEntityHook or angular.noop)()
+        hook() for hook in self.beforeUpdateEntityHooks
         deferred = $q.defer()
 
         # Update entity into database
@@ -192,16 +216,16 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
             self.entity = success.data
             self.lookup = success.lookup if success.lookup?
 
-            (self.updateEntitySuccessHook or angular.noop)(success)
+            hook(success) for hook in self.updateEntitySuccessHooks
             deferred.resolve(success)
 
           (error) ->
-            (self.updateEntityErrorHook or angular.noop)(error)
+            hook(error) for hook in self.updateEntityErrorHooks
             deferred.reject(error)
 
         ).finally(
           () ->
-            (self.afterUpdateEntityHook or angular.noop)()
+            hook() for hook in self.afterUpdateEntityHooks
         )
         deferred.promise
 
@@ -220,7 +244,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @initEntity = () ->
-        (self.beforeInitEntityHook or angular.noop)()
+        hook() for hook in self.beforeInitEntityHooks
         deferred = $q.defer()
 
         $q.when(
@@ -230,15 +254,15 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
             @newEntity()
         ).then(
           (success) ->
-            (self.initEntitySuccessHook or angular.noop)(success)
+            hook(success) for hook in self.initEntitySuccessHooks
             deferred.resolve(success)
 
           (error) ->
-            (self.initEntityErrorHook or angular.noop)(error)
+            hook(error) for hook in self.initEntityErrorHooks
             deferred.reject(error)
         ).finally(
           () ->
-            (self.afterInitEntityHook or angular.noop)()
+            hook() for hook in self.afterInitEntityHooks
         )
         deferred.promise
 
@@ -257,6 +281,17 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       ###
       @getLookup = (key) ->
         self.lookup?[key]
+
+
+
+      # Invokes
+
+      $injector.invoke $rootScope.shApi, @shApi
+      $injector.invoke $rootScope.shPersistenceHookNotification, self
+
+
+
+      return
 
 
   ]

@@ -52,7 +52,38 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @shApi =
         resource: self.resource
 
-      $injector.invoke $rootScope.shApi, @shApi
+
+      # Hooks Variables
+      @beforeGetEntitiesHooks = []
+      @getEntitiesSuccessHooks = []
+      @getEntitiesErrorHooks = []
+      @afterGetEntitiesHooks = []
+
+      @beforeNewEntityHooks = []
+      @newEntitySuccessHooks = []
+      @newEntityErrorHooks = []
+      @afterNewEntityHooks = []
+
+      @beforeCreateEntityHooks = []
+      @createEntitySuccessHooks = []
+      @createEntityErrorHooks = []
+      @afterCreateEntityHooks = []
+
+      @beforeEditEntityHooks = []
+      @editEntitySuccessHooks = []
+      @editEntityErrorHooks = []
+      @afterEditEntityHooks = []
+
+      @beforeUpdateEntityHooks = []
+      @updateEntitySuccessHooks = []
+      @updateEntityErrorHooks = []
+      @afterUpdateEntityHooks = []
+
+      @beforeDeleteEntityHooks = []
+      @deleteEntitySuccessHooks = []
+      @deleteEntityErrorHooks = []
+      @afterDeleteEntityHooks = []
+
 
       ###*
       # @ngdoc method
@@ -64,7 +95,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @getEntities = () ->
-        (self.beforeGetEntitiesHook or angular.noop)()
+        hook() for hook in self.beforeGetEntitiesHooks
         deferred = $q.defer()
 
         # GEt the entities
@@ -72,16 +103,16 @@ shTableModule.run ['$rootScope', ($rootScope) ->
           @optParams
         ).then(
           (success) ->
-            (self.getEntitiesSuccessHook or angular.noop)(success)
+            hook(success) for hook in self.getEntitiesSuccessHooks
             deferred.resolve success
 
           (error) ->
-            (self.getEntitiesErrorHook or angular.noop)(error)
+            hook(error) for hook in self.getEntitiesErrorHooks
             deferred.reject error
 
         ).finally(
           () ->
-            (self.afterGetEntitiesHook or angular.noop)()
+            hook() for hook in self.afterGetEntitiesHooks
         )
         deferred.promise
 
@@ -97,7 +128,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @newEntity = () ->
-        (self.beforeNewEntityHook or angular.noop)()
+        hook() for hook in self.beforeNewEntityHooks
         deferred = $q.defer()
 
         # Fetch blank entity
@@ -108,16 +139,16 @@ shTableModule.run ['$rootScope', ($rootScope) ->
             self.entity = success.data
             self.lookup = success.lookup if success.lookup?
 
-            (self.newEntitySuccessHook or angular.noop)(success)
+            hook(success) for hook in self.newEntitySuccessHooks
             deferred.resolve success
 
           (error) ->
-            (self.newEntityErrorHook or angular.noop)(error)
+            hook(error) for hook in self.newEntityErrorHooks
             deferred.reject error
 
         ).finally(
           () ->
-            (self.afterNewEntityHook or angular.noop)()
+            hook() for hook in self.afterNewEntityHooks
         )
         deferred.promise
 
@@ -134,7 +165,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @createEntity = (entity) ->
-        (self.beforeCreateEntityHook or angular.noop)()
+        hook() for hook in self.beforeCreateEntityHooks
         deferred = $q.defer()
 
         # Persist an entity into database
@@ -148,16 +179,16 @@ shTableModule.run ['$rootScope', ($rootScope) ->
             self.lookup = success.lookup if success.lookup?
             self.refreshGrid()
 
-            (self.createEntitySuccessHook or angular.noop)(success)
+            hook(success) for hook in self.createEntitySuccessHooks
             deferred.resolve(success)
 
           (error) ->
-            (self.createEntityErrorHook or angular.noop)(error)
+            hook(error) for hook in self.createEntityErrorHooks
             deferred.reject(error)
 
         ).finally(
           () ->
-            (self.afterCreateEntityHook or angular.noop)()
+            hook() for hook in self.afterCreateEntityHooks
         )
         deferred.promise
 
@@ -175,7 +206,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @editEntity = (id) ->
-        (self.beforeEditEntityHook or angular.noop)()
+        hook() for hook in self.beforeEditEntityHooks
         deferred = $q.defer()
 
         # Fetch entity for editing
@@ -187,16 +218,16 @@ shTableModule.run ['$rootScope', ($rootScope) ->
             self.entity = success.data
             self.lookup = success.lookup if success.lookup?
 
-            (self.editEntitySuccessHook or angular.noop)(success)
+            hook(success) for hook in self.editEntitySuccessHooks
             deferred.resolve(success)
 
           (error) ->
-            (self.editEntityErrorHook or angular.noop)(error)
+            hook(error) for hook in self.editEntityErrorHooks
             deferred.reject(error)
 
         ).finally(
           () ->
-            (self.afterEditEntityHook or angular.noop)()
+            hook() for hook in self.afterEditEntityHooks
         )
         deferred.promise
 
@@ -215,7 +246,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @updateEntity = (id, entity) ->
-        (self.beforeUpdateEntityHook or angular.noop)()
+        hook() for hook in self.beforeUpdateEntityHooks
         deferred = $q.defer()
 
         # Update entity into database
@@ -230,16 +261,16 @@ shTableModule.run ['$rootScope', ($rootScope) ->
             self.lookup = success.lookup if success.lookup?
             self.refreshGrid()
 
-            (self.updateEntitySuccessHook or angular.noop)(success)
+            hook(success) for hook in self.updateEntitySuccessHooks
             deferred.resolve(success)
 
           (error) ->
-            (self.updateEntityErrorHook or angular.noop)(error)
+            hook(error) for hook in self.updateEntityErrorHooks
             deferred.reject(error)
 
         ).finally(
           () ->
-            (self.afterUpdateEntityHook or angular.noop)()
+            hook() for hook in self.afterUpdateEntityHooks
         )
         deferred.promise
 
@@ -257,7 +288,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @returns {promise}
       ###
       @deleteEntity = (id) ->
-        (self.beforeDeleteEntityHook or angular.noop)()
+        hook() for hook in self.beforeDeleteEntityHooks
         deferred = $q.defer()
 
         # Delete entity from database
@@ -269,16 +300,16 @@ shTableModule.run ['$rootScope', ($rootScope) ->
             self.deletedIds.push id
             self.refreshGrid()
 
-            (self.deleteEntitySuccessHook or angular.noop)(success)
+            hook(success) for hook in self.deleteEntitySuccessHooks
             deferred.resolve(success)
 
           (error) ->
-            (self.deleteEntityErrorHook or angular.noop)(error)
+            hook(error) for hook in self.deleteEntityErrorHooks
             deferred.reject(error)
 
         ).finally(
           () ->
-            (self.afterDeleteEntityHook or angular.noop)()
+            hook() for hook in self.afterDeleteEntityHooks
         )
         deferred.promise
 
@@ -297,6 +328,17 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       ###
       @getLookup = (key) ->
         self.lookup?[key]
+
+
+
+      # Invokes
+
+      $injector.invoke $rootScope.shApi, @shApi
+      $injector.invoke $rootScope.shTableHookNotification, self
+
+
+
+      return
 
 
   ]
