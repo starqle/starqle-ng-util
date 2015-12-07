@@ -21,7 +21,7 @@
 
 angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$interval', ($timeout, $interval) ->
 
-  defaultLifetime = 4000
+  defaultLifetime = 3000
   defaultDuration = 500
 
   @toasts = []
