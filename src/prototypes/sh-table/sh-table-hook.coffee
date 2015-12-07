@@ -99,7 +99,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # GEt the entities
-        @shApi.getEntities(
+        @shApi.index(
           @optParams
         ).then(
           (success) ->
@@ -132,7 +132,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Fetch blank entity
-        @shApi.newEntity(
+        @shApi.new(
           @optParams
         ).then(
           (success) ->
@@ -168,10 +168,15 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         hook() for hook in self.beforeCreateEntityHooks
         deferred = $q.defer()
 
+        # Check if the entity is a FormData (Useful for file uploaded form)
+        data = {data: entity}
+        if Object.prototype.toString.call(entity).slice(8, -1) is 'FormData'
+          data = entity
+
         # Persist an entity into database
-        @shApi.createEntity(
+        @shApi.create(
           @optParams
-          entity
+          data
         ).then(
           (success) ->
             self.сreatedIds.push success.data.id
@@ -210,7 +215,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Fetch entity for editing
-        @shApi.editEntity(
+        @shApi.edit(
           id
           @optParams
         ).then(
@@ -249,11 +254,16 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         hook() for hook in self.beforeUpdateEntityHooks
         deferred = $q.defer()
 
+        # Check if the entity is a FormData (Useful for file uploaded form)
+        data = {data: entity}
+        if Object.prototype.toString.call(entity).slice(8, -1) is 'FormData'
+          data = entity
+
         # Update entity into database
-        @shApi.updateEntity(
+        @shApi.update(
           id
           @optParams
-          entity
+          data
         ).then(
           (success) ->
             self.updatedIds.push success.data.id
@@ -292,7 +302,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Delete entity from database
-        @shApi.deleteEntity(
+        @shApi.delete(
           id
           @optParams
         ).then(

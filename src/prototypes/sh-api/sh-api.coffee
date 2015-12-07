@@ -40,19 +40,19 @@ shApiModule.run ['$rootScope', ($rootScope) ->
 
       ###*
       # @ngdoc method
-      # @name getEntities
+      # @name index
       #
       # @description
-      # Get list of entities based on params
+      # Get list of records based on params. `GET`
       #
       # @param {Object} params Parameter objects
       #
       # @returns {promise}
       ###
-      @getEntities = (params) ->
+      @index = (params) ->
         deferred = $q.defer()
 
-        # GEt the entities
+        # GEt the records
         @resource.get(
           params
         ).$promise.then(
@@ -68,17 +68,17 @@ shApiModule.run ['$rootScope', ($rootScope) ->
 
       ###*
       # @ngdoc method
-      # @name newEntity
+      # @name new
       #
       # @description
-      # New an entity
+      # Get a new Record. `GET`
       #
       # @returns {promise}
       ###
-      @newEntity = (params) ->
+      @new = (params) ->
         deferred = $q.defer()
 
-        # Fetch blank entity
+        # Fetch blank record
         @resource.new(
           params
         ).$promise.then(
@@ -93,23 +93,23 @@ shApiModule.run ['$rootScope', ($rootScope) ->
 
       ###*
       # @ngdoc method
-      # @name createEntity
+      # @name create
       #
       # @description
-      # Create/persist an entity to database
+      # Create/persist an record to database. `POST`
       #
       # @param {Object} params Parameter objects
-      # @param {Object} entity Entity object which should not contain an id
+      # @param {Object} data Data object. Usualy it's formed `{data: entity}`
       #
       # @returns {promise}
       ###
-      @createEntity = (params, entity) ->
+      @create = (params, data) ->
         deferred = $q.defer()
 
-        # Persist an entity into database
+        # Persist an record into database
         @resource.save(
           params
-          data: entity
+          data
         ).$promise.then(
           (success) ->
             deferred.resolve(success)
@@ -123,20 +123,20 @@ shApiModule.run ['$rootScope', ($rootScope) ->
 
       ###*
       # @ngdoc method
-      # @name editEntity
+      # @name edit
       #
       # @description
-      # Edit an entity
+      # Get a record, equals with show. `GET`
       #
-      # @param {String} id Entity id in string or UUID
+      # @param {String} id Record id in string or UUID
       # @param {Object} params Parameter objects
       #
       # @returns {promise}
       ###
-      @editEntity = (id, params) ->
+      @edit = (id, params) ->
         deferred = $q.defer()
 
-        # Fetch entity for editing
+        # Fetch a record for editing
         @resource.edit(
           angular.extend({id: id}, params)
         ).$promise.then(
@@ -152,24 +152,24 @@ shApiModule.run ['$rootScope', ($rootScope) ->
 
       ###*
       # @ngdoc method
-      # @name updateEntity
+      # @name update
       #
       # @description
-      # Update an entity
+      # Update a record
       #
-      # @param {String} id Entity id in string or UUID
+      # @param {String} id Record id in string or UUID. `PUT`
       # @param {Object} params Parameter objects
-      # @param {Object} entity Entity object which should contain an id
+      # @param {Object} data Data object. Usualy it's formed `{data: entity}`
       #
       # @returns {promise}
       ###
-      @updateEntity = (id, params, entity) ->
+      @update = (id, params, data) ->
         deferred = $q.defer()
 
-        # Update entity into database
+        # Update a record into database
         @resource.update(
           angular.extend({id: id}, params)
-          data: entity
+          data
         ).$promise.then(
           (success) ->
             deferred.resolve(success)
@@ -183,20 +183,20 @@ shApiModule.run ['$rootScope', ($rootScope) ->
 
       ###*
       # @ngdoc method
-      # @name deleteEntity
+      # @name delete
       #
       # @description
-      # Delete an entity
+      # Delete a record. `DELETE`
       #
-      # @param {String} id Entity id in string or UUID
+      # @param {String} id Record id in string or UUID
       # @param {Object} params Parameter objects
       #
       # @returns {promise}
       ###
-      @deleteEntity = (id, params) ->
+      @delete = (id, params) ->
         deferred = $q.defer()
 
-        # Delete entity from database
+        # Delete record from database
         @resource.delete(
           angular.extend({id: id}, params)
         ).$promise.then(

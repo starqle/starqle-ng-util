@@ -71,6 +71,11 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       @updateEntityErrorHooks = []
       @afterUpdateEntityHooks = []
 
+      @beforeDeleteEntityHooks = []
+      @deleteEntitySuccessHooks = []
+      @deleteEntityErrorHooks = []
+      @afterDeleteEntityHooks = []
+
       @beforeInitEntityHooks = []
       @initEntitySuccessHooks = []
       @initEntityErrorHooks = []
@@ -91,7 +96,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Fetch blank entity
-        @shApi.newEntity(
+        @shApi.new(
           @optParams
         ).then(
           (success) ->
@@ -127,10 +132,15 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
         hook() for hook in self.beforeCreateEntityHooks
         deferred = $q.defer()
 
+        # Check if the entity is a FormData (Useful for file uploaded form)
+        data = {data: entity}
+        if Object.prototype.toString.call(entity).slice(8, -1) is 'FormData'
+          data = entity
+
         # Persist an entity into database
-        @shApi.createEntity(
+        @shApi.create(
           @optParams
-          entity
+          data
         ).then(
           (success) ->
             self.entity = success.data
@@ -167,7 +177,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Fetch entity for editing
-        @shApi.editEntity(
+        @shApi.edit(
           id
           @optParams
         ).then(
@@ -206,11 +216,16 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
         hook() for hook in self.beforeUpdateEntityHooks
         deferred = $q.defer()
 
+        # Check if the entity is a FormData (Useful for file uploaded form)
+        data = {data: entity}
+        if Object.prototype.toString.call(entity).slice(8, -1) is 'FormData'
+          data = entity
+
         # Update entity into database
-        @shApi.updateEntity(
+        @shApi.update(
           id
           @optParams
-          entity
+          data
         ).then(
           (success) ->
             self.entity = success.data
@@ -226,6 +241,42 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
         ).finally(
           () ->
             hook() for hook in self.afterUpdateEntityHooks
+        )
+        deferred.promise
+
+
+
+      ###*
+      # @ngdoc method
+      # @name deleteEntity
+      #
+      # @description
+      # Delete an entity
+      #
+      # @param {String} id Entity id in string or UUID
+      #
+      # @returns {promise}
+      ###
+      @deleteEntity = (id) ->
+        hook() for hook in self.beforeDeleteEntityHooks
+        deferred = $q.defer()
+
+        # Delete entity from database
+        @shApi.delete(
+          id
+          @optParams
+        ).then(
+          (success) ->
+            hook(success) for hook in self.deleteEntitySuccessHooks
+            deferred.resolve(success)
+
+          (error) ->
+            hook(error) for hook in self.deleteEntityErrorHooks
+            deferred.reject(error)
+
+        ).finally(
+          () ->
+            hook() for hook in self.afterDeleteEntityHooks
         )
         deferred.promise
 
