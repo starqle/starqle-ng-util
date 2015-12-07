@@ -60,22 +60,6 @@ shFormModule.run ['$rootScope', ($rootScope) ->
 
       ###*
       # @ngdoc method
-      # @name isDisabled
-      #
-      # @description
-      # Return this entity form state
-      #
-      # @returns {Boolean} entityForm state
-      ###
-      @isDisabled = () ->
-        return true unless @entityForm?
-        @entityForm?.$pristine or
-        @entityForm?.$invalid or
-        @entityForm?.$submitted
-
-
-      ###*
-      # @ngdoc method
       # @name reset
       #
       # @description
@@ -100,5 +84,78 @@ shFormModule.run ['$rootScope', ($rootScope) ->
       ###
       @resetSubmitted = () ->
         @entityForm?.$submitted = false
+
+
+      ###*
+      # @ngdoc method
+      # @name isDisabled
+      #
+      # @description
+      # Return this entity form state
+      #
+      # @returns {Boolean} entityForm state
+      ###
+      @isDisabled = () ->
+        return true unless @entityForm?
+        @entityForm?.$pristine or
+        @entityForm?.$invalid or
+        @entityForm?.$submitted
+
+
+      ###*
+      # @ngdoc method
+      # @name isCompleted
+      #
+      # @description
+      # Predicate to check whether the form in completed
+      #
+      # @returns {Boolean} true if `$pristine`, `$valid`, & not in `$submitted` state
+      ###
+      @isCompleted = () ->
+        @entityForm?.$pristine and
+        @entityForm?.$valid and
+        not @entityForm.$submitted
+
+
+      ###*
+      # @ngdoc method
+      # @name isDirtyAndValid
+      #
+      # @description
+      # Predicate to check whether the form in `$dirty` and `$valid` state
+      #
+      # @returns {Boolean} true if `$dirty` and `$valid`
+      ###
+      @isDirtyAndValid = () ->
+        @entityForm?.$dirty and
+        @entityForm?.$valid
+
+
+      ###*
+      # @ngdoc method
+      # @name isDirtyAndInvalid
+      #
+      # @description
+      # Predicate to check whether the form in `$dirty` and `$invalid` state
+      #
+      # @returns {Boolean} true if `$dirty` and `$invalid`
+      ###
+      @isDirtyAndInvalid = () ->
+        @entityForm?.$dirty and
+        @entityForm?.$invalid
+
+
+      ###*
+      # @ngdoc method
+      # @name isResetButtonDisabled
+      #
+      # @description
+      # Predicate to check whether the reset button should disabled or not
+      #
+      # @returns {Boolean} true if `$pristine` or `$submitted`
+      ###
+      @isResetButtonDisabled = () ->
+        @entityForm?.$pristine or
+        @entityForm?.$submitted
   ]
 ]
