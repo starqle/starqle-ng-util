@@ -2021,16 +2021,16 @@ shApiModule.run([
 
         /**
          * @ngdoc method
-         * @name getEntities
+         * @name index
          *
          * @description
-         * Get list of entities based on params
+         * Get list of records based on params. `GET`
          *
          * @param {Object} params Parameter objects
          *
          * @returns {promise}
          */
-        this.getEntities = function(params) {
+        this.index = function(params) {
           var deferred;
           deferred = $q.defer();
           this.resource.get(params).$promise.then(function(success) {
@@ -2043,14 +2043,14 @@ shApiModule.run([
 
         /**
          * @ngdoc method
-         * @name newEntity
+         * @name new
          *
          * @description
-         * New an entity
+         * Get a new Record. `GET`
          *
          * @returns {promise}
          */
-        this.newEntity = function(params) {
+        this["new"] = function(params) {
           var deferred;
           deferred = $q.defer();
           this.resource["new"](params).$promise.then(function(success) {
@@ -2063,22 +2063,20 @@ shApiModule.run([
 
         /**
          * @ngdoc method
-         * @name createEntity
+         * @name create
          *
          * @description
-         * Create/persist an entity to database
+         * Create/persist an record to database. `POST`
          *
          * @param {Object} params Parameter objects
-         * @param {Object} entity Entity object which should not contain an id
+         * @param {Object} data Data object. Usualy it's formed `{data: entity}`
          *
          * @returns {promise}
          */
-        this.createEntity = function(params, entity) {
+        this.create = function(params, data) {
           var deferred;
           deferred = $q.defer();
-          this.resource.save(params, {
-            data: entity
-          }).$promise.then(function(success) {
+          this.resource.save(params, data).$promise.then(function(success) {
             return deferred.resolve(success);
           }, function(error) {
             return deferred.reject(error);
@@ -2088,17 +2086,17 @@ shApiModule.run([
 
         /**
          * @ngdoc method
-         * @name editEntity
+         * @name edit
          *
          * @description
-         * Edit an entity
+         * Get a record, equals with show. `GET`
          *
-         * @param {String} id Entity id in string or UUID
+         * @param {String} id Record id in string or UUID
          * @param {Object} params Parameter objects
          *
          * @returns {promise}
          */
-        this.editEntity = function(id, params) {
+        this.edit = function(id, params) {
           var deferred;
           deferred = $q.defer();
           this.resource.edit(angular.extend({
@@ -2113,25 +2111,23 @@ shApiModule.run([
 
         /**
          * @ngdoc method
-         * @name updateEntity
+         * @name update
          *
          * @description
-         * Update an entity
+         * Update a record
          *
-         * @param {String} id Entity id in string or UUID
+         * @param {String} id Record id in string or UUID. `PUT`
          * @param {Object} params Parameter objects
-         * @param {Object} entity Entity object which should contain an id
+         * @param {Object} data Data object. Usualy it's formed `{data: entity}`
          *
          * @returns {promise}
          */
-        this.updateEntity = function(id, params, entity) {
+        this.update = function(id, params, data) {
           var deferred;
           deferred = $q.defer();
           this.resource.update(angular.extend({
             id: id
-          }, params), {
-            data: entity
-          }).$promise.then(function(success) {
+          }, params), data).$promise.then(function(success) {
             return deferred.resolve(success);
           }, function(error) {
             return deferred.reject(error);
@@ -2141,17 +2137,17 @@ shApiModule.run([
 
         /**
          * @ngdoc method
-         * @name deleteEntity
+         * @name delete
          *
          * @description
-         * Delete an entity
+         * Delete a record. `DELETE`
          *
-         * @param {String} id Entity id in string or UUID
+         * @param {String} id Record id in string or UUID
          * @param {Object} params Parameter objects
          *
          * @returns {promise}
          */
-        return this.deleteEntity = function(id, params) {
+        return this["delete"] = function(id, params) {
           var deferred;
           deferred = $q.defer();
           this.resource["delete"](angular.extend({
@@ -2218,23 +2214,6 @@ shFormModule.run([
 
         /**
          * @ngdoc method
-         * @name isDisabled
-         *
-         * @description
-         * Return this entity form state
-         *
-         * @returns {Boolean} entityForm state
-         */
-        this.isDisabled = function() {
-          var ref, ref1, ref2;
-          if (this.entityForm == null) {
-            return true;
-          }
-          return ((ref = this.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = this.entityForm) != null ? ref1.$invalid : void 0) || ((ref2 = this.entityForm) != null ? ref2.$submitted : void 0);
-        };
-
-        /**
-         * @ngdoc method
          * @name reset
          *
          * @description
@@ -2260,10 +2239,115 @@ shFormModule.run([
          *
          * @returns {*}
          */
-        return this.resetSubmitted = function() {
+        this.resetSubmitted = function() {
           var ref;
           return (ref = this.entityForm) != null ? ref.$submitted = false : void 0;
         };
+
+        /**
+         * @ngdoc method
+         * @name isDisabled
+         *
+         * @description
+         * Return this entity form state
+         *
+         * @returns {Boolean} entityForm state
+         */
+        this.isDisabled = function() {
+          var ref, ref1, ref2;
+          if (this.entityForm == null) {
+            return true;
+          }
+          return ((ref = this.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = this.entityForm) != null ? ref1.$invalid : void 0) || ((ref2 = this.entityForm) != null ? ref2.$submitted : void 0);
+        };
+
+        /**
+         * @ngdoc method
+         * @name isCompleted
+         *
+         * @description
+         * Predicate to check whether the form in completed
+         *
+         * @returns {Boolean} true if `$pristine`, `$valid`, & not in `$submitted` state
+         */
+        this.isCompleted = function() {
+          var ref, ref1;
+          return ((ref = this.entityForm) != null ? ref.$pristine : void 0) && ((ref1 = this.entityForm) != null ? ref1.$valid : void 0) && !this.entityForm.$submitted;
+        };
+
+        /**
+         * @ngdoc method
+         * @name isDirtyAndValid
+         *
+         * @description
+         * Predicate to check whether the form in `$dirty` and `$valid` state
+         *
+         * @returns {Boolean} true if `$dirty` and `$valid`
+         */
+        this.isDirtyAndValid = function() {
+          var ref, ref1;
+          return ((ref = this.entityForm) != null ? ref.$dirty : void 0) && ((ref1 = this.entityForm) != null ? ref1.$valid : void 0);
+        };
+
+        /**
+         * @ngdoc method
+         * @name isDirtyAndInvalid
+         *
+         * @description
+         * Predicate to check whether the form in `$dirty` and `$invalid` state
+         *
+         * @returns {Boolean} true if `$dirty` and `$invalid`
+         */
+        this.isDirtyAndInvalid = function() {
+          var ref, ref1;
+          return ((ref = this.entityForm) != null ? ref.$dirty : void 0) && ((ref1 = this.entityForm) != null ? ref1.$invalid : void 0);
+        };
+
+        /**
+         * @ngdoc method
+         * @name isResetButtonDisabled
+         *
+         * @description
+         * Predicate to check whether the reset button should disabled or not
+         *
+         * @returns {Boolean} true if `$pristine` or `$submitted`
+         */
+        return this.isResetButtonDisabled = function() {
+          var ref, ref1;
+          return ((ref = this.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = this.entityForm) != null ? ref1.$submitted : void 0);
+        };
+      }
+    ];
+  }
+]);
+
+"use strict";
+shPersistenceModule.run([
+  '$rootScope', function($rootScope) {
+
+    /**
+     * @ngdoc factory
+     * @name shTableHook
+     *
+     * @description
+     * ShTableRest
+     */
+    return $rootScope.shPersistenceHookNotification = [
+      'ShNotification', function(ShNotification) {
+        var self;
+        self = this;
+        this.newEntityErrorHooks.push(function(error) {
+          return ShNotification.toastByResponse(error);
+        });
+        this.createEntityErrorHooks.push(function(error) {
+          return ShNotification.toastByResponse(error);
+        });
+        this.editEntityErrorHooks.push(function(error) {
+          return ShNotification.toastByResponse(error);
+        });
+        return this.updateEntityErrorHooks.push(function(error) {
+          return ShNotification.toastByResponse(error);
+        });
       }
     ];
   }
@@ -2302,7 +2386,30 @@ shPersistenceModule.run([
         this.shApi = {
           resource: self.resource
         };
-        $injector.invoke($rootScope.shApi, this.shApi);
+        this.beforeNewEntityHooks = [];
+        this.newEntitySuccessHooks = [];
+        this.newEntityErrorHooks = [];
+        this.afterNewEntityHooks = [];
+        this.beforeCreateEntityHooks = [];
+        this.createEntitySuccessHooks = [];
+        this.createEntityErrorHooks = [];
+        this.afterCreateEntityHooks = [];
+        this.beforeEditEntityHooks = [];
+        this.editEntitySuccessHooks = [];
+        this.editEntityErrorHooks = [];
+        this.afterEditEntityHooks = [];
+        this.beforeUpdateEntityHooks = [];
+        this.updateEntitySuccessHooks = [];
+        this.updateEntityErrorHooks = [];
+        this.afterUpdateEntityHooks = [];
+        this.beforeDeleteEntityHooks = [];
+        this.deleteEntitySuccessHooks = [];
+        this.deleteEntityErrorHooks = [];
+        this.afterDeleteEntityHooks = [];
+        this.beforeInitEntityHooks = [];
+        this.initEntitySuccessHooks = [];
+        this.initEntityErrorHooks = [];
+        this.afterInitEntityHooks = [];
 
         /**
          * @ngdoc method
@@ -2314,21 +2421,42 @@ shPersistenceModule.run([
          * @returns {promise}
          */
         this.newEntity = function() {
-          var deferred;
-          (self.beforeNewEntityHook || angular.noop)();
+          var deferred, hook, i, len, ref;
+          ref = self.beforeNewEntityHooks;
+          for (i = 0, len = ref.length; i < len; i++) {
+            hook = ref[i];
+            hook();
+          }
           deferred = $q.defer();
-          this.shApi.newEntity(this.optParams).then(function(success) {
+          this.shApi["new"](this.optParams).then(function(success) {
+            var j, len1, ref1;
             self.entity = success.data;
             if (success.lookup != null) {
               self.lookup = success.lookup;
             }
-            (self.newEntitySuccessHook || angular.noop)(success);
+            ref1 = self.newEntitySuccessHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(success);
+            }
             return deferred.resolve(success);
           }, function(error) {
-            (self.newEntityErrorHook || angular.noop)(error);
+            var j, len1, ref1;
+            ref1 = self.newEntityErrorHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(error);
+            }
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterNewEntityHook || angular.noop)();
+            var j, len1, ref1, results;
+            ref1 = self.afterNewEntityHooks;
+            results = [];
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              results.push(hook());
+            }
+            return results;
           });
           return deferred.promise;
         };
@@ -2345,21 +2473,48 @@ shPersistenceModule.run([
          * @returns {promise}
          */
         this.createEntity = function(entity) {
-          var deferred;
-          (self.beforeCreateEntityHook || angular.noop)();
+          var data, deferred, hook, i, len, ref;
+          ref = self.beforeCreateEntityHooks;
+          for (i = 0, len = ref.length; i < len; i++) {
+            hook = ref[i];
+            hook();
+          }
           deferred = $q.defer();
-          this.shApi.createEntity(this.optParams, entity).then(function(success) {
+          data = {
+            data: entity
+          };
+          if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
+            data = entity;
+          }
+          this.shApi.create(this.optParams, data).then(function(success) {
+            var j, len1, ref1;
             self.entity = success.data;
             if (success.lookup != null) {
               self.lookup = success.lookup;
             }
-            (self.createEntitySuccessHook || angular.noop)(success);
+            ref1 = self.createEntitySuccessHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(success);
+            }
             return deferred.resolve(success);
           }, function(error) {
-            (self.createEntityErrorHook || angular.noop)(error);
+            var j, len1, ref1;
+            ref1 = self.createEntityErrorHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(error);
+            }
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterCreateEntityHook || angular.noop)();
+            var j, len1, ref1, results;
+            ref1 = self.afterCreateEntityHooks;
+            results = [];
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              results.push(hook());
+            }
+            return results;
           });
           return deferred.promise;
         };
@@ -2376,21 +2531,42 @@ shPersistenceModule.run([
          * @returns {promise}
          */
         this.editEntity = function(id) {
-          var deferred;
-          (self.beforeEditEntityHook || angular.noop)();
+          var deferred, hook, i, len, ref;
+          ref = self.beforeEditEntityHooks;
+          for (i = 0, len = ref.length; i < len; i++) {
+            hook = ref[i];
+            hook();
+          }
           deferred = $q.defer();
-          this.shApi.editEntity(id, this.optParams).then(function(success) {
+          this.shApi.edit(id, this.optParams).then(function(success) {
+            var j, len1, ref1;
             self.entity = success.data;
             if (success.lookup != null) {
               self.lookup = success.lookup;
             }
-            (self.editEntitySuccessHook || angular.noop)(success);
+            ref1 = self.editEntitySuccessHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(success);
+            }
             return deferred.resolve(success);
           }, function(error) {
-            (self.editEntityErrorHook || angular.noop)(error);
+            var j, len1, ref1;
+            ref1 = self.editEntityErrorHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(error);
+            }
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterEditEntityHook || angular.noop)();
+            var j, len1, ref1, results;
+            ref1 = self.afterEditEntityHooks;
+            results = [];
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              results.push(hook());
+            }
+            return results;
           });
           return deferred.promise;
         };
@@ -2408,21 +2584,96 @@ shPersistenceModule.run([
          * @returns {promise}
          */
         this.updateEntity = function(id, entity) {
-          var deferred;
-          (self.beforeUpdateEntityHook || angular.noop)();
+          var data, deferred, hook, i, len, ref;
+          ref = self.beforeUpdateEntityHooks;
+          for (i = 0, len = ref.length; i < len; i++) {
+            hook = ref[i];
+            hook();
+          }
           deferred = $q.defer();
-          this.shApi.updateEntity(id, this.optParams, entity).then(function(success) {
+          data = {
+            data: entity
+          };
+          if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
+            data = entity;
+          }
+          this.shApi.update(id, this.optParams, data).then(function(success) {
+            var j, len1, ref1;
             self.entity = success.data;
             if (success.lookup != null) {
               self.lookup = success.lookup;
             }
-            (self.updateEntitySuccessHook || angular.noop)(success);
+            ref1 = self.updateEntitySuccessHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(success);
+            }
             return deferred.resolve(success);
           }, function(error) {
-            (self.updateEntityErrorHook || angular.noop)(error);
+            var j, len1, ref1;
+            ref1 = self.updateEntityErrorHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(error);
+            }
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterUpdateEntityHook || angular.noop)();
+            var j, len1, ref1, results;
+            ref1 = self.afterUpdateEntityHooks;
+            results = [];
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              results.push(hook());
+            }
+            return results;
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name deleteEntity
+         *
+         * @description
+         * Delete an entity
+         *
+         * @param {String} id Entity id in string or UUID
+         *
+         * @returns {promise}
+         */
+        this.deleteEntity = function(id) {
+          var deferred, hook, i, len, ref;
+          ref = self.beforeDeleteEntityHooks;
+          for (i = 0, len = ref.length; i < len; i++) {
+            hook = ref[i];
+            hook();
+          }
+          deferred = $q.defer();
+          this.shApi["delete"](id, this.optParams).then(function(success) {
+            var j, len1, ref1;
+            ref1 = self.deleteEntitySuccessHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(success);
+            }
+            return deferred.resolve(success);
+          }, function(error) {
+            var j, len1, ref1;
+            ref1 = self.deleteEntityErrorHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(error);
+            }
+            return deferred.reject(error);
+          })["finally"](function() {
+            var j, len1, ref1, results;
+            ref1 = self.afterDeleteEntityHooks;
+            results = [];
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              results.push(hook());
+            }
+            return results;
           });
           return deferred.promise;
         };
@@ -2440,17 +2691,38 @@ shPersistenceModule.run([
          * @returns {promise}
          */
         this.initEntity = function() {
-          var deferred;
-          (self.beforeInitEntityHook || angular.noop)();
+          var deferred, hook, i, len, ref;
+          ref = self.beforeInitEntityHooks;
+          for (i = 0, len = ref.length; i < len; i++) {
+            hook = ref[i];
+            hook();
+          }
           deferred = $q.defer();
           $q.when(self.id != null ? this.editEntity(self.id) : this.newEntity()).then(function(success) {
-            (self.initEntitySuccessHook || angular.noop)(success);
+            var j, len1, ref1;
+            ref1 = self.initEntitySuccessHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(success);
+            }
             return deferred.resolve(success);
           }, function(error) {
-            (self.initEntityErrorHook || angular.noop)(error);
+            var j, len1, ref1;
+            ref1 = self.initEntityErrorHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(error);
+            }
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterInitEntityHook || angular.noop)();
+            var j, len1, ref1, results;
+            ref1 = self.afterInitEntityHooks;
+            results = [];
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              results.push(hook());
+            }
+            return results;
           });
           return deferred.promise;
         };
@@ -2466,10 +2738,12 @@ shPersistenceModule.run([
          *
          * @returns {Object|Array} Reference to `obj`.
          */
-        return this.getLookup = function(key) {
+        this.getLookup = function(key) {
           var ref;
           return (ref = self.lookup) != null ? ref[key] : void 0;
         };
+        $injector.invoke($rootScope.shApi, this.shApi);
+        $injector.invoke($rootScope.shPersistenceHookNotification, self);
       }
     ];
   }
@@ -2915,6 +3189,44 @@ shTableModule.run([
      * @description
      * ShTableRest
      */
+    return $rootScope.shTableHookNotification = [
+      'ShNotification', function(ShNotification) {
+        var self;
+        self = this;
+        this.getEntitiesErrorHooks.push(function(error) {
+          return ShNotification.toastByResponse(error);
+        });
+        this.newEntityErrorHooks.push(function(error) {
+          return ShNotification.toastByResponse(error);
+        });
+        this.createEntityErrorHooks.push(function(error) {
+          return ShNotification.toastByResponse(error);
+        });
+        this.editEntityErrorHooks.push(function(error) {
+          return ShNotification.toastByResponse(error);
+        });
+        this.updateEntityErrorHooks.push(function(error) {
+          return ShNotification.toastByResponse(error);
+        });
+        return this.deleteEntityErrorHooks.push(function(error) {
+          return ShNotification.toastByResponse(error);
+        });
+      }
+    ];
+  }
+]);
+
+"use strict";
+shTableModule.run([
+  '$rootScope', function($rootScope) {
+
+    /**
+     * @ngdoc factory
+     * @name shTableHook
+     *
+     * @description
+     * ShTableRest
+     */
     return $rootScope.shTableHook = [
       '$q', '$injector', function($q, $injector) {
         var self;
@@ -2937,7 +3249,30 @@ shTableModule.run([
         this.shApi = {
           resource: self.resource
         };
-        $injector.invoke($rootScope.shApi, this.shApi);
+        this.beforeGetEntitiesHooks = [];
+        this.getEntitiesSuccessHooks = [];
+        this.getEntitiesErrorHooks = [];
+        this.afterGetEntitiesHooks = [];
+        this.beforeNewEntityHooks = [];
+        this.newEntitySuccessHooks = [];
+        this.newEntityErrorHooks = [];
+        this.afterNewEntityHooks = [];
+        this.beforeCreateEntityHooks = [];
+        this.createEntitySuccessHooks = [];
+        this.createEntityErrorHooks = [];
+        this.afterCreateEntityHooks = [];
+        this.beforeEditEntityHooks = [];
+        this.editEntitySuccessHooks = [];
+        this.editEntityErrorHooks = [];
+        this.afterEditEntityHooks = [];
+        this.beforeUpdateEntityHooks = [];
+        this.updateEntitySuccessHooks = [];
+        this.updateEntityErrorHooks = [];
+        this.afterUpdateEntityHooks = [];
+        this.beforeDeleteEntityHooks = [];
+        this.deleteEntitySuccessHooks = [];
+        this.deleteEntityErrorHooks = [];
+        this.afterDeleteEntityHooks = [];
 
         /**
          * @ngdoc method
@@ -2949,17 +3284,38 @@ shTableModule.run([
          * @returns {promise}
          */
         this.getEntities = function() {
-          var deferred;
-          (self.beforeGetEntitiesHook || angular.noop)();
+          var deferred, hook, i, len, ref;
+          ref = self.beforeGetEntitiesHooks;
+          for (i = 0, len = ref.length; i < len; i++) {
+            hook = ref[i];
+            hook();
+          }
           deferred = $q.defer();
-          this.shApi.getEntities(this.optParams).then(function(success) {
-            (self.getEntitiesSuccessHook || angular.noop)(success);
+          this.shApi.index(this.optParams).then(function(success) {
+            var j, len1, ref1;
+            ref1 = self.getEntitiesSuccessHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(success);
+            }
             return deferred.resolve(success);
           }, function(error) {
-            (self.getEntitiesErrorHook || angular.noop)(error);
+            var j, len1, ref1;
+            ref1 = self.getEntitiesErrorHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(error);
+            }
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterGetEntitiesHook || angular.noop)();
+            var j, len1, ref1, results;
+            ref1 = self.afterGetEntitiesHooks;
+            results = [];
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              results.push(hook());
+            }
+            return results;
           });
           return deferred.promise;
         };
@@ -2974,21 +3330,42 @@ shTableModule.run([
          * @returns {promise}
          */
         this.newEntity = function() {
-          var deferred;
-          (self.beforeNewEntityHook || angular.noop)();
+          var deferred, hook, i, len, ref;
+          ref = self.beforeNewEntityHooks;
+          for (i = 0, len = ref.length; i < len; i++) {
+            hook = ref[i];
+            hook();
+          }
           deferred = $q.defer();
-          this.shApi.newEntity(this.optParams).then(function(success) {
+          this.shApi["new"](this.optParams).then(function(success) {
+            var j, len1, ref1;
             self.entity = success.data;
             if (success.lookup != null) {
               self.lookup = success.lookup;
             }
-            (self.newEntitySuccessHook || angular.noop)(success);
+            ref1 = self.newEntitySuccessHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(success);
+            }
             return deferred.resolve(success);
           }, function(error) {
-            (self.newEntityErrorHook || angular.noop)(error);
+            var j, len1, ref1;
+            ref1 = self.newEntityErrorHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(error);
+            }
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterNewEntityHook || angular.noop)();
+            var j, len1, ref1, results;
+            ref1 = self.afterNewEntityHooks;
+            results = [];
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              results.push(hook());
+            }
+            return results;
           });
           return deferred.promise;
         };
@@ -3005,23 +3382,50 @@ shTableModule.run([
          * @returns {promise}
          */
         this.createEntity = function(entity) {
-          var deferred;
-          (self.beforeCreateEntityHook || angular.noop)();
+          var data, deferred, hook, i, len, ref;
+          ref = self.beforeCreateEntityHooks;
+          for (i = 0, len = ref.length; i < len; i++) {
+            hook = ref[i];
+            hook();
+          }
           deferred = $q.defer();
-          this.shApi.createEntity(this.optParams, entity).then(function(success) {
+          data = {
+            data: entity
+          };
+          if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
+            data = entity;
+          }
+          this.shApi.create(this.optParams, data).then(function(success) {
+            var j, len1, ref1;
             self.сreatedIds.push(success.data.id);
             self.entity = success.data;
             if (success.lookup != null) {
               self.lookup = success.lookup;
             }
             self.refreshGrid();
-            (self.createEntitySuccessHook || angular.noop)(success);
+            ref1 = self.createEntitySuccessHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(success);
+            }
             return deferred.resolve(success);
           }, function(error) {
-            (self.createEntityErrorHook || angular.noop)(error);
+            var j, len1, ref1;
+            ref1 = self.createEntityErrorHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(error);
+            }
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterCreateEntityHook || angular.noop)();
+            var j, len1, ref1, results;
+            ref1 = self.afterCreateEntityHooks;
+            results = [];
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              results.push(hook());
+            }
+            return results;
           });
           return deferred.promise;
         };
@@ -3038,21 +3442,42 @@ shTableModule.run([
          * @returns {promise}
          */
         this.editEntity = function(id) {
-          var deferred;
-          (self.beforeEditEntityHook || angular.noop)();
+          var deferred, hook, i, len, ref;
+          ref = self.beforeEditEntityHooks;
+          for (i = 0, len = ref.length; i < len; i++) {
+            hook = ref[i];
+            hook();
+          }
           deferred = $q.defer();
-          this.shApi.editEntity(id, this.optParams).then(function(success) {
+          this.shApi.edit(id, this.optParams).then(function(success) {
+            var j, len1, ref1;
             self.entity = success.data;
             if (success.lookup != null) {
               self.lookup = success.lookup;
             }
-            (self.editEntitySuccessHook || angular.noop)(success);
+            ref1 = self.editEntitySuccessHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(success);
+            }
             return deferred.resolve(success);
           }, function(error) {
-            (self.editEntityErrorHook || angular.noop)(error);
+            var j, len1, ref1;
+            ref1 = self.editEntityErrorHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(error);
+            }
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterEditEntityHook || angular.noop)();
+            var j, len1, ref1, results;
+            ref1 = self.afterEditEntityHooks;
+            results = [];
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              results.push(hook());
+            }
+            return results;
           });
           return deferred.promise;
         };
@@ -3070,23 +3495,50 @@ shTableModule.run([
          * @returns {promise}
          */
         this.updateEntity = function(id, entity) {
-          var deferred;
-          (self.beforeUpdateEntityHook || angular.noop)();
+          var data, deferred, hook, i, len, ref;
+          ref = self.beforeUpdateEntityHooks;
+          for (i = 0, len = ref.length; i < len; i++) {
+            hook = ref[i];
+            hook();
+          }
           deferred = $q.defer();
-          this.shApi.updateEntity(id, this.optParams, entity).then(function(success) {
+          data = {
+            data: entity
+          };
+          if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
+            data = entity;
+          }
+          this.shApi.update(id, this.optParams, data).then(function(success) {
+            var j, len1, ref1;
             self.updatedIds.push(success.data.id);
             self.entity = success.data;
             if (success.lookup != null) {
               self.lookup = success.lookup;
             }
             self.refreshGrid();
-            (self.updateEntitySuccessHook || angular.noop)(success);
+            ref1 = self.updateEntitySuccessHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(success);
+            }
             return deferred.resolve(success);
           }, function(error) {
-            (self.updateEntityErrorHook || angular.noop)(error);
+            var j, len1, ref1;
+            ref1 = self.updateEntityErrorHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(error);
+            }
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterUpdateEntityHook || angular.noop)();
+            var j, len1, ref1, results;
+            ref1 = self.afterUpdateEntityHooks;
+            results = [];
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              results.push(hook());
+            }
+            return results;
           });
           return deferred.promise;
         };
@@ -3103,19 +3555,40 @@ shTableModule.run([
          * @returns {promise}
          */
         this.deleteEntity = function(id) {
-          var deferred;
-          (self.beforeDeleteEntityHook || angular.noop)();
+          var deferred, hook, i, len, ref;
+          ref = self.beforeDeleteEntityHooks;
+          for (i = 0, len = ref.length; i < len; i++) {
+            hook = ref[i];
+            hook();
+          }
           deferred = $q.defer();
-          this.shApi.deleteEntity(id, this.optParams).then(function(success) {
+          this.shApi["delete"](id, this.optParams).then(function(success) {
+            var j, len1, ref1;
             self.deletedIds.push(id);
             self.refreshGrid();
-            (self.deleteEntitySuccessHook || angular.noop)(success);
+            ref1 = self.deleteEntitySuccessHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(success);
+            }
             return deferred.resolve(success);
           }, function(error) {
-            (self.deleteEntityErrorHook || angular.noop)(error);
+            var j, len1, ref1;
+            ref1 = self.deleteEntityErrorHooks;
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              hook(error);
+            }
             return deferred.reject(error);
           })["finally"](function() {
-            return (self.afterDeleteEntityHook || angular.noop)();
+            var j, len1, ref1, results;
+            ref1 = self.afterDeleteEntityHooks;
+            results = [];
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              hook = ref1[j];
+              results.push(hook());
+            }
+            return results;
           });
           return deferred.promise;
         };
@@ -3131,10 +3604,12 @@ shTableModule.run([
          *
          * @returns {Object|Array} Reference to `obj`.
          */
-        return this.getLookup = function(key) {
+        this.getLookup = function(key) {
           var ref;
           return (ref = self.lookup) != null ? ref[key] : void 0;
         };
+        $injector.invoke($rootScope.shApi, this.shApi);
+        $injector.invoke($rootScope.shTableHookNotification, self);
       }
     ];
   }
@@ -3370,7 +3845,7 @@ angular.module('sh.button.state', []).service("ShButtonState", [
 angular.module('sh.notification', []).service("ShNotification", [
   '$timeout', '$interval', function($timeout, $interval) {
     var defaultDuration, defaultLifetime;
-    defaultLifetime = 4000;
+    defaultLifetime = 3000;
     defaultDuration = 500;
     this.toasts = [];
     this.notifications = [];
