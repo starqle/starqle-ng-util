@@ -1,6 +1,6 @@
 {
   "name": "starqle-ng-util",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Collection of Starqle Angular utilities.",
   "main": "''",
   "scripts": {
