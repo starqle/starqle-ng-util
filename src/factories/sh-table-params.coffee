@@ -54,8 +54,6 @@ shTableModule.factory(
         autoload: params.autoload ? true
 
 
-      @$initialized = false
-
       @$totalCount = 0
       @$loading = false
       @getData = params.getData
@@ -80,7 +78,6 @@ shTableModule.factory(
 
       @initialize = ->
         @reload()
-        @$initialized = true
 
       ###*
       # @ngdoc method
