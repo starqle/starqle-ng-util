@@ -41,15 +41,15 @@ shTableModule.directive("shTablePagination", ->
       </div>
 
       <ul class="pagination pull-left">
-        <li ng-class="{'disabled': page.disabled}" ng-repeat="page in shTablePagination.pages" ng-switch="page.type">
-          <a ng-switch-when="FIRST" ng-click="shTablePaginationAction({pageNumber: page.number})">«</a>
-          <a ng-switch-when="PREV" ng-click="shTablePaginationAction({pageNumber: page.number})">&lt;</a>
-          <a ng-switch-when="PAGE" ng-click="shTablePaginationAction({pageNumber: page.number})">
+        <li ng-repeat="page in shTablePagination.pages" ng-switch="page.type">
+          <a ng-switch-when="FIRST" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">«</a>
+          <a ng-switch-when="PREV" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">&lt;</a>
+          <a ng-switch-when="PAGE" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">
             <span ng-bind="page.number"></span>
           </a>
-          <a ng-switch-when="MORE">…</a>
-          <a ng-switch-when="NEXT" ng-click="shTablePaginationAction({pageNumber: page.number})">&gt;</a>
-          <a ng-switch-when="LAST" ng-click="shTablePaginationAction({pageNumber: page.number})">»</a>
+          <a ng-switch-when="MORE" ng-disabled="page.disabled">…</a>
+          <a ng-switch-when="NEXT" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">&gt;</a>
+          <a ng-switch-when="LAST" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">»</a>
         </li>
       </ul>
 
