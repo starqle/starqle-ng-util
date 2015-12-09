@@ -41,9 +41,19 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       HelperService
     ) ->
 
-      @filterParams = {}
+      self = this
+
+      @filterParams = {} unless @filterParams?
       @filterRegion =
         visible: true # show filter by default
+
+
+      @form = {}
+
+      #
+      # Injection
+      #
+      $injector.invoke $rootScope.shForm, @form
 
       # =========================================================================
       # Date filters
@@ -68,68 +78,145 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         @tableParams.$params.pageNumber = 1
         @refreshGrid()
 
-      @filterDateAny = (shFilter) ->
-        @prepareFilterDate(shFilter)
+      @filterDateLabel = (keyword, shFilter, n) ->
+        switch keyword
+          when 'ANY'
+            $filter('translate')('LABEL_ALL')
+
+          when 'TODAY'
+            $filter('translate')('LABEL_TODAY')
+
+          when 'PAST_N_DAYS'
+            $filter('translate')('LABEL_FROM') + ' ' +
+            if n is 1
+              $filter('translate')('LABEL_YESTERDAY')
+            else
+              moment().subtract(n, 'days').fromNow()
+
+          when 'PAST_N_WEEKS'
+            $filter('translate')('LABEL_FROM') + ' ' +
+            moment().subtract(n, 'weeks').fromNow()
+
+          when 'PAST_N_MONTHS'
+            $filter('translate')('LABEL_FROM') + ' ' +
+            moment().subtract(n, 'months').fromNow()
+
+          when 'PAST_N_YEARS'
+            $filter('translate')('LABEL_FROM') + ' ' +
+            moment().subtract(n, 'years').fromNow()
+
+          when 'NEXT_N_DAYS'
+            if n is 1
+              $filter('translate')('LABEL_THRU') + ' ' +
+              $filter('translate')('LABEL_TOMORROW')
+            else
+              moment().add(n, 'days').fromNow() + ' ' +
+              $filter('translate')('LABEL_AHEAD')
+
+          when 'NEXT_N_WEEKS'
+            moment().add(n, 'weeks').fromNow() + ' ' +
+            $filter('translate')('LABEL_AHEAD')
+
+          when 'NEXT_N_MONTHS'
+            moment().add(n, 'months').fromNow() + ' ' +
+            $filter('translate')('LABEL_AHEAD')
+
+          when 'NEXT_N_YEARS'
+            moment().add(n, 'years').fromNow() + ' ' +
+            $filter('translate')('LABEL_AHEAD')
+
+      @filterDate = (keyword, shFilter, n) ->
+        if keyword in ['RANGE', 'CERTAIN']
+          switch keyword
+            when 'RANGE'
+              fromDate = @filterParams[shFilter+"_gteqdate"]
+              thruDate = @filterParams[shFilter+"_lteqdate"]
+              @prepareFilterDate(shFilter)
+              @filterDateRange(shFilter, fromDate, thruDate)
+              @filterLabel[shFilter] = moment(fromDate).format('DD-MM-YYYY')+' - '+moment(thruDate).format('DD-MM-YYYY')
+            when 'CERTAIN'
+              fromDate = @filterParams[shFilter+"_gteqdate"]
+              thruDate = fromDate
+              @prepareFilterDate(shFilter)
+              @filterDateRange(shFilter, fromDate, thruDate)
+              @filterLabel[shFilter] = moment(fromDate).format('DD-MM-YYYY')
+
+        else
+          @prepareFilterDate(shFilter)
+          switch keyword
+            when 'ANY'
+              @filterDateAny(shFilter)
+            when 'TODAY'
+              @filterDateToday(shFilter)
+
+            when 'PAST_N_DAYS'
+              @filterDatePastNDays(shFilter, n)
+            when 'PAST_N_WEEKS'
+              @filterDatePastNWeeks(shFilter, n)
+            when 'PAST_N_MONTHS'
+              @filterDatePastNMonths(shFilter, n)
+            when 'PAST_N_YEARS'
+              @filterDatePastNYears(shFilter, n)
+
+            when 'NEXT_N_DAYS'
+              @filterDateNextNDays(shFilter, n)
+            when 'NEXT_N_WEEKS'
+              @filterDateNextNWeeks(shFilter, n)
+            when 'NEXT_N_MONTHS'
+              @filterDateNextNMonths(shFilter, n)
+            when 'NEXT_N_YEARS'
+              @filterDateNextNYears(shFilter, n)
+
+          @filterLabel[shFilter] = @filterDateLabel(keyword, shFilter, n)
+
         @executeFilterDate()
+
+
+      @filterDateAny = (shFilter) ->
+        ### ###
 
       @filterDateToday = (shFilter) ->
-        @prepareFilterDate(shFilter)
         dateParams[shFilter+"_eqdate"] = moment().format('YYYY-MM-DD')
-        @executeFilterDate()
+
 
       @filterDatePastNDays = (shFilter, n) ->
-        @prepareFilterDate(shFilter)
         dateParams[shFilter+"_lteqdate"] = moment().format('YYYY-MM-DD')
-        dateParams[shFilter+"_gteqdate"] = moment().subtract('days', n).format('YYYY-MM-DD')
-        @executeFilterDate()
+        dateParams[shFilter+"_gteqdate"] = moment().subtract(n, 'days').format('YYYY-MM-DD')
 
       @filterDatePastNWeeks = (shFilter, n) ->
-        @prepareFilterDate(shFilter)
         dateParams[shFilter+"_lteqdate"] = moment().format('YYYY-MM-DD')
-        dateParams[shFilter+"_gteqdate"] = moment().subtract('weeks', n).format('YYYY-MM-DD')
-        @executeFilterDate()
+        dateParams[shFilter+"_gteqdate"] = moment().subtract(n, 'weeks').format('YYYY-MM-DD')
 
       @filterDatePastNMonths = (shFilter, n) ->
-        @prepareFilterDate(shFilter)
         dateParams[shFilter+"_lteqdate"] = moment().format('YYYY-MM-DD')
-        dateParams[shFilter+"_gteqdate"] = moment().subtract('months', n).format('YYYY-MM-DD')
-        @executeFilterDate()
+        dateParams[shFilter+"_gteqdate"] = moment().subtract(n, 'months').format('YYYY-MM-DD')
 
       @filterDatePastNYears = (shFilter, n) ->
-        @prepareFilterDate(shFilter)
         dateParams[shFilter+"_lteqdate"] = moment().format('YYYY-MM-DD')
-        dateParams[shFilter+"_gteqdate"] = moment().subtract('years', n).format('YYYY-MM-DD')
-        @executeFilterDate()
+        dateParams[shFilter+"_gteqdate"] = moment().subtract(n, 'years').format('YYYY-MM-DD')
 
-      @filterDateRange = (shFilter) ->
-        fromDate = @filterParams[shFilter+"_gteqdate"]
-        thruDate = @filterParams[shFilter+"_lteqdate"]
-        @prepareFilterDate(shFilter)
 
-        if fromDate is undefined and thruDate is undefined
-          @filterLabel[shFilter] = 'All'
-        else if fromDate is undefined
-          @filterLabel[shFilter] = 'Before ' + moment(thruDate).format('DD-MM-YYYY')
-        else if thruDate is undefined
-          @filterLabel[shFilter] = 'After ' + moment(fromDate).format('DD-MM-YYYY')
-        else
-          @filterLabel[shFilter] = moment(fromDate).format('DD-MM-YYYY') + ' - ' + moment(thruDate).format('DD-MM-YYYY')
+      @filterDateNextNDays = (shFilter, n) ->
+        dateParams[shFilter+"_lteqdate"] = moment().add(n, 'days').format('YYYY-MM-DD')
+        dateParams[shFilter+"_gteqdate"] = moment().format('YYYY-MM-DD')
 
+      @filterDateNextNWeeks = (shFilter, n) ->
+        dateParams[shFilter+"_lteqdate"] = moment().add(n, 'weeks').format('YYYY-MM-DD')
+        dateParams[shFilter+"_gteqdate"] = moment().format('YYYY-MM-DD')
+
+      @filterDateNextNMonths = (shFilter, n) ->
+        dateParams[shFilter+"_lteqdate"] = moment().add(n, 'months').format('YYYY-MM-DD')
+        dateParams[shFilter+"_gteqdate"] = moment().format('YYYY-MM-DD')
+
+      @filterDateNextNYears = (shFilter, n) ->
+        dateParams[shFilter+"_lteqdate"] = moment().add(n, 'years').format('YYYY-MM-DD')
+        dateParams[shFilter+"_gteqdate"] = moment().format('YYYY-MM-DD')
+
+
+      @filterDateRange = (shFilter, fromDate, thruDate) ->
         dateParams[shFilter+"_gteqdate"] = fromDate
         dateParams[shFilter+"_lteqdate"] = thruDate
-        @executeFilterDate()
-        angular.element("#date-filter-#{shFilter}-modal").modal('hide')
-        return
 
-      @getLabelDateRange = (shFilter, leftDate, rightDate) ->
-        if (not (leftDate is null or leftDate is undefined) and not (rightDate is null or rightDate is undefined))
-          moment(leftDate).format('DD-MM-YYYY') + ' - ' + moment(rightDate).format('DD-MM-YYYY')
-        else if (not (leftDate is null or leftDate is undefined))
-          'After ' + moment(leftDate).format('DD-MM-YYYY')
-        else if (not (rightDate is null or rightDate is undefined))
-          'Before ' + moment(rightDate).format('DD-MM-YYYY')
-        else
-          null
 
       @getLabelDateSpecific = (shFilter) ->
         # empty space ('') is not the same with null
@@ -237,7 +324,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @filterInCollection = (shFilter, key = null) ->
         if key?
           @filterLabel[shFilter] = @filterCollection[shFilter].map(
-            (o) -> $filter('translate') o.name ).join(', ')
+            (o) -> $filter('translate') o[key + ''] ).join(', ')
           @filterParams[shFilter + '_in'] =
           @filterCollection[shFilter].map( (o) -> o[key + ''] )
         else
@@ -281,6 +368,11 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @resetFilter = () ->
         @filterParams = {}
         @filterLabel = {}
+
+        # Clear filter-collections
+        for k, v of @filterCollection
+          HelperService.clearRowSelection(@filterCollection[k])
+
         @refreshGrid()
 
       # Return true if there's no filter
