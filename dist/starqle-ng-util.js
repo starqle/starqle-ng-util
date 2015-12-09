@@ -112,7 +112,7 @@ shTableModule.directive("shTablePagination", function() {
       shTablePagination: '=',
       shTablePaginationAction: '&'
     },
-    template: '<div ng-if="shTablePagination.totalCount > 10" class="pagination form-inline pull-left">\n  <select ng-model=\'perPage\' ng-change="shTablePaginationAction({pageNumber: 1, perPage: perPage})" ng-options="perPage for perPage in getPerPages()" class="form-control text-right"></select>&nbsp;\n  &nbsp;\n  &nbsp;\n</div>\n\n<ul class="pagination pull-left">\n  <li ng-class="{\'disabled\': page.disabled}" ng-repeat="page in shTablePagination.pages" ng-switch="page.type">\n    <a ng-switch-when="FIRST" ng-click="shTablePaginationAction({pageNumber: page.number})">«</a>\n    <a ng-switch-when="PREV" ng-click="shTablePaginationAction({pageNumber: page.number})">&lt;</a>\n    <a ng-switch-when="PAGE" ng-click="shTablePaginationAction({pageNumber: page.number})">\n      <span ng-bind="page.number"></span>\n    </a>\n    <a ng-switch-when="MORE">…</a>\n    <a ng-switch-when="NEXT" ng-click="shTablePaginationAction({pageNumber: page.number})">&gt;</a>\n    <a ng-switch-when="LAST" ng-click="shTablePaginationAction({pageNumber: page.number})">»</a>\n  </li>\n</ul>\n\n<div class="pagination pull-left">\n  <div class="btn disabled">\n    <span class="page-count">\n      &nbsp;{{shTablePagination.currentPageCount}}&nbsp;\n    </span>\n    <span>\n      <em translate="LABEL_OF"></em>\n    </span>\n    <span class="page-total">\n      &nbsp;{{shTablePagination.totalCount}}&nbsp;\n    </span>\n  </div>\n</div>\n\n<div class="pagination pull-left">\n  <div ng-click="shTablePaginationAction()" class="btn">\n    <i class="fa fa-refresh"></i>\n  </div>\n</div>',
+    template: '<div ng-if="shTablePagination.totalCount > 10" class="pagination form-inline pull-left">\n  <select ng-model=\'perPage\' ng-change="shTablePaginationAction({pageNumber: 1, perPage: perPage})" ng-options="perPage for perPage in getPerPages()" class="form-control text-right"></select>&nbsp;\n  &nbsp;\n  &nbsp;\n</div>\n\n<ul class="pagination pull-left">\n  <li ng-repeat="page in shTablePagination.pages" ng-switch="page.type">\n    <a ng-switch-when="FIRST" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">«</a>\n    <a ng-switch-when="PREV" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">&lt;</a>\n    <a ng-switch-when="PAGE" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">\n      <span ng-bind="page.number"></span>\n    </a>\n    <a ng-switch-when="MORE" ng-disabled="page.disabled">…</a>\n    <a ng-switch-when="NEXT" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">&gt;</a>\n    <a ng-switch-when="LAST" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">»</a>\n  </li>\n</ul>\n\n<div class="pagination pull-left">\n  <div class="btn disabled">\n    <span class="page-count">\n      &nbsp;{{shTablePagination.currentPageCount}}&nbsp;\n    </span>\n    <span>\n      <em translate="LABEL_OF"></em>\n    </span>\n    <span class="page-total">\n      &nbsp;{{shTablePagination.totalCount}}&nbsp;\n    </span>\n  </div>\n</div>\n\n<div class="pagination pull-left">\n  <div ng-click="shTablePaginationAction()" class="btn">\n    <i class="fa fa-refresh"></i>\n  </div>\n</div>',
     controller: [
       '$scope', function($scope) {
         $scope.perPage = 10;
@@ -311,10 +311,12 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           }
         });
         ngModelCtrl.$render = function() {
-          var date;
+          var date, ref;
           date = ngModelCtrl.$viewValue;
           if (angular.isDefined(date) && date !== null) {
-            element.data('DateTimePicker').date(moment(date, 'YYYY-MM-DD'));
+            if ((ref = element.data('DateTimePicker')) != null) {
+              ref.date(moment(date, 'YYYY-MM-DD'));
+            }
           }
           return ngModelCtrl.$viewValue;
         };
@@ -346,27 +348,30 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           }
         });
         element.bind('dp.hide', function(data) {
+          var ref;
           if (!moment(ngModelCtrl.$viewValue, 'DD-MM-YYYY').isValid()) {
             ngModelCtrl.$setViewValue(null);
-            return element.data('DateTimePicker').date(null);
+            return (ref = element.data('DateTimePicker')) != null ? ref.date(null) : void 0;
           }
         });
         scope.$watch('shFromDate', function(newVal, oldVal) {
+          var ref, ref1;
           if (newVal != null) {
             if (moment(new Date(newVal)).isValid()) {
-              return element.data('DateTimePicker').minDate(moment(new Date(newVal)));
+              return (ref = element.data('DateTimePicker')) != null ? ref.minDate(moment(new Date(newVal))) : void 0;
             }
           } else {
-            return element.data('DateTimePicker').minDate(false);
+            return (ref1 = element.data('DateTimePicker')) != null ? ref1.minDate(false) : void 0;
           }
         });
         return scope.$watch('shThruDate', function(newVal, oldVal) {
+          var ref, ref1;
           if (newVal != null) {
             if (moment(new Date(newVal)).isValid()) {
-              return element.data('DateTimePicker').maxDate(moment(new Date(newVal)));
+              return (ref = element.data('DateTimePicker')) != null ? ref.maxDate(moment(new Date(newVal))) : void 0;
             }
           } else {
-            return element.data('DateTimePicker').maxDate(false);
+            return (ref1 = element.data('DateTimePicker')) != null ? ref1.maxDate(false) : void 0;
           }
         });
       }
@@ -409,10 +414,10 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           }
         });
         ngModelCtrl.$render = function() {
-          var date;
+          var date, ref;
           date = ngModelCtrl.$viewValue;
           if (angular.isDefined(date) && date !== null) {
-            return element.data('DateTimePicker').date(moment.tz(moment(+date).format(), scope.shTimezone));
+            return (ref = element.data('DateTimePicker')) != null ? ref.date(moment.tz(moment(+date).format(), scope.shTimezone)) : void 0;
           }
         };
         ngModelCtrl.$parsers.push(function(data) {
@@ -442,31 +447,34 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           }
         });
         element.bind('dp.hide', function(data) {
+          var ref;
           if (!moment(ngModelCtrl.$viewValue, 'DD-MM-YYYY, HH:mm (z)').isValid()) {
             ngModelCtrl.$setViewValue(null);
-            return element.data('DateTimePicker').date(null);
+            return (ref = element.data('DateTimePicker')) != null ? ref.date(null) : void 0;
           }
         });
         scope.$watch('shFromTime', function(newVal, oldVal) {
+          var ref, ref1;
           if (newVal != null) {
-            return element.data('DateTimePicker').minDate(moment.tz(newVal * 1, scope.shTimezone));
+            return (ref = element.data('DateTimePicker')) != null ? ref.minDate(moment.tz(newVal * 1, scope.shTimezone)) : void 0;
           } else {
-            return element.data('DateTimePicker').minDate(false);
+            return (ref1 = element.data('DateTimePicker')) != null ? ref1.minDate(false) : void 0;
           }
         });
         scope.$watch('shThruTime', function(newVal, oldVal) {
+          var ref, ref1;
           if (newVal != null) {
-            return element.data('DateTimePicker').maxDate(moment.tz(newVal * 1, scope.shTimezone));
+            return (ref = element.data('DateTimePicker')) != null ? ref.maxDate(moment.tz(newVal * 1, scope.shTimezone)) : void 0;
           } else {
-            return element.data('DateTimePicker').maxDate(false);
+            return (ref1 = element.data('DateTimePicker')) != null ? ref1.maxDate(false) : void 0;
           }
         });
         return scope.$watch('shTimezone', function(newVal, oldVal) {
-          var date;
+          var date, ref;
           if (newVal != null) {
             date = ngModelCtrl.$modelValue;
             if (angular.isDefined(date) && date !== null) {
-              return element.data('DateTimePicker').date(moment.tz(moment(+date).format(), scope.shTimezone));
+              return (ref = element.data('DateTimePicker')) != null ? ref.date(moment.tz(moment(+date).format(), scope.shTimezone)) : void 0;
             }
           }
         });
@@ -1045,7 +1053,6 @@ shTableModule.factory('ShTableParams', [
         sorting: params.sorting,
         autoload: (ref2 = params.autoload) != null ? ref2 : true
       };
-      this.$initialized = false;
       this.$totalCount = 0;
       this.$loading = false;
       this.getData = params.getData;
@@ -1065,8 +1072,7 @@ shTableModule.factory('ShTableParams', [
        *
        */
       this.initialize = function() {
-        this.reload();
-        return this.$initialized = true;
+        return this.reload();
       };
 
       /**
@@ -2799,11 +2805,16 @@ shTableModule.run([
      */
     return $rootScope.shTableFilter = [
       '$filter', '$injector', '$rootScope', 'HelperService', function($filter, $injector, $rootScope, HelperService) {
-        var dateParams, numberParams;
-        this.filterParams = {};
+        var dateParams, numberParams, self;
+        self = this;
+        if (this.filterParams == null) {
+          this.filterParams = {};
+        }
         this.filterRegion = {
           visible: true
         };
+        this.form = {};
+        $injector.invoke($rootScope.shForm, this.form);
         dateParams = {};
         this.filterLabel = {};
         this.filterCollection = {};
@@ -2818,68 +2829,132 @@ shTableModule.run([
           this.tableParams.$params.pageNumber = 1;
           return this.refreshGrid();
         };
-        this.filterDateAny = function(shFilter) {
-          this.prepareFilterDate(shFilter);
+        this.filterDateLabel = function(keyword, shFilter, n) {
+          switch (keyword) {
+            case 'ANY':
+              return $filter('translate')('LABEL_ALL');
+            case 'TODAY':
+              return $filter('translate')('LABEL_TODAY');
+            case 'PAST_N_DAYS':
+              return $filter('translate')('LABEL_FROM') + ' ' + (n === 1 ? $filter('translate')('LABEL_YESTERDAY') : moment().subtract(n, 'days').fromNow());
+            case 'PAST_N_WEEKS':
+              return $filter('translate')('LABEL_FROM') + ' ' + moment().subtract(n, 'weeks').fromNow();
+            case 'PAST_N_MONTHS':
+              return $filter('translate')('LABEL_FROM') + ' ' + moment().subtract(n, 'months').fromNow();
+            case 'PAST_N_YEARS':
+              return $filter('translate')('LABEL_FROM') + ' ' + moment().subtract(n, 'years').fromNow();
+            case 'NEXT_N_DAYS':
+              if (n === 1) {
+                return $filter('translate')('LABEL_THRU') + ' ' + $filter('translate')('LABEL_TOMORROW');
+              } else {
+                return moment().add(n, 'days').fromNow() + ' ' + $filter('translate')('LABEL_AHEAD');
+              }
+              break;
+            case 'NEXT_N_WEEKS':
+              return moment().add(n, 'weeks').fromNow() + ' ' + $filter('translate')('LABEL_AHEAD');
+            case 'NEXT_N_MONTHS':
+              return moment().add(n, 'months').fromNow() + ' ' + $filter('translate')('LABEL_AHEAD');
+            case 'NEXT_N_YEARS':
+              return moment().add(n, 'years').fromNow() + ' ' + $filter('translate')('LABEL_AHEAD');
+          }
+        };
+        this.filterDate = function(keyword, shFilter, n) {
+          var fromDate, thruDate;
+          if (keyword === 'RANGE' || keyword === 'CERTAIN') {
+            switch (keyword) {
+              case 'RANGE':
+                fromDate = this.filterParams[shFilter + "_gteqdate"];
+                thruDate = this.filterParams[shFilter + "_lteqdate"];
+                this.prepareFilterDate(shFilter);
+                this.filterDateRange(shFilter, fromDate, thruDate);
+                this.filterLabel[shFilter] = moment(fromDate).format('DD-MM-YYYY') + ' - ' + moment(thruDate).format('DD-MM-YYYY');
+                break;
+              case 'CERTAIN':
+                fromDate = this.filterParams[shFilter + "_gteqdate"];
+                thruDate = fromDate;
+                this.prepareFilterDate(shFilter);
+                this.filterDateRange(shFilter, fromDate, thruDate);
+                this.filterLabel[shFilter] = moment(fromDate).format('DD-MM-YYYY');
+            }
+          } else {
+            this.prepareFilterDate(shFilter);
+            switch (keyword) {
+              case 'ANY':
+                this.filterDateAny(shFilter);
+                break;
+              case 'TODAY':
+                this.filterDateToday(shFilter);
+                break;
+              case 'PAST_N_DAYS':
+                this.filterDatePastNDays(shFilter, n);
+                break;
+              case 'PAST_N_WEEKS':
+                this.filterDatePastNWeeks(shFilter, n);
+                break;
+              case 'PAST_N_MONTHS':
+                this.filterDatePastNMonths(shFilter, n);
+                break;
+              case 'PAST_N_YEARS':
+                this.filterDatePastNYears(shFilter, n);
+                break;
+              case 'NEXT_N_DAYS':
+                this.filterDateNextNDays(shFilter, n);
+                break;
+              case 'NEXT_N_WEEKS':
+                this.filterDateNextNWeeks(shFilter, n);
+                break;
+              case 'NEXT_N_MONTHS':
+                this.filterDateNextNMonths(shFilter, n);
+                break;
+              case 'NEXT_N_YEARS':
+                this.filterDateNextNYears(shFilter, n);
+            }
+            this.filterLabel[shFilter] = this.filterDateLabel(keyword, shFilter, n);
+          }
           return this.executeFilterDate();
+        };
+        this.filterDateAny = function(shFilter) {
+
+          /* */
         };
         this.filterDateToday = function(shFilter) {
-          this.prepareFilterDate(shFilter);
-          dateParams[shFilter + "_eqdate"] = moment().format('YYYY-MM-DD');
-          return this.executeFilterDate();
+          return dateParams[shFilter + "_eqdate"] = moment().format('YYYY-MM-DD');
         };
         this.filterDatePastNDays = function(shFilter, n) {
-          this.prepareFilterDate(shFilter);
           dateParams[shFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
-          dateParams[shFilter + "_gteqdate"] = moment().subtract('days', n).format('YYYY-MM-DD');
-          return this.executeFilterDate();
+          return dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'days').format('YYYY-MM-DD');
         };
         this.filterDatePastNWeeks = function(shFilter, n) {
-          this.prepareFilterDate(shFilter);
           dateParams[shFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
-          dateParams[shFilter + "_gteqdate"] = moment().subtract('weeks', n).format('YYYY-MM-DD');
-          return this.executeFilterDate();
+          return dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'weeks').format('YYYY-MM-DD');
         };
         this.filterDatePastNMonths = function(shFilter, n) {
-          this.prepareFilterDate(shFilter);
           dateParams[shFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
-          dateParams[shFilter + "_gteqdate"] = moment().subtract('months', n).format('YYYY-MM-DD');
-          return this.executeFilterDate();
+          return dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'months').format('YYYY-MM-DD');
         };
         this.filterDatePastNYears = function(shFilter, n) {
-          this.prepareFilterDate(shFilter);
           dateParams[shFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
-          dateParams[shFilter + "_gteqdate"] = moment().subtract('years', n).format('YYYY-MM-DD');
-          return this.executeFilterDate();
+          return dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'years').format('YYYY-MM-DD');
         };
-        this.filterDateRange = function(shFilter) {
-          var fromDate, thruDate;
-          fromDate = this.filterParams[shFilter + "_gteqdate"];
-          thruDate = this.filterParams[shFilter + "_lteqdate"];
-          this.prepareFilterDate(shFilter);
-          if (fromDate === void 0 && thruDate === void 0) {
-            this.filterLabel[shFilter] = 'All';
-          } else if (fromDate === void 0) {
-            this.filterLabel[shFilter] = 'Before ' + moment(thruDate).format('DD-MM-YYYY');
-          } else if (thruDate === void 0) {
-            this.filterLabel[shFilter] = 'After ' + moment(fromDate).format('DD-MM-YYYY');
-          } else {
-            this.filterLabel[shFilter] = moment(fromDate).format('DD-MM-YYYY') + ' - ' + moment(thruDate).format('DD-MM-YYYY');
-          }
+        this.filterDateNextNDays = function(shFilter, n) {
+          dateParams[shFilter + "_lteqdate"] = moment().add(n, 'days').format('YYYY-MM-DD');
+          return dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
+        };
+        this.filterDateNextNWeeks = function(shFilter, n) {
+          dateParams[shFilter + "_lteqdate"] = moment().add(n, 'weeks').format('YYYY-MM-DD');
+          return dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
+        };
+        this.filterDateNextNMonths = function(shFilter, n) {
+          dateParams[shFilter + "_lteqdate"] = moment().add(n, 'months').format('YYYY-MM-DD');
+          return dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
+        };
+        this.filterDateNextNYears = function(shFilter, n) {
+          dateParams[shFilter + "_lteqdate"] = moment().add(n, 'years').format('YYYY-MM-DD');
+          return dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
+        };
+        this.filterDateRange = function(shFilter, fromDate, thruDate) {
           dateParams[shFilter + "_gteqdate"] = fromDate;
-          dateParams[shFilter + "_lteqdate"] = thruDate;
-          this.executeFilterDate();
-          angular.element("#date-filter-" + shFilter + "-modal").modal('hide');
-        };
-        this.getLabelDateRange = function(shFilter, leftDate, rightDate) {
-          if (!(leftDate === null || leftDate === void 0) && !(rightDate === null || rightDate === void 0)) {
-            return moment(leftDate).format('DD-MM-YYYY') + ' - ' + moment(rightDate).format('DD-MM-YYYY');
-          } else if (!(leftDate === null || leftDate === void 0)) {
-            return 'After ' + moment(leftDate).format('DD-MM-YYYY');
-          } else if (!(rightDate === null || rightDate === void 0)) {
-            return 'Before ' + moment(rightDate).format('DD-MM-YYYY');
-          } else {
-            return null;
-          }
+          return dateParams[shFilter + "_lteqdate"] = thruDate;
         };
         this.getLabelDateSpecific = function(shFilter) {
           return this.filterParams[shFilter + "_eqdate"] || null;
@@ -2974,7 +3049,7 @@ shTableModule.run([
           }
           if (key != null) {
             this.filterLabel[shFilter] = this.filterCollection[shFilter].map(function(o) {
-              return $filter('translate')(o.name);
+              return $filter('translate')(o[key + '']);
             }).join(', ');
             this.filterParams[shFilter + '_in'] = this.filterCollection[shFilter].map(function(o) {
               return o[key + ''];
@@ -3039,8 +3114,14 @@ shTableModule.run([
           return this.filterRegion.visible = !this.filterRegion.visible;
         };
         this.resetFilter = function() {
+          var k, ref, v;
           this.filterParams = {};
           this.filterLabel = {};
+          ref = this.filterCollection;
+          for (k in ref) {
+            v = ref[k];
+            HelperService.clearRowSelection(this.filterCollection[k]);
+          }
           return this.refreshGrid();
         };
         return this.isNoFilter = function() {
