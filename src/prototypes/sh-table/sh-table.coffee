@@ -47,6 +47,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
       #
       @resource = null unless @resource?
+      @columnDefs = [] unless @columnDefs?
       @localLookup = {}
       @sorting = id: "desc" unless @sorting?
       @autoload = true unless @autoload?
