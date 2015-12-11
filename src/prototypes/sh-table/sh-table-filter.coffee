@@ -218,14 +218,6 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         dateParams[shFilter+"_lteqdate"] = thruDate
 
 
-      @getLabelDateSpecific = (shFilter) ->
-        # empty space ('') is not the same with null
-        @filterParams[shFilter+"_eqdate"] or null
-
-      @openDateFilterModal = (shFilter) ->
-        angular.element("#date-filter-#{shFilter}-modal").modal('show')
-        return
-
 
 
       # =========================================================================
@@ -245,41 +237,90 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         @tableParams.$params.pageNumber = 1
         @refreshGrid()
 
-      @filterNumberAny = (shFilter) ->
-        console.log '@filterNumberAny', shFilter
-        @prepareFilterNumber(shFilter)
+      @filterNumberLabel = (keyword, shFilter, leftNumber, rightNumber) ->
+        leftNumber = numberParams[shFilter+"_gteq"] unless leftNumber?
+        rightNumber = numberParams[shFilter+"_lteq"] unless rightNumber?
+        eqNumber = if numberParams[shFilter+"_eq"]? then numberParams[shFilter+"_eq"] else leftNumber
+
+        switch keyword
+          when 'ANY'
+            $filter('translate')('LABEL_ALL')
+
+          when 'BETWEEN'
+            $filter('number')(leftNumber) + ' - ' + $filter('number')(rightNumber)
+
+          when 'LOWER_THAN'
+            '≤ ' + $filter('number')(rightNumber)
+
+          when 'GREATER_THAN'
+            '≥ ' + $filter('number')(leftNumber)
+
+          when 'RANGE'
+            if leftNumber? and rightNumber?
+              if leftNumber is rightNumber
+                $filter('number')(leftNumber)
+              else
+                $filter('number')(leftNumber) + ' - ' + $filter('number')(rightNumber)
+            else if leftNumber?
+              '≥ ' + $filter('number')(leftNumber)
+            else if rightNumber?
+              '≤ ' + $filter('number')(rightNumber)
+            else
+              $filter('translate')('LABEL_ALL')
+
+          when 'CERTAIN'
+            $filter('number')(eqNumber)
+
+
+      @filterNumber = (keyword, shFilter, leftNumber, rightNumber) ->
+        switch keyword
+          when 'ANY'
+            @prepareFilterNumber(shFilter)
+            @filterNumberAny(shFilter)
+
+          when 'BETWEEN'
+            @prepareFilterNumber(shFilter)
+            @filterNumberRange(shFilter, leftNumber, rightNumber)
+
+          when 'LOWER_THAN'
+            rightNumber = @filterParams[shFilter+"_lteq"]
+            @prepareFilterNumber(shFilter)
+            @filterNumberRange(shFilter, null, rightNumber)
+
+          when 'GREATER_THAN'
+            leftNumber = @filterParams[shFilter+"_gteq"]
+            @prepareFilterNumber(shFilter)
+            @filterNumberRange(shFilter, leftNumber, null)
+
+          when 'RANGE'
+            leftNumber = @filterParams[shFilter+"_gteq"]
+            rightNumber = @filterParams[shFilter+"_lteq"]
+            @prepareFilterNumber(shFilter)
+            @filterNumberRange(shFilter, leftNumber, rightNumber)
+
+          when 'CERTAIN'
+            eqNumber = @filterParams[shFilter+"_eq"]
+            @prepareFilterNumber(shFilter)
+            @filterNumberSpecific(shFilter, eqNumber)
+
+        @filterLabel[shFilter] = @filterNumberLabel(keyword, shFilter)
+
         @executeFilterNumber()
+
+
+      @filterNumberAny = (shFilter) ->
+        ### ###
 
       @filterNumberSpecific = (shFilter, number) ->
-        console.log '@filterNumberSpecific', number
-        @prepareFilterNumber(shFilter)
-        numberParams[shFilter+"_eq"] = number unless (number is null or number is undefined)
-        @executeFilterNumber()
+        numberParams[shFilter+"_eq"] = number
 
       @filterNumberRange = (shFilter, leftNumber, rightNumber) ->
-        console.log '@filterNumberRange', shFilter, leftNumber, rightNumber
-        @prepareFilterNumber(shFilter)
-        numberParams[shFilter+"_gteq"] = leftNumber unless (leftNumber is null or leftNumber is undefined)
-        numberParams[shFilter+"_lteq"] = rightNumber unless (rightNumber is null or rightNumber is undefined)
-        @executeFilterNumber()
+        numberParams[shFilter+"_gteq"] = leftNumber if leftNumber?
+        numberParams[shFilter+"_lteq"] = rightNumber if rightNumber?
+        if leftNumber? and rightNumber? and leftNumber > rightNumber
+          numberParams[shFilter+"_gteq"] = rightNumber
+          numberParams[shFilter+"_lteq"] = leftNumber
 
-      @getLabelNumberRange = (shFilter, leftNumber, rightNumber) ->
-        if (not (leftNumber is null or leftNumber is undefined) and not (rightNumber is null or rightNumber is undefined))
-          $filter('number')(leftNumber) + ' - ' + $filter('number')(rightNumber)
-        else if (not (leftNumber is null or leftNumber is undefined))
-          '> ' + $filter('number')(leftNumber)
-        else if (not (rightNumber is null or rightNumber is undefined))
-          '< ' + $filter('number')(rightNumber)
-        else
-          null
-
-      @getLabelNumberSpecific = (shFilter) ->
-        # empty space ('') is not the same with null
-        @filterParams[shFilter+"_eq"] or null
-
-      @openNumberFilterModal = (shFilter) ->
-        angular.element("#number-filter-#{shFilter}-modal").modal('show')
-        return
 
 
 
