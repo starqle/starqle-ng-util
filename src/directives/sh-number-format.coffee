@@ -48,7 +48,7 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
       number = String(value).replace(/\,/g, '')
       number = parseFloat number
       if !number
-        return 0
+        return null
 
       if scope.shMin? and number < parseFloat(scope.shMin)
         return parseFloat(scope.shMin)
@@ -66,6 +66,7 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
         valid = valid && +scope.ngModel <= scope.shMax if scope.shMax?
         unless shAllowZero
           valid = +scope.ngModel isnt 0
+        valid = false unless scope.ngModel?
         ngModel.$setValidity 'required', valid
 
     element.on 'focusout', ->
