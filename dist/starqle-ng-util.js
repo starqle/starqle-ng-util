@@ -598,7 +598,7 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
           number = String(value).replace(/\,/g, '');
           number = parseFloat(number);
           if (!number) {
-            return 0;
+            return null;
           }
           if ((scope.shMin != null) && number < parseFloat(scope.shMin)) {
             return parseFloat(scope.shMin);
@@ -622,6 +622,9 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
             }
             if (!shAllowZero) {
               valid = +scope.ngModel !== 0;
+            }
+            if (scope.ngModel == null) {
+              valid = false;
             }
             return ngModel.$setValidity('required', valid);
           }
@@ -2956,12 +2959,6 @@ shTableModule.run([
           dateParams[shFilter + "_gteqdate"] = fromDate;
           return dateParams[shFilter + "_lteqdate"] = thruDate;
         };
-        this.getLabelDateSpecific = function(shFilter) {
-          return this.filterParams[shFilter + "_eqdate"] || null;
-        };
-        this.openDateFilterModal = function(shFilter) {
-          angular.element("#date-filter-" + shFilter + "-modal").modal('show');
-        };
         numberParams = {};
         this.prepareFilterNumber = function(shFilter) {
           numberParams = {};
@@ -2974,46 +2971,96 @@ shTableModule.run([
           this.tableParams.$params.pageNumber = 1;
           return this.refreshGrid();
         };
-        this.filterNumberAny = function(shFilter) {
-          console.log('@filterNumberAny', shFilter);
-          this.prepareFilterNumber(shFilter);
+        this.filterNumberLabel = function(keyword, shFilter, leftNumber, rightNumber) {
+          var eqNumber;
+          if (leftNumber == null) {
+            leftNumber = numberParams[shFilter + "_gteq"];
+          }
+          if (rightNumber == null) {
+            rightNumber = numberParams[shFilter + "_lteq"];
+          }
+          eqNumber = numberParams[shFilter + "_eq"] != null ? numberParams[shFilter + "_eq"] : leftNumber;
+          switch (keyword) {
+            case 'ANY':
+              return $filter('translate')('LABEL_ALL');
+            case 'BETWEEN':
+              return $filter('number')(leftNumber) + ' - ' + $filter('number')(rightNumber);
+            case 'LOWER_THAN':
+              return '≤ ' + $filter('number')(rightNumber);
+            case 'GREATER_THAN':
+              return '≥ ' + $filter('number')(leftNumber);
+            case 'RANGE':
+              if ((leftNumber != null) && (rightNumber != null)) {
+                if (leftNumber === rightNumber) {
+                  return $filter('number')(leftNumber);
+                } else {
+                  return $filter('number')(leftNumber) + ' - ' + $filter('number')(rightNumber);
+                }
+              } else if (leftNumber != null) {
+                return '≥ ' + $filter('number')(leftNumber);
+              } else if (rightNumber != null) {
+                return '≤ ' + $filter('number')(rightNumber);
+              } else {
+                return $filter('translate')('LABEL_ALL');
+              }
+              break;
+            case 'CERTAIN':
+              return $filter('number')(eqNumber);
+          }
+        };
+        this.filterNumber = function(keyword, shFilter, leftNumber, rightNumber) {
+          var eqNumber;
+          switch (keyword) {
+            case 'ANY':
+              this.prepareFilterNumber(shFilter);
+              this.filterNumberAny(shFilter);
+              break;
+            case 'BETWEEN':
+              this.prepareFilterNumber(shFilter);
+              this.filterNumberRange(shFilter, leftNumber, rightNumber);
+              break;
+            case 'LOWER_THAN':
+              rightNumber = this.filterParams[shFilter + "_lteq"];
+              this.prepareFilterNumber(shFilter);
+              this.filterNumberRange(shFilter, null, rightNumber);
+              break;
+            case 'GREATER_THAN':
+              leftNumber = this.filterParams[shFilter + "_gteq"];
+              this.prepareFilterNumber(shFilter);
+              this.filterNumberRange(shFilter, leftNumber, null);
+              break;
+            case 'RANGE':
+              leftNumber = this.filterParams[shFilter + "_gteq"];
+              rightNumber = this.filterParams[shFilter + "_lteq"];
+              this.prepareFilterNumber(shFilter);
+              this.filterNumberRange(shFilter, leftNumber, rightNumber);
+              break;
+            case 'CERTAIN':
+              eqNumber = this.filterParams[shFilter + "_eq"];
+              this.prepareFilterNumber(shFilter);
+              this.filterNumberSpecific(shFilter, eqNumber);
+          }
+          this.filterLabel[shFilter] = this.filterNumberLabel(keyword, shFilter);
           return this.executeFilterNumber();
+        };
+        this.filterNumberAny = function(shFilter) {
+
+          /* */
         };
         this.filterNumberSpecific = function(shFilter, number) {
-          console.log('@filterNumberSpecific', number);
-          this.prepareFilterNumber(shFilter);
-          if (!(number === null || number === void 0)) {
-            numberParams[shFilter + "_eq"] = number;
-          }
-          return this.executeFilterNumber();
+          return numberParams[shFilter + "_eq"] = number;
         };
         this.filterNumberRange = function(shFilter, leftNumber, rightNumber) {
-          console.log('@filterNumberRange', shFilter, leftNumber, rightNumber);
-          this.prepareFilterNumber(shFilter);
-          if (!(leftNumber === null || leftNumber === void 0)) {
+          if (leftNumber != null) {
             numberParams[shFilter + "_gteq"] = leftNumber;
           }
-          if (!(rightNumber === null || rightNumber === void 0)) {
+          if (rightNumber != null) {
             numberParams[shFilter + "_lteq"] = rightNumber;
           }
-          return this.executeFilterNumber();
-        };
-        this.getLabelNumberRange = function(shFilter, leftNumber, rightNumber) {
-          if (!(leftNumber === null || leftNumber === void 0) && !(rightNumber === null || rightNumber === void 0)) {
-            return $filter('number')(leftNumber) + ' - ' + $filter('number')(rightNumber);
-          } else if (!(leftNumber === null || leftNumber === void 0)) {
-            return '> ' + $filter('number')(leftNumber);
-          } else if (!(rightNumber === null || rightNumber === void 0)) {
-            return '< ' + $filter('number')(rightNumber);
-          } else {
-            return null;
+          if ((leftNumber != null) && (rightNumber != null) && leftNumber > rightNumber) {
+            numberParams[shFilter + "_gteq"] = rightNumber;
+            return numberParams[shFilter + "_lteq"] = leftNumber;
           }
-        };
-        this.getLabelNumberSpecific = function(shFilter) {
-          return this.filterParams[shFilter + "_eq"] || null;
-        };
-        this.openNumberFilterModal = function(shFilter) {
-          angular.element("#number-filter-" + shFilter + "-modal").modal('show');
         };
         this.filterTextCont = function(shFilter) {
           console.log('bar');
@@ -3850,6 +3897,9 @@ shTableModule.run([
         this.entity = {};
         if (this.resource == null) {
           this.resource = null;
+        }
+        if (this.columnDefs == null) {
+          this.columnDefs = [];
         }
         this.localLookup = {};
         if (this.sorting == null) {
