@@ -74,7 +74,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
       ###*
       # @ngdoc method
-      # @name rowEventClass
+      # @name rowRestEventClass
       #
       # @description
       # Get CSS class based on state
