@@ -40,10 +40,11 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       #
       self = this
 
-      #
-      $injector.invoke $rootScope.shTableFilter, this
-      $injector.invoke $rootScope.shTableHelper, this
-      $injector.invoke $rootScope.shTableHook, this
+      @beforeRefreshGridHooks = []
+      @refreshGridSuccessHooks = []
+      @refreshGridErrorHooks = []
+      @afterRefreshGridHooks = []
+
 
       ###*
       # @ngdoc method
@@ -73,7 +74,25 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @returns {*}
       ###
       @refreshGrid = () ->
-        @tableParams.reload()
+        hook() for hook in self.beforeRefreshGridHooks
+        deferred = $q.defer()
+
+        # GEt the entities
+        @tableParams.reload().then(
+          (success) ->
+            hook(success) for hook in self.refreshGridSuccessHooks
+            deferred.resolve success
+
+          (error) ->
+            hook(error) for hook in self.refreshGridErrorHooks
+            deferred.reject error
+
+        ).finally(
+          () ->
+            hook() for hook in self.afterRefreshGridHooks
+        )
+        deferred.promise
+
 
 
       ###*
@@ -156,6 +175,13 @@ shTableModule.run ['$rootScope', ($rootScope) ->
               field: columnDef.field
 
         return processedColumnDefs
+
+
+      #
+      $injector.invoke $rootScope.shTableFilter, this
+      $injector.invoke $rootScope.shTableHelper, this
+      $injector.invoke $rootScope.shTableHook, this
+
   ]
 
 
