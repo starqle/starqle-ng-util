@@ -176,6 +176,9 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
         hook() for hook in self.beforeEditEntityHooks
         deferred = $q.defer()
 
+        # Allow edit without providing parameter id. (self edit)
+        id = @id unless id
+
         # Fetch entity for editing
         @shApi.edit(
           id
@@ -215,6 +218,11 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       @updateEntity = (id, entity) ->
         hook() for hook in self.beforeUpdateEntityHooks
         deferred = $q.defer()
+
+        # Allow edit without providing parameter id. (self update)
+        if angular.isObject(id)
+          entity = id
+          id = @id
 
         # Check if the entity is a FormData (Useful for file uploaded form)
         data = {data: entity}
@@ -260,6 +268,9 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       @deleteEntity = (id) ->
         hook() for hook in self.beforeDeleteEntityHooks
         deferred = $q.defer()
+
+        # Allow delete without providing parameter id. (self delete)
+        id = @id unless id
 
         # Delete entity from database
         @shApi.delete(
