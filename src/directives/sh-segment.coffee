@@ -34,7 +34,7 @@ angular.module('sh.segment', []
 
   restrict: 'C'
   replace: false
-  compile: (element, attrs) ->
+  link: (scope, element, attrs) ->
     body = element.find('.table-scroll-body')
     head = element.find('.table-scroll-head')
     foot = element.find('.table-scroll-foot')
