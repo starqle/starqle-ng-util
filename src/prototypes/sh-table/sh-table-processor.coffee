@@ -28,6 +28,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
   #
   # @description
   # shTableProcessor
+  #
   ###
   $rootScope.shTableProcessor = [
     '$injector'
@@ -51,7 +52,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @name goToPage
       #
       # @description
-      #
+      # Assign page number to `this.tableParams.$params.pageNumber`, then calling `this.refreshGrid()` in appropriate format
       #
       # @returns {*}
       ###
@@ -69,7 +70,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @name refreshGrid
       #
       # @description
-      #
+      # Calling `tableParams.reload()`
       #
       # @returns {*}
       ###
@@ -100,7 +101,8 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @name generateGridParams
       #
       # @description
-      #
+      # Generate appropriate GET parameters from `tableParams.$params`.
+      # Providing `column_defs`, `page`, `per_page`, `sort_info`, and `filter_params`
       #
       # @returns {Object} Grid params object
       ###
@@ -133,7 +135,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @name getPagedDataAsync
       #
       # @description
-      #
+      # Calling `this.getEntities()` after processing `this.optParams`
       #
       # @returns {promise}
       ###
