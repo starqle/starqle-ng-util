@@ -44,6 +44,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       @entity = {}
 
       #
+      @id = null unless @id?
       @resource = null unless @resource?
       @localLookup = {}
       @sorting = id: "desc" unless @sorting?
