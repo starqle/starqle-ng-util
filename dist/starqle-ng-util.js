@@ -890,12 +890,17 @@ shSpinningModule.directive("shSpinning", [
         scope.$watch((function() {
           return ShSpinningService.isSpinning(attrs.shSpinning);
         }, function(newVal, oldVal) {
+          var ref, ref1;
           if (ShSpinningService.isSpinning(attrs.shSpinning)) {
             angular.element(element).addClass('sh-spinning-spin');
-            scope.spinner.spin(element[0]);
+            if ((ref = scope.spinner) != null) {
+              ref.spin(element[0]);
+            }
           } else {
             angular.element(element).removeClass('sh-spinning-spin');
-            scope.spinner.stop();
+            if ((ref1 = scope.spinner) != null) {
+              ref1.stop();
+            }
           }
         }));
       }
@@ -2784,6 +2789,9 @@ shPersistenceModule.run([
         var self;
         self = this;
         this.entity = {};
+        if (this.id == null) {
+          this.id = null;
+        }
         if (this.resource == null) {
           this.resource = null;
         }
