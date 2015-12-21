@@ -2802,7 +2802,7 @@ shPersistenceModule.run([
           };
         }
         if (this.autoload == null) {
-          this.autoload = true;
+          this.autoload = false;
         }
         $injector.invoke($rootScope.shPersistenceHook, this);
         if (this.autoload) {
@@ -3965,7 +3965,7 @@ shTableModule.run([
           };
         }
         if (this.autoload == null) {
-          this.autoload = true;
+          this.autoload = false;
         }
         $injector.invoke($rootScope.shTableProcessor, this);
         this.tableParams = new ShTableParams({
