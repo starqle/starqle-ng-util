@@ -50,7 +50,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @columnDefs = [] unless @columnDefs?
       @localLookup = {}
       @sorting = id: "desc" unless @sorting?
-      @autoload = true unless @autoload?
+      @autoload = false unless @autoload?
 
       #
       $injector.invoke $rootScope.shTableProcessor, this
