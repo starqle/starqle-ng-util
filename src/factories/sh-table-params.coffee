@@ -34,7 +34,7 @@ shTableModule.factory(
 
     ###*
     # @ngdoc method
-    # @name reload
+    # @name ShTableParams
     #
     # @param {}
     #
@@ -56,7 +56,6 @@ shTableModule.factory(
 
       @$totalCount = 0
       @$loading = false
-      @getData = params.getData
 
       @$data = []
 
@@ -81,7 +80,7 @@ shTableModule.factory(
 
         self = this
         self.$loading = true
-        self.getData().then(
+        params.getData().then(
           (success) ->
             # Assign returned items to $data
             self.$data = success.items
