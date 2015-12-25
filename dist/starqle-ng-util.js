@@ -1041,7 +1041,7 @@ shTableModule.factory('ShTableParams', [
 
     /**
      * @ngdoc method
-     * @name reload
+     * @name ShTableParams
      *
      * @param {}
      *
@@ -1063,25 +1063,8 @@ shTableModule.factory('ShTableParams', [
       };
       this.$totalCount = 0;
       this.$loading = false;
-      this.getData = params.getData;
       this.$data = [];
       this.$pagination = [];
-
-      /**
-       * @ngdoc method
-       * @name initialize
-       *
-       * @param {}
-       *
-       * @returns promise
-       *
-       * @description
-       * ShTableParams factory
-       *
-       */
-      this.initialize = function() {
-        return this.reload();
-      };
 
       /**
        * @ngdoc method
@@ -1100,7 +1083,7 @@ shTableModule.factory('ShTableParams', [
         deferred = $q.defer();
         self = this;
         self.$loading = true;
-        self.getData().then(function(success) {
+        params.getData().then(function(success) {
           self.$data = success.items;
           self.$totalCount = success.totalCount;
           self.$pagination = self.generatePagination(self.$params.pageNumber, self.$params.perPage, self.$totalCount);
@@ -1143,8 +1126,7 @@ shTableModule.factory('ShTableParams', [
        */
       this.sortData = function(field, direction) {
         this.$params.sorting = {};
-        this.$params.sorting[field] = direction;
-        return this.reload();
+        return this.$params.sorting[field] = direction;
       };
 
       /**
@@ -2022,6 +2004,145 @@ shApiModule.run([
 
     /**
      * @ngdoc factory
+     * @name shApiHook
+     *
+     * @description
+     * ShTableRest
+     */
+    return $rootScope.shApiHook = [
+      '$q', '$injector', function($q, $injector) {
+        var self, shApi;
+        self = this;
+        if (this.resource == null) {
+          this.resource = null;
+        }
+        if (this.entity == null) {
+          this.entity = {};
+        }
+        if (this.lookup == null) {
+          this.lookup = {};
+        }
+        if (this.optParams == null) {
+          this.optParams = {};
+        }
+        this.сreatedIds = [];
+        this.updatedIds = [];
+        this.deletedIds = [];
+        shApi = {
+          resource: self.resource
+        };
+        this.beforeApiCallEntityHooks = {};
+        this.аpiCallEntitySuccessHooks = {};
+        this.аpiCallEntityErrorHooks = {};
+        this.afterApiCallEntityHooks = {};
+
+        /**
+         * @ngdoc method
+         * @name apiCall
+         *
+         * @description
+         * Call api by name
+         *
+         * @param {Object} opts Parameter objects method, name, id, entity
+         *
+         * @returns {promise}
+         */
+        this.apiCallEntity = function(opts) {
+          var apiParameters, data, deferred, hook, i, len, ref, ref1, ref2;
+          deferred = $q.defer();
+          if (!((opts.method != null) && ((ref = opts.method) === 'GET' || ref === 'POST' || ref === 'PUT' || ref === 'DELETE'))) {
+            console.log('STARQLE_NG_UTIL: Unknown Method');
+            deferred.reject({});
+          } else if (opts.name == null) {
+            console.log('STARQLE_NG_UTIL: Options name is required');
+            deferred.reject({});
+          } else {
+            apiParameters = {
+              name: opts.name,
+              method: opts.method,
+              params: this.optParams
+            };
+            if (opts.id) {
+              apiParameters.id = opts.id;
+            }
+            switch (opts.method) {
+              case 'GET':
+              case 'DELETE':
+                if (opts.entity != null) {
+                  console.log('STARQLE_NG_UTIL: Options entity should not be provided');
+                  deferred.reject({});
+                }
+                break;
+              case 'POST':
+              case 'PUT':
+                if (opts.entity == null) {
+                  console.log('STARQLE_NG_UTIL: Options entity is required');
+                  deferred.reject({});
+                } else {
+                  data = {
+                    data: opts.entity
+                  };
+                  if (Object.prototype.toString.call(opts.entity).slice(8, -1) === 'FormData') {
+                    data = opts.entity;
+                  }
+                  apiParameters.data = data;
+                }
+            }
+            ref2 = (ref1 = self.beforeApiCallEntityHooks[opts.name]) != null ? ref1 : [];
+            for (i = 0, len = ref2.length; i < len; i++) {
+              hook = ref2[i];
+              hook();
+            }
+            shApi.apiCall(apiParameters).then(function(success) {
+              var j, len1, ref3, ref4, ref5, ref6, ref7;
+              if ((ref3 = opts.method) === 'POST' || ref3 === 'PUT') {
+                self.updatedIds.push(id);
+              }
+              if ((ref4 = opts.method) === 'DELETE') {
+                self.deletedIds.push(id);
+              }
+              if ((ref5 = opts.method) === 'DELETE' || ref5 === 'POST' || ref5 === 'PUT') {
+                self.refreshGrid();
+              }
+              ref7 = (ref6 = self.аpiCallEntitySuccessHooks[opts.name]) != null ? ref6 : [];
+              for (j = 0, len1 = ref7.length; j < len1; j++) {
+                hook = ref7[j];
+                hook(success);
+              }
+              return deferred.resolve(success);
+            }, function(error) {
+              var j, len1, ref3, ref4;
+              ref4 = (ref3 = self.аpiCallEntityErrorHooks[opts.name]) != null ? ref3 : [];
+              for (j = 0, len1 = ref4.length; j < len1; j++) {
+                hook = ref4[j];
+                hook(error);
+              }
+              return deferred.reject(error);
+            })["finally"](function() {
+              var j, len1, ref3, ref4, results;
+              ref4 = (ref3 = self.afterApiCallEntityHooks[opts.name]) != null ? ref3 : [];
+              results = [];
+              for (j = 0, len1 = ref4.length; j < len1; j++) {
+                hook = ref4[j];
+                results.push(hook());
+              }
+              return results;
+            });
+          }
+          return deferred.promise;
+        };
+        return $injector.invoke($rootScope.shApi, shApi);
+      }
+    ];
+  }
+]);
+
+"use strict";
+shApiModule.run([
+  '$rootScope', function($rootScope) {
+
+    /**
+     * @ngdoc factory
      * @name shApi
      *
      * @description
@@ -2161,7 +2282,7 @@ shApiModule.run([
          *
          * @returns {promise}
          */
-        return this["delete"] = function(id, params) {
+        this["delete"] = function(id, params) {
           var deferred;
           deferred = $q.defer();
           this.resource["delete"](angular.extend({
@@ -2171,6 +2292,52 @@ shApiModule.run([
           }, function(error) {
             return deferred.reject(error);
           });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name apiCall
+         *
+         * @description
+         * apiCall `GET`
+         * apiCall `POST`
+         * apiCall `PUT`
+         * apiCall `DELETE`
+         *
+         * @param {String} id Record id in string or UUID
+         * @param {Object} params Parameter objects
+         *
+         * @returns {promise}
+         */
+        return this.apiCall = function(opts) {
+          var deferred;
+          deferred = $q.defer();
+          switch (opts.method) {
+            case 'GET':
+            case 'DELETE':
+              this.resource[opts.name](angular.extend({
+                id: opts.id
+              }, opts.params)).$promise.then(function(success) {
+                return deferred.resolve(success);
+              }, function(error) {
+                return deferred.reject(error);
+              });
+              break;
+            case 'POST':
+            case 'PUT':
+              this.resource[opts.name](angular.extend({
+                id: opts.id
+              }, opts.params), opts.data).$promise.then(function(success) {
+                return deferred.resolve(success);
+              }, function(error) {
+                return deferred.reject(error);
+              });
+              break;
+            default:
+              console.log('STARQLE_NG_UTIL: Unknown Method');
+              deferred.reject({});
+          }
           return deferred.promise;
         };
       }
@@ -2380,7 +2547,7 @@ shPersistenceModule.run([
      */
     return $rootScope.shPersistenceHook = [
       '$q', '$injector', function($q, $injector) {
-        var self;
+        var self, shApi;
         self = this;
         if (this.id == null) {
           this.id = null;
@@ -2397,7 +2564,7 @@ shPersistenceModule.run([
         if (this.optParams == null) {
           this.optParams = {};
         }
-        this.shApi = {
+        shApi = {
           resource: self.resource
         };
         this.beforeNewEntityHooks = [];
@@ -2442,7 +2609,7 @@ shPersistenceModule.run([
             hook();
           }
           deferred = $q.defer();
-          this.shApi["new"](this.optParams).then(function(success) {
+          shApi["new"](this.optParams).then(function(success) {
             var j, len1, ref1;
             self.entity = success.data;
             if (success.lookup != null) {
@@ -2500,7 +2667,7 @@ shPersistenceModule.run([
           if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
             data = entity;
           }
-          this.shApi.create(this.optParams, data).then(function(success) {
+          shApi.create(this.optParams, data).then(function(success) {
             var j, len1, ref1;
             self.entity = success.data;
             if (success.lookup != null) {
@@ -2555,7 +2722,7 @@ shPersistenceModule.run([
           if (!id) {
             id = this.id;
           }
-          this.shApi.edit(id, this.optParams).then(function(success) {
+          shApi.edit(id, this.optParams).then(function(success) {
             var j, len1, ref1;
             self.entity = success.data;
             if (success.lookup != null) {
@@ -2618,7 +2785,7 @@ shPersistenceModule.run([
           if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
             data = entity;
           }
-          this.shApi.update(id, this.optParams, data).then(function(success) {
+          shApi.update(id, this.optParams, data).then(function(success) {
             var j, len1, ref1;
             self.entity = success.data;
             if (success.lookup != null) {
@@ -2673,7 +2840,7 @@ shPersistenceModule.run([
           if (!id) {
             id = this.id;
           }
-          this.shApi["delete"](id, this.optParams).then(function(success) {
+          shApi["delete"](id, this.optParams).then(function(success) {
             var j, len1, ref1;
             ref1 = self.deleteEntitySuccessHooks;
             for (j = 0, len1 = ref1.length; j < len1; j++) {
@@ -2766,7 +2933,8 @@ shPersistenceModule.run([
           var ref;
           return (ref = self.lookup) != null ? ref[key] : void 0;
         };
-        $injector.invoke($rootScope.shApi, this.shApi);
+        $injector.invoke($rootScope.shApi, shApi);
+        $injector.invoke($rootScope.shApiHook, self);
         $injector.invoke($rootScope.shPersistenceHookNotification, self);
       }
     ];
@@ -2801,13 +2969,7 @@ shPersistenceModule.run([
             id: "desc"
           };
         }
-        if (this.autoload == null) {
-          this.autoload = false;
-        }
-        $injector.invoke($rootScope.shPersistenceHook, this);
-        if (this.autoload) {
-          return this.initEntity();
-        }
+        return $injector.invoke($rootScope.shPersistenceHook, this);
       }
     ];
   }
@@ -3247,7 +3409,8 @@ shTableModule.run([
         this.sortableClick = function(fieldName) {
           var newDirection;
           newDirection = this.tableParams.isSortBy(fieldName, 'asc') ? 'desc' : 'asc';
-          return this.tableParams.sortData(fieldName, newDirection);
+          this.tableParams.sortData(fieldName, newDirection);
+          return this.refreshGrid();
         };
 
         /**
@@ -3375,7 +3538,7 @@ shTableModule.run([
      */
     return $rootScope.shTableHook = [
       '$q', '$injector', function($q, $injector) {
-        var self;
+        var self, shApi;
         self = this;
         if (this.resource == null) {
           this.resource = null;
@@ -3392,7 +3555,7 @@ shTableModule.run([
         this.сreatedIds = [];
         this.updatedIds = [];
         this.deletedIds = [];
-        this.shApi = {
+        shApi = {
           resource: self.resource
         };
         this.beforeGetEntitiesHooks = [];
@@ -3437,7 +3600,7 @@ shTableModule.run([
             hook();
           }
           deferred = $q.defer();
-          this.shApi.index(this.optParams).then(function(success) {
+          shApi.index(this.optParams).then(function(success) {
             var j, len1, ref1;
             ref1 = self.getEntitiesSuccessHooks;
             for (j = 0, len1 = ref1.length; j < len1; j++) {
@@ -3483,7 +3646,7 @@ shTableModule.run([
             hook();
           }
           deferred = $q.defer();
-          this.shApi["new"](this.optParams).then(function(success) {
+          shApi["new"](this.optParams).then(function(success) {
             var j, len1, ref1;
             self.entity = success.data;
             if (success.lookup != null) {
@@ -3541,7 +3704,7 @@ shTableModule.run([
           if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
             data = entity;
           }
-          this.shApi.create(this.optParams, data).then(function(success) {
+          shApi.create(this.optParams, data).then(function(success) {
             var j, len1, ref1;
             self.сreatedIds.push(success.data.id);
             self.entity = success.data;
@@ -3595,7 +3758,7 @@ shTableModule.run([
             hook();
           }
           deferred = $q.defer();
-          this.shApi.edit(id, this.optParams).then(function(success) {
+          shApi.edit(id, this.optParams).then(function(success) {
             var j, len1, ref1;
             self.entity = success.data;
             if (success.lookup != null) {
@@ -3654,7 +3817,7 @@ shTableModule.run([
           if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
             data = entity;
           }
-          this.shApi.update(id, this.optParams, data).then(function(success) {
+          shApi.update(id, this.optParams, data).then(function(success) {
             var j, len1, ref1;
             self.updatedIds.push(success.data.id);
             self.entity = success.data;
@@ -3708,7 +3871,7 @@ shTableModule.run([
             hook();
           }
           deferred = $q.defer();
-          this.shApi["delete"](id, this.optParams).then(function(success) {
+          shApi["delete"](id, this.optParams).then(function(success) {
             var j, len1, ref1;
             self.deletedIds.push(id);
             self.refreshGrid();
@@ -3754,7 +3917,8 @@ shTableModule.run([
           var ref;
           return (ref = self.lookup) != null ? ref[key] : void 0;
         };
-        $injector.invoke($rootScope.shApi, this.shApi);
+        $injector.invoke($rootScope.shApi, shApi);
+        $injector.invoke($rootScope.shApiHook, self);
         $injector.invoke($rootScope.shTableHookNotification, self);
       }
     ];
@@ -3767,13 +3931,12 @@ shTableModule.run([
 
     /**
      * @ngdoc factory
-     * @name shTableProcessor
+     * @name shTableParamsHook
      *
      * @description
-     * shTableProcessor
-     *
+     * ShTableRest
      */
-    return $rootScope.shTableProcessor = [
+    return $rootScope.shTableParamsHook = [
       '$injector', '$q', function($injector, $q) {
         var self;
         self = this;
@@ -3847,41 +4010,6 @@ shTableModule.run([
 
         /**
          * @ngdoc method
-         * @name generateGridParams
-         *
-         * @description
-         * Generate appropriate GET parameters from `tableParams.$params`.
-         * Providing `column_defs`, `page`, `per_page`, `sort_info`, and `filter_params`
-         *
-         * @returns {Object} Grid params object
-         */
-        this.generateGridParams = function() {
-          var directions, fields, gridParams, params, property;
-          params = this.tableParams.$params;
-          fields = [];
-          directions = [];
-          for (property in params.sorting) {
-            fields.push(property);
-            directions.push(params.sorting[property]);
-          }
-          gridParams = {
-            column_defs: JSON.stringify(this.getProcessedColumnDefs(this.columnDefs)),
-            page: params.pageNumber,
-            per_page: params.perPage,
-            sort_info: JSON.stringify({
-              fields: fields,
-              directions: directions
-            }),
-            filter_params: {}
-          };
-          if (this.filterParams) {
-            angular.extend(gridParams.filter_params, this.filterParams);
-          }
-          return gridParams;
-        };
-
-        /**
-         * @ngdoc method
          * @name getPagedDataAsync
          *
          * @description
@@ -3889,12 +4017,9 @@ shTableModule.run([
          *
          * @returns {promise}
          */
-        this.getPagedDataAsync = function() {
-          var deferred, gridParams, params;
+        return this.getPagedDataAsync = function() {
+          var deferred;
           deferred = $q.defer();
-          params = this.tableParams.$params;
-          gridParams = this.generateGridParams();
-          angular.extend(this.optParams, gridParams);
           this.getEntities().then(function(success) {
             return deferred.resolve({
               items: success.data.items,
@@ -3903,19 +4028,73 @@ shTableModule.run([
           });
           return deferred.promise;
         };
+      }
+    ];
+  }
+]);
+
+"use strict";
+shTableModule.run([
+  '$rootScope', function($rootScope) {
+
+    /**
+     * @ngdoc factory
+     * @name shTableProcessor
+     *
+     * @description
+     * shTableProcessor
+     *
+     */
+    return $rootScope.shTableProcessor = [
+      '$injector', function($injector) {
 
         /**
          * @ngdoc method
-         * @name sortableClass
+         * @name generateGridParams
          *
          * @description
-         * Get CSS class based on sortable state
+         * Generate appropriate GET parameters from `tableParams.$params`.
+         * Providing `column_defs`, `page`, `per_page`, `sort_info`, and `filter_params`
          *
-         * @param {String} fieldName Field/column name
-         *
-         * @returns {String} class for CSS usage
+         * @returns {Object} Grid params object
          */
-        this.getProcessedColumnDefs = function(columnDefs) {
+        this.generateGridParams = function(opts) {
+          var directions, fields, gridParams, params, property;
+          params = opts.params;
+          fields = [];
+          directions = [];
+          for (property in params.sorting) {
+            fields.push(property);
+            directions.push(params.sorting[property]);
+          }
+          gridParams = {
+            column_defs: JSON.stringify(this.getProcessedColumnDefs(opts.columnDefs)),
+            page: params.pageNumber,
+            per_page: params.perPage,
+            sort_info: JSON.stringify({
+              fields: fields,
+              directions: directions
+            }),
+            filter_params: {}
+          };
+          if (opts.filterParams) {
+            angular.extend(gridParams.filter_params, opts.filterParams);
+          }
+          return gridParams;
+        };
+
+        /**
+         * @ngdoc method
+         * @name getProcessedColumnDefs
+         *
+         * @description
+         * Returns processedColumnDefs
+         *
+         * @param Array columnDefs
+         *
+         * @returns Array class for CSS usage
+         */
+        return this.getProcessedColumnDefs = function(columnDefs) {
           var columnDef, i, len, processedColumnDefs;
           processedColumnDefs = [];
           for (i = 0, len = columnDefs.length; i < len; i++) {
@@ -3928,9 +4107,6 @@ shTableModule.run([
           }
           return processedColumnDefs;
         };
-        $injector.invoke($rootScope.shTableFilter, this);
-        $injector.invoke($rootScope.shTableHelper, this);
-        return $injector.invoke($rootScope.shTableHook, this);
       }
     ];
   }
@@ -3949,7 +4125,7 @@ shTableModule.run([
      */
     return $rootScope.shTable = [
       '$injector', '$q', 'ShTableParams', function($injector, $q, ShTableParams) {
-        var self;
+        var self, shTableProcessor;
         self = this;
         this.entity = {};
         if (this.resource == null) {
@@ -3964,22 +4140,28 @@ shTableModule.run([
             id: "desc"
           };
         }
-        if (this.autoload == null) {
-          this.autoload = false;
-        }
-        $injector.invoke($rootScope.shTableProcessor, this);
-        this.tableParams = new ShTableParams({
+        shTableProcessor = {};
+        $injector.invoke($rootScope.shTableFilter, this);
+        $injector.invoke($rootScope.shTableHelper, this);
+        $injector.invoke($rootScope.shTableHook, this);
+        $injector.invoke($rootScope.shTableParamsHook, this);
+        $injector.invoke($rootScope.shTableProcessor, shTableProcessor);
+        return this.tableParams = new ShTableParams({
           pageNumber: 1,
           perPage: 10,
           sortInfo: 'this is sort info',
           sorting: this.sorting,
           getData: function() {
+            var gridParams;
+            gridParams = shTableProcessor.generateGridParams({
+              params: self.tableParams.$params,
+              columnDefs: self.columnDefs,
+              filterParams: self.filterParams
+            });
+            angular.extend(self.optParams, gridParams);
             return self.getPagedDataAsync();
           }
         });
-        if (this.autoload) {
-          return this.tableParams.initialize();
-        }
       }
     ];
   }
