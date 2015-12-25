@@ -32,68 +32,9 @@ shTableModule.run ['$rootScope', ($rootScope) ->
   ###
   $rootScope.shTableProcessor = [
     '$injector'
-    '$q'
     (
       $injector
-      $q
     ) ->
-
-      #
-      self = this
-
-      @beforeRefreshGridHooks = []
-      @refreshGridSuccessHooks = []
-      @refreshGridErrorHooks = []
-      @afterRefreshGridHooks = []
-
-
-      ###*
-      # @ngdoc method
-      # @name goToPage
-      #
-      # @description
-      # Assign page number to `this.tableParams.$params.pageNumber`, then calling `this.refreshGrid()` in appropriate format
-      #
-      # @returns {*}
-      ###
-      @goToPage = (pageNumber, perPage) ->
-        if pageNumber?
-          @tableParams.$params.perPage = perPage or @tableParams.$params.perPage
-          @tableParams.$params.pageNumber = pageNumber
-
-        # Manually refresh with current page
-        @refreshGrid()
-
-
-      ###*
-      # @ngdoc method
-      # @name refreshGrid
-      #
-      # @description
-      # Calling `tableParams.reload()`
-      #
-      # @returns {*}
-      ###
-      @refreshGrid = () ->
-        hook() for hook in self.beforeRefreshGridHooks
-        deferred = $q.defer()
-
-        # GEt the entities
-        @tableParams.reload().then(
-          (success) ->
-            hook(success) for hook in self.refreshGridSuccessHooks
-            deferred.resolve success
-
-          (error) ->
-            hook(error) for hook in self.refreshGridErrorHooks
-            deferred.reject error
-
-        ).finally(
-          () ->
-            hook() for hook in self.afterRefreshGridHooks
-        )
-        deferred.promise
-
 
 
       ###*
@@ -106,8 +47,8 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       #
       # @returns {Object} Grid params object
       ###
-      @generateGridParams = ->
-        params = @tableParams.$params
+      @generateGridParams = (opts) ->
+        params = opts.params
 
         fields = []
         directions = []
@@ -116,7 +57,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
           directions.push params.sorting[property]
 
         gridParams =
-          column_defs: JSON.stringify @getProcessedColumnDefs(@columnDefs)
+          column_defs: JSON.stringify @getProcessedColumnDefs(opts.columnDefs)
           page: params.pageNumber
           per_page: params.perPage
           sort_info: JSON.stringify
@@ -124,50 +65,22 @@ shTableModule.run ['$rootScope', ($rootScope) ->
             directions: directions
           filter_params: {}
 
-        if @filterParams
-          angular.extend gridParams.filter_params, @filterParams
+        if opts.filterParams
+          angular.extend gridParams.filter_params, opts.filterParams
 
         return gridParams
 
 
       ###*
       # @ngdoc method
-      # @name getPagedDataAsync
+      # @name getProcessedColumnDefs
       #
       # @description
-      # Calling `this.getEntities()` after processing `this.optParams`
+      # Returns processedColumnDefs
       #
-      # @returns {promise}
-      ###
-      @getPagedDataAsync = ->
-        deferred = $q.defer()
-
-        params = @tableParams.$params
-        gridParams = @generateGridParams()
-
-        # Merge gridParams to @optParams
-        angular.extend(@optParams, gridParams)
-
-        @getEntities().then(
-          (success) ->
-            deferred.resolve
-              items: success.data.items
-              totalCount: success.data.total_server_items
-        )
-
-        deferred.promise
-
-
-      ###*
-      # @ngdoc method
-      # @name sortableClass
+      # @param Array columnDefs
       #
-      # @description
-      # Get CSS class based on sortable state
-      #
-      # @param {String} fieldName Field/column name
-      #
-      # @returns {String} class for CSS usage
+      # @returns Array class for CSS usage
       ###
       @getProcessedColumnDefs = (columnDefs) ->
         processedColumnDefs = []
@@ -178,11 +91,6 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
         return processedColumnDefs
 
-
-      #
-      $injector.invoke $rootScope.shTableFilter, this
-      $injector.invoke $rootScope.shTableHelper, this
-      $injector.invoke $rootScope.shTableHook, this
 
   ]
 

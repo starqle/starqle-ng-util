@@ -51,8 +51,16 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @localLookup = {}
       @sorting = id: "desc" unless @sorting?
 
+      shTableProcessor = {}
+
       #
-      $injector.invoke $rootScope.shTableProcessor, this
+      #
+      $injector.invoke $rootScope.shTableFilter, this
+      $injector.invoke $rootScope.shTableHelper, this
+      $injector.invoke $rootScope.shTableHook, this
+      $injector.invoke $rootScope.shTableParamsHook, this
+
+      $injector.invoke $rootScope.shTableProcessor, shTableProcessor
 
       #
       @tableParams = new ShTableParams(
@@ -61,6 +69,14 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         sortInfo: 'this is sort info'
         sorting: @sorting
         getData: () ->
+          gridParams = shTableProcessor.generateGridParams
+            params: self.tableParams.$params
+            columnDefs: self.columnDefs
+            filterParams: self.filterParams
+
+          # Merge gridParams to @optParams
+          angular.extend(self.optParams, gridParams)
+
           self.getPagedDataAsync()
       )
 
