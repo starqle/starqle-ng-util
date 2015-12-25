@@ -344,6 +344,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # Invokes
 
       $injector.invoke $rootScope.shApi, shApi
+      $injector.invoke $rootScope.shApiHook, self
       $injector.invoke $rootScope.shTableHookNotification, self
 
 
