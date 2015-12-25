@@ -48,16 +48,11 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       @resource = null unless @resource?
       @localLookup = {}
       @sorting = id: "desc" unless @sorting?
-      @autoload = false unless @autoload?
 
       #
       $injector.invoke $rootScope.shPersistenceHook, this
 
-      #
-      # Initialization
-      #
 
-      @initEntity() if @autoload
   ]
 
 

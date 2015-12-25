@@ -65,22 +65,6 @@ shTableModule.factory(
 
       ###*
       # @ngdoc method
-      # @name initialize
-      #
-      # @param {}
-      #
-      # @returns promise
-      #
-      # @description
-      # ShTableParams factory
-      #
-      ###
-
-      @initialize = ->
-        @reload()
-
-      ###*
-      # @ngdoc method
       # @name reload
       #
       # @param {}
