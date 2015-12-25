@@ -46,7 +46,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       @optParams = {} unless @optParams?
 
 
-      @shApi =
+      shApi =
         resource: self.resource
 
       # Hooks Variables
@@ -96,7 +96,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Fetch blank entity
-        @shApi.new(
+        shApi.new(
           @optParams
         ).then(
           (success) ->
@@ -138,7 +138,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
           data = entity
 
         # Persist an entity into database
-        @shApi.create(
+        shApi.create(
           @optParams
           data
         ).then(
@@ -180,7 +180,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
         id = @id unless id
 
         # Fetch entity for editing
-        @shApi.edit(
+        shApi.edit(
           id
           @optParams
         ).then(
@@ -230,7 +230,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
           data = entity
 
         # Update entity into database
-        @shApi.update(
+        shApi.update(
           id
           @optParams
           data
@@ -273,7 +273,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
         id = @id unless id
 
         # Delete entity from database
-        @shApi.delete(
+        shApi.delete(
           id
           @optParams
         ).then(
@@ -348,7 +348,7 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
 
       # Invokes
 
-      $injector.invoke $rootScope.shApi, @shApi
+      $injector.invoke $rootScope.shApi, shApi
       $injector.invoke $rootScope.shPersistenceHookNotification, self
 
 

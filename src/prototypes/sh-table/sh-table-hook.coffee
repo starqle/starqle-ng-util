@@ -49,7 +49,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @deletedIds = []
 
 
-      @shApi =
+      shApi =
         resource: self.resource
 
 
@@ -99,7 +99,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # GEt the entities
-        @shApi.index(
+        shApi.index(
           @optParams
         ).then(
           (success) ->
@@ -132,7 +132,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Fetch blank entity
-        @shApi.new(
+        shApi.new(
           @optParams
         ).then(
           (success) ->
@@ -174,7 +174,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
           data = entity
 
         # Persist an entity into database
-        @shApi.create(
+        shApi.create(
           @optParams
           data
         ).then(
@@ -215,7 +215,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Fetch entity for editing
-        @shApi.edit(
+        shApi.edit(
           id
           @optParams
         ).then(
@@ -260,7 +260,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
           data = entity
 
         # Update entity into database
-        @shApi.update(
+        shApi.update(
           id
           @optParams
           data
@@ -302,7 +302,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         # Delete entity from database
-        @shApi.delete(
+        shApi.delete(
           id
           @optParams
         ).then(
@@ -343,7 +343,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
       # Invokes
 
-      $injector.invoke $rootScope.shApi, @shApi
+      $injector.invoke $rootScope.shApi, shApi
       $injector.invoke $rootScope.shTableHookNotification, self
 
 
