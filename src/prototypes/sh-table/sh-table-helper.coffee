@@ -70,6 +70,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @sortableClick = (fieldName) ->
         newDirection = if @tableParams.isSortBy(fieldName, 'asc') then 'desc' else 'asc'
         @tableParams.sortData(fieldName, newDirection)
+        @refreshGrid()
 
 
       ###*

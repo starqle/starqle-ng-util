@@ -138,7 +138,6 @@ shTableModule.factory(
       @sortData = (field, direction) ->
         @$params.sorting = {}
         @$params.sorting[field] = direction
-        @reload()
 
 
       ###*
