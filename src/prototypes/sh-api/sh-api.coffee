@@ -207,6 +207,64 @@ shApiModule.run ['$rootScope', ($rootScope) ->
             deferred.reject(error)
         )
         deferred.promise
+
+
+      # @index = (params) ->
+      # @new = (params) ->
+      # @create = (params, data) ->
+      # @edit = (id, params) ->
+      # @update = (id, params, data) ->
+      # @delete = (id, params) ->
+
+      ###*
+      # @ngdoc method
+      # @name apiCall
+      #
+      # @description
+      # apiCall `GET`
+      # apiCall `POST`
+      # apiCall `PUT`
+      # apiCall `DELETE`
+      #
+      # @param {String} id Record id in string or UUID
+      # @param {Object} params Parameter objects
+      #
+      # @returns {promise}
+      ###
+      @apiCall = (opts) ->
+        deferred = $q.defer()
+
+        switch opts.method
+          when 'GET', 'DELETE'
+            # Fetch a record for editing
+            @resource[opts.name](
+              angular.extend({id: opts.id}, opts.params)
+            ).$promise.then(
+              (success) ->
+                deferred.resolve(success)
+
+              (error) ->
+                deferred.reject(error)
+            )
+
+          when 'POST', 'PUT'
+            @resource[opts.name](
+              angular.extend({id: opts.id}, opts.params)
+              opts.data
+            ).$promise.then(
+              (success) ->
+                deferred.resolve(success)
+
+              (error) ->
+                deferred.reject(error)
+            )
+          else
+            console.log 'STARQLE_NG_UTIL: Unknown Method'
+            deferred.reject({})
+
+        deferred.promise
+
+
   ]
 
 
