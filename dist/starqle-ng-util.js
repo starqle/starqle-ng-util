@@ -4151,9 +4151,7 @@ shTableModule.run([
         }
         this.localLookup = {};
         if (this.sorting == null) {
-          this.sorting = {
-            id: "desc"
-          };
+          this.sorting = {};
         }
         shTableProcessor = {};
         $injector.invoke($rootScope.shTableFilter, this);
