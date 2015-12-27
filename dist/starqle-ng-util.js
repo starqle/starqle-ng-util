@@ -567,15 +567,18 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
       restrict: 'A',
       scope: {
         shAllowZero: '@?',
-        shMin: '@',
-        shMax: '@',
+        shMin: '=?',
+        shMax: '=?',
+        shLowerThan: '=?',
+        shGreaterThan: '=?',
         shNumberInvalidMessage: '@?',
         shNumberHint: '@?',
         ngModel: '='
       },
       require: '?ngModel',
       link: function(scope, element, attributes, ngModel) {
-        var shAllowZero, updatePopover;
+        var classId, shAllowZero, updatePopover;
+        classId = 'sh-number-' + Math.random().toString().slice(2);
         shAllowZero = scope.shAllowZero === 'false' ? false : true;
         updatePopover = function() {
           var popoverContent, ref, ref1;
@@ -587,7 +590,7 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
               popoverContent = (ref1 = scope.shNumberHint) != null ? ref1 : 'Insert valid number';
             }
           }
-          element.siblings('.popover').find('.popover-content').html(popoverContent);
+          angular.element('.' + classId).find('.popover-content').html(popoverContent);
           return scope.applyValidity();
         };
         ngModel.$formatters.push(function(value) {
@@ -623,6 +626,12 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
             if (!shAllowZero) {
               valid = +scope.ngModel !== 0;
             }
+            if (scope.shLowerThan != null) {
+              valid = +scope.ngModel < scope.shLowerThan;
+            }
+            if (scope.shGreaterThan != null) {
+              valid = +scope.ngModel > scope.shGreaterThan;
+            }
             if (scope.ngModel == null) {
               valid = false;
             }
@@ -654,7 +663,9 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
         });
         element.popover({
           trigger: 'focus',
-          placement: 'top'
+          container: 'body',
+          placement: 'top',
+          template: '<div class="popover ' + classId + '" role="tooltip">' + '  <div class="arrow"></div>' + '  <h3 class="popover-title"></h3>' + '  <div class="popover-content"></div>' + '</div>'
         });
         return element.on('shown.bs.popover', function() {
           return updatePopover();
@@ -1064,6 +1075,7 @@ shTableModule.factory('ShTableParams', [
       this.$totalCount = 0;
       this.$loading = false;
       this.$data = [];
+      this.$extras = null;
       this.$pagination = [];
 
       /**
@@ -1086,6 +1098,9 @@ shTableModule.factory('ShTableParams', [
         params.getData().then(function(success) {
           self.$data = success.items;
           self.$totalCount = success.totalCount;
+          if (success.extras != null) {
+            self.$extras = success.extras;
+          }
           self.$pagination = self.generatePagination(self.$params.pageNumber, self.$params.perPage, self.$totalCount);
           self.$loading = false;
           return deferred.resolve(success);
