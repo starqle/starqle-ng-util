@@ -32,6 +32,8 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
     ngModel: '='
   require: '?ngModel'
   link: (scope, element, attributes, ngModel) ->
+    classId = 'sh-number-' + Math.random().toString().slice(2)
+
     shAllowZero = if scope.shAllowZero is 'false' then false else true
 
     updatePopover = ->
@@ -40,7 +42,7 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
         popoverContent = scope.shNumberInvalidMessage ? 'Invalid Number'
       else
         popoverContent = (scope.shNumberHint ? 'Insert valid number') unless ngModel.$modelValue?
-      element.siblings('.popover').find('.popover-content').html(popoverContent)
+      angular.element('.' + classId).find('.popover-content').html(popoverContent)
       scope.applyValidity()
 
     ngModel.$formatters.push (value) ->
@@ -105,7 +107,19 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
     #
     # Initialize
     #
-    element.popover({trigger: 'focus', placement: 'top'})
+    element.popover(
+      trigger: 'focus'
+      container: 'body'
+      placement: 'top'
+      template:
+        '<div class="popover ' + classId + '" role="tooltip">' +
+        '  <div class="arrow"></div>' +
+        '  <h3 class="popover-title"></h3>' +
+        '  <div class="popover-content"></div>' +
+        '</div>'
+
+    )
+
     element.on 'shown.bs.popover', ->
       updatePopover()
 ]
