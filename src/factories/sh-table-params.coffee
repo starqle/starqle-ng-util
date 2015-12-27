@@ -58,6 +58,7 @@ shTableModule.factory(
       @$loading = false
 
       @$data = []
+      @$extras = null
 
       @$pagination = []
 
@@ -85,6 +86,7 @@ shTableModule.factory(
             # Assign returned items to $data
             self.$data = success.items
             self.$totalCount = success.totalCount
+            self.$extras = success.extras if success.extras?
 
             # Call pages generator
             self.$pagination = self.generatePagination(self.$params.pageNumber, self.$params.perPage, self.$totalCount)
