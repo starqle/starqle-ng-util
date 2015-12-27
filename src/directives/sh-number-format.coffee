@@ -23,8 +23,10 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
   restrict: 'A'
   scope:
     shAllowZero: '@?'
-    shMin: '@'
-    shMax: '@'
+    shMin: '=?'
+    shMax: '=?'
+    shLowerThan: '=?'
+    shGreaterThan: '=?'
     shNumberInvalidMessage: '@?'
     shNumberHint: '@?'
     ngModel: '='
@@ -66,6 +68,13 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
         valid = valid && +scope.ngModel <= scope.shMax if scope.shMax?
         unless shAllowZero
           valid = +scope.ngModel isnt 0
+
+        if scope.shLowerThan?
+          valid = +scope.ngModel < scope.shLowerThan
+
+        if scope.shGreaterThan?
+          valid = +scope.ngModel > scope.shGreaterThan
+
         valid = false unless scope.ngModel?
         ngModel.$setValidity 'required', valid
 
