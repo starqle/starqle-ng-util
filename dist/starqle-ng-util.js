@@ -2111,10 +2111,10 @@ shApiModule.run([
             shApi.apiCall(apiParameters).then(function(success) {
               var j, len1, ref3, ref4, ref5, ref6, ref7;
               if ((ref3 = opts.method) === 'POST' || ref3 === 'PUT') {
-                self.updatedIds.push(id);
+                self.updatedIds.push(success.data.id);
               }
               if ((ref4 = opts.method) === 'DELETE') {
-                self.deletedIds.push(id);
+                self.deletedIds.push(success.data.id);
               }
               if ((ref5 = opts.method) === 'DELETE' || ref5 === 'POST' || ref5 === 'PUT') {
                 self.refreshGrid();

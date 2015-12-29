@@ -116,8 +116,8 @@ shApiModule.run ['$rootScope', ($rootScope) ->
             apiParameters
           ).then(
             (success) ->
-              self.updatedIds.push id if opts.method in ['POST', 'PUT']
-              self.deletedIds.push id if opts.method in ['DELETE']
+              self.updatedIds.push success.data.id if opts.method in ['POST', 'PUT']
+              self.deletedIds.push success.data.id if opts.method in ['DELETE']
               self.refreshGrid() if opts.method in ['DELETE', 'POST', 'PUT']
 
               hook(success) for hook in (self.аpiCallEntitySuccessHooks[opts.name] ? [])
