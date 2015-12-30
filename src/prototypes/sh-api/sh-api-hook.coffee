@@ -53,10 +53,9 @@ shApiModule.run ['$rootScope', ($rootScope) ->
         resource: self.resource
 
       @beforeApiCallEntityHooks = {}
-      @аpiCallEntitySuccessHooks = {}
-      @аpiCallEntityErrorHooks = {}
+      @apiCallEntitySuccessHooks = {}
+      @apiCallEntityErrorHooks = {}
       @afterApiCallEntityHooks = {}
-
 
       ###*
       # @ngdoc method
@@ -108,28 +107,35 @@ shApiModule.run ['$rootScope', ($rootScope) ->
                 apiParameters.data = data
 
 
+          # Preparing hooks based-on name
+          self.beforeApiCallEntityHooks[opts.name] ?= []
+          self.apiCallEntitySuccessHooks[opts.name] ?= []
+          self.apiCallEntityErrorHooks[opts.name] ?= []
+          self.afterApiCallEntityHooks[opts.name] ?= []
+
           # Call shApi apiCall
 
-          hook() for hook in (self.beforeApiCallEntityHooks[opts.name] ? [])
+          hook() for hook in self.beforeApiCallEntityHooks[opts.name]
 
           shApi.apiCall(
             apiParameters
           ).then(
             (success) ->
-              self.updatedIds.push success.data.id if opts.method in ['POST', 'PUT']
-              self.deletedIds.push success.data.id if opts.method in ['DELETE']
-              self.refreshGrid() if opts.method in ['DELETE', 'POST', 'PUT']
+              # These following 3-lines only applicable for shTable
+              # self.updatedIds.push success.data.id if opts.method in ['POST', 'PUT']
+              # self.deletedIds.push success.data.id if opts.method in ['DELETE']
+              # self.refreshGrid() if opts.method in ['DELETE', 'POST', 'PUT']
 
-              hook(success) for hook in (self.аpiCallEntitySuccessHooks[opts.name] ? [])
+              hook(success) for hook in self.apiCallEntitySuccessHooks[opts.name]
               deferred.resolve(success)
 
             (error) ->
-              hook(error) for hook in (self.аpiCallEntityErrorHooks[opts.name] ? [])
+              hook(error) for hook in self.apiCallEntityErrorHooks[opts.name]
               deferred.reject(error)
 
           ).finally(
             () ->
-              hook() for hook in (self.afterApiCallEntityHooks[opts.name] ? [])
+              hook() for hook in self.afterApiCallEntityHooks[opts.name]
           )
 
         deferred.promise

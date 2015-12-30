@@ -2047,8 +2047,8 @@ shApiModule.run([
           resource: self.resource
         };
         this.beforeApiCallEntityHooks = {};
-        this.аpiCallEntitySuccessHooks = {};
-        this.аpiCallEntityErrorHooks = {};
+        this.apiCallEntitySuccessHooks = {};
+        this.apiCallEntityErrorHooks = {};
         this.afterApiCallEntityHooks = {};
 
         /**
@@ -2063,7 +2063,7 @@ shApiModule.run([
          * @returns {promise}
          */
         this.apiCallEntity = function(opts) {
-          var apiParameters, data, deferred, hook, i, len, ref, ref1, ref2;
+          var apiParameters, base, base1, base2, base3, data, deferred, hook, i, len, name, name1, name2, name3, ref, ref1;
           deferred = $q.defer();
           if (!((opts.method != null) && ((ref = opts.method) === 'GET' || ref === 'POST' || ref === 'PUT' || ref === 'DELETE'))) {
             console.log('STARQLE_NG_UTIL: Unknown Method');
@@ -2103,42 +2103,45 @@ shApiModule.run([
                   apiParameters.data = data;
                 }
             }
-            ref2 = (ref1 = self.beforeApiCallEntityHooks[opts.name]) != null ? ref1 : [];
-            for (i = 0, len = ref2.length; i < len; i++) {
-              hook = ref2[i];
+            if ((base = self.beforeApiCallEntityHooks)[name = opts.name] == null) {
+              base[name] = [];
+            }
+            if ((base1 = self.apiCallEntitySuccessHooks)[name1 = opts.name] == null) {
+              base1[name1] = [];
+            }
+            if ((base2 = self.apiCallEntityErrorHooks)[name2 = opts.name] == null) {
+              base2[name2] = [];
+            }
+            if ((base3 = self.afterApiCallEntityHooks)[name3 = opts.name] == null) {
+              base3[name3] = [];
+            }
+            ref1 = self.beforeApiCallEntityHooks[opts.name];
+            for (i = 0, len = ref1.length; i < len; i++) {
+              hook = ref1[i];
               hook();
             }
             shApi.apiCall(apiParameters).then(function(success) {
-              var j, len1, ref3, ref4, ref5, ref6, ref7;
-              if ((ref3 = opts.method) === 'POST' || ref3 === 'PUT') {
-                self.updatedIds.push(success.data.id);
-              }
-              if ((ref4 = opts.method) === 'DELETE') {
-                self.deletedIds.push(success.data.id);
-              }
-              if ((ref5 = opts.method) === 'DELETE' || ref5 === 'POST' || ref5 === 'PUT') {
-                self.refreshGrid();
-              }
-              ref7 = (ref6 = self.аpiCallEntitySuccessHooks[opts.name]) != null ? ref6 : [];
-              for (j = 0, len1 = ref7.length; j < len1; j++) {
-                hook = ref7[j];
+              var j, len1, ref2;
+              ref2 = self.apiCallEntitySuccessHooks[opts.name];
+              for (j = 0, len1 = ref2.length; j < len1; j++) {
+                hook = ref2[j];
                 hook(success);
               }
               return deferred.resolve(success);
             }, function(error) {
-              var j, len1, ref3, ref4;
-              ref4 = (ref3 = self.аpiCallEntityErrorHooks[opts.name]) != null ? ref3 : [];
-              for (j = 0, len1 = ref4.length; j < len1; j++) {
-                hook = ref4[j];
+              var j, len1, ref2;
+              ref2 = self.apiCallEntityErrorHooks[opts.name];
+              for (j = 0, len1 = ref2.length; j < len1; j++) {
+                hook = ref2[j];
                 hook(error);
               }
               return deferred.reject(error);
             })["finally"](function() {
-              var j, len1, ref3, ref4, results;
-              ref4 = (ref3 = self.afterApiCallEntityHooks[opts.name]) != null ? ref3 : [];
+              var j, len1, ref2, results;
+              ref2 = self.afterApiCallEntityHooks[opts.name];
               results = [];
-              for (j = 0, len1 = ref4.length; j < len1; j++) {
-                hook = ref4[j];
+              for (j = 0, len1 = ref2.length; j < len1; j++) {
+                hook = ref2[j];
                 results.push(hook());
               }
               return results;
