@@ -34,6 +34,19 @@ shApiModule = angular.module('sh.api.module', []);
 
 /**
  * @ngdoc module
+ * @name shDialogModule
+ *
+ * @description
+ * shDialogModule
+ */
+var shDialogModule;
+
+shDialogModule = angular.module('sh.dialog.module', []);
+
+"use strict";
+
+/**
+ * @ngdoc module
  * @name shFormModule
  *
  * @description
@@ -94,6 +107,19 @@ shSpinningModule = angular.module('sh.spinning.module', []);
 var shTableModule;
 
 shTableModule = angular.module('sh.table.module', []);
+
+"use strict";
+
+/**
+ * @ngdoc module
+ * @name shValidationModule
+ *
+ * @description
+ * shValidationModule
+ */
+var shValidationModule;
+
+shValidationModule = angular.module('sh.validation.module', []);
 
 "use strict";
 
@@ -484,55 +510,146 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
 ]);
 
 "use strict";
-angular.module('sh.dialog', []).directive("shDialog", [
-  '$compile', '$templateCache', function($compile, $templateCache) {
+shDialogModule.directive("shDialog", [
+  '$compile', '$templateCache', '$timeout', '$q', function($compile, $templateCache, $timeout, $q) {
     return {
-      restrict: 'E',
-      transclude: true,
+      restrict: 'A',
       replace: true,
       scope: {
-        shDialogOk: '&',
+        shDialogOk: '&?',
+        shDialogBeforeShow: '&?',
         shDialogCancel: '&?',
-        shDialogContent: '@?',
-        shDialogSrc: '@?',
+        shDialogHeader: '@?',
+        shDialogBody: '@?',
+        shDialogFooter: '@?',
+        shDialogForm: '@?',
         shDialogClass: '@?',
+        shDialogEntity: '=?',
+        shDialogLoading: '=?',
+        shDialogDisabled: '&?',
         title: '@?'
       },
-      template: '<span>\n  <a title="{{getTitle()}}" ng-click="onHandleClick()" ng-transclude></a>\n</span>',
       link: function(scope, element, attrs) {
-        scope.getShDialogModal = function() {
-          return element.find('#modal-sh-dialog');
-        };
-        scope.getShDialogContent = function() {
-          return scope.shDialogContent || 'Are you sure?';
-        };
-        scope.getTitle = function() {
-          return scope.title || element.text();
-        };
-        scope.onHandleClick = function() {
-          var shDialogModal, shDialogModalSrc;
-          if (!(scope.getShDialogModal().length > 0)) {
-            shDialogModal = angular.element('<div id="modal-sh-dialog" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">\n  <div class="modal-dialog {{shDialogClass || \'modal-sm\'}}">\n    <div class="modal-content">\n      <div class="modal-header">\n        <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>\n        <div class="modal-title">&nbsp;</div>\n      </div>\n      <div class="modal-body">\n        <div class="row">\n          <div class="col-lg-12 sh-dialog-modal-content"></div>\n        </div>\n      </div>\n      <div class="modal-footer">\n        <button ng-click="onHandleModalOkClick()" class="btn btn-primary">OK</button>\n        <button data-dismiss="modal" class="btn btn-default">Cancel</button>\n      </div>\n    </div>\n  </div>\n</div>');
-            $compile(shDialogModal)(scope);
-            if (scope.shDialogSrc) {
-              shDialogModalSrc = angular.element($templateCache.get(scope.shDialogSrc));
-              $compile(shDialogModalSrc)(scope.$parent);
-              shDialogModal.find('.sh-dialog-modal-content').append(shDialogModalSrc);
-            } else {
-              shDialogModal.find('.sh-dialog-modal-content').append(scope.getShDialogContent());
-            }
-            element.append(shDialogModal);
+        var hideModal, onHandleClick;
+        angular.element(element).addClass('sh-dialog').children().eq(0).on('click', function() {
+          return onHandleClick();
+        });
+        onHandleClick = function() {
+          var buttonOkElement, compiledShDialogBody, compiledShDialogFooter, compiledShDialogHeader, modalIdSuffix, ref, ref1, shDialogModal;
+          modalIdSuffix = scope.$id;
+          shDialogModal = null;
+          if (scope.shDialogForm != null) {
+            shDialogModal = angular.element('<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' + '<div class="modal-dialog ' + ((ref = scope.shDialogClass) != null ? ref : 'modal-sm') + '">' + '<form class="modal-content" novalidate="" name="' + scope.shDialogForm + '">' + '      <div class="modal-header">\n        <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>\n        <h4 class="modal-title"></h4>\n      </div>\n      <div class="modal-body"></div>\n      <div class="modal-footer"></div>\n    </form>\n  </div>\n</div>');
+          } else {
+            shDialogModal = angular.element('<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' + '<div class="modal-dialog ' + ((ref1 = scope.shDialogClass) != null ? ref1 : 'modal-sm') + '">' + '    <div class="modal-content">\n      <div class="modal-header">\n        <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>\n        <h4 class="modal-title"></h4>\n      </div>\n      <div class="modal-body"></div>\n      <div class="modal-footer"></div>\n    </div>\n  </div>\n</div>');
           }
-          scope.getShDialogModal().modal('show');
+          if (scope.shDialogHeader != null) {
+            compiledShDialogHeader = angular.element($templateCache.get(scope.shDialogHeader));
+            shDialogModal.find('.modal-title').append(compiledShDialogHeader);
+          } else {
+            shDialogModal.find('.modal-title').html(scope.title);
+          }
+          if (scope.shDialogBody != null) {
+            compiledShDialogBody = angular.element($templateCache.get(scope.shDialogBody));
+            shDialogModal.find('.modal-body').append(compiledShDialogBody);
+          }
+          if (scope.shDialogFooter != null) {
+            compiledShDialogFooter = angular.element($templateCache.get(scope.shDialogFooter));
+            shDialogModal.find('.modal-footer').append(compiledShDialogFooter);
+          } else if (attrs.shDialogOk != null) {
+            buttonOkElement = '<button\n  class="btn btn-primary margin-left"\n\n  ng-disabled="' + 'aliasShDialogDisabled()' + '"\n\nng-click="' + 'aliasShDialogOk($event)' + '"\n\nsh-submit="' + '{{aliasShDialogForm}}' + '  "\n\n  ng-attr-title="{{\'ACTION_SUBMIT\' | translate}}"\n  translate="ACTION_SUBMIT"\n  type="submit"\n>\n</button>';
+            shDialogModal.find('.modal-footer').append(buttonOkElement);
+            shDialogModal.find('.modal-footer').append('<button type="button" data-dismiss="modal" translate="ACTION_CANCEL" class="btn btn-default margin-left">\n</button>');
+          } else {
+            shDialogModal.find('.modal-footer').append('<button type="button" data-dismiss="modal" translate="ACTION_CLOSE" class="btn btn-default margin-left">\n</button>');
+          }
+          $compile(shDialogModal)(scope.$parent);
+          angular.element('body').append(shDialogModal);
+          if (scope.shDialogEntity != null) {
+            scope.$parent.shDialogEntity = angular.copy(scope.shDialogEntity, {});
+          }
+          shDialogModal.on('show.bs.modal', function() {
+            var deferred;
+            scope.$parent.shDialogLoading = true;
+            deferred = $q.defer();
+            $q.when((scope.shDialogBeforeShow || angular.noop)()).then(function(success) {
+              if ((success != null ? success.data : void 0) != null) {
+                scope.$parent.shDialogEntity = angular.copy(success.data, {});
+              }
+
+              /* */
+              return deferred.resolve(success);
+            }, function(error) {
+
+              /* */
+              hideModal();
+              return deferred.reject(error);
+            })["finally"](function() {
+
+              /* */
+              return scope.$parent.shDialogLoading = false;
+            });
+            return deferred.promise;
+          }).on('hidden.bs.modal', function() {
+            shDialogModal.remove();
+            return scope.$parent.shDialogEntity = {};
+          });
+          $timeout(function() {
+            return shDialogModal.modal('show');
+          }, 20);
+          scope.$parent.aliasShDialogDisabled = function() {
+            var ref2, ref3, ref4;
+            if (scope.$parent.shDialogLoading) {
+              return true;
+            }
+            if (attrs.shDialogDisabled != null) {
+              return scope.shDialogDisabled();
+            }
+            if (scope.shDialogForm == null) {
+              return false;
+            }
+            return ((ref2 = scope.$parent[scope.shDialogForm]) != null ? ref2.$pristine : void 0) || ((ref3 = scope.$parent[scope.shDialogForm]) != null ? ref3.$invalid : void 0) || ((ref4 = scope.$parent[scope.shDialogForm]) != null ? ref4.$submitted : void 0);
+          };
+          scope.$parent.aliasShDialogOk = function($event) {
+            scope.$parent.shDialogLoading = true;
+            return $q.when((scope.shDialogOk || angular.noop)({
+              $event: $event
+            })).then(function(success) {
+              return hideModal();
+            }, function(error) {
+              var ref2;
+              if (scope.shDialogForm != null) {
+                return (ref2 = scope.$parent[scope.shDialogForm]) != null ? ref2.$submitted = false : void 0;
+              }
+            })["finally"](function() {
+              return scope.$parent.shDialogLoading = false;
+            });
+          };
+          scope.$parent.aliasShDialogForm = scope.shDialogForm;
         };
-        return scope.onHandleModalOkClick = function() {
-          scope.getShDialogModal().modal('hide');
-          scope.shDialogOk();
+        hideModal = function() {
+          angular.element('.modal').modal('hide');
         };
+        scope.$watch('$parent.shDialogLoading', function(newVal, oldVal) {
+          if (newVal != null) {
+            if (scope.shDialogLoading != null) {
+              return scope.shDialogLoading = newVal;
+            }
+          }
+        });
       }
     };
   }
 ]);
+
+shDialogModule.directive('shDialogDismissButton', function() {
+  return {
+    restrict: 'EA',
+    template: function(element, attrs) {
+      return '<button type="button" data-dismiss="modal" translate="ACTION_CANCEL" class="btn btn-default margin-left">\n</button>';
+    }
+  };
+});
 
 "use strict";
 angular.module('sh.focus', []).directive("shFocus", [
@@ -921,25 +1038,43 @@ shSpinningModule.directive("shSpinning", [
 
 "use strict";
 angular.module('sh.submit', []).directive('shSubmit', [
-  '$compile', function($compile) {
+  '$compile', '$filter', function($compile, $filter) {
     return {
       restrict: 'A',
+      scope: true,
       link: function(scope, element, attrs) {
-        var random, shSubmitInvalid, shSubmitOverlay;
-        random = (Math.random() + '').slice(2);
-        shSubmitOverlay = angular.element('<span class="sh-submit-overlay" ng-mouseover="overlayHover' + random + '()" ng-mouseleave="overlayLeave()"></span>');
+        var getDescendantProp, shSubmitInvalid, shSubmitOverlay, shSubmitOverlayInner;
+        shSubmitOverlay = angular.element('<segment\n  class="sh-submit-overlay"\n  ng-mouseover="overlayHover()"\n>\n</segment>');
+        shSubmitOverlay.css({
+          position: 'relative',
+          float: element.css('float')
+        });
+        shSubmitOverlayInner = angular.element('<div\n  class="sh-submit-overlay-inner"\n  ng-mouseover="overlayInnerHover()"\n>\n</div>');
+        shSubmitOverlayInner.css({
+          position: 'absolute'
+        });
+        shSubmitOverlayInner.appendTo(shSubmitOverlay);
         $compile(shSubmitOverlay)(scope);
-        shSubmitInvalid = attrs.shSubmitInvalid || 'Please correct/fill out the highlighted fields';
+        shSubmitInvalid = attrs.shSubmitInvalid || $filter('translate')('INFO_FIELD_CORRECTION');
         if (element.next('.sh-submit-overlay').length === 0 && element.parents('.sh-submit-overlay').length === 0) {
           shSubmitOverlay.insertAfter(element);
-          shSubmitOverlay.tooltip({
+          element.prependTo(shSubmitOverlay);
+          shSubmitOverlayInner.tooltip({
             title: shSubmitInvalid
           });
-          element.appendTo(shSubmitOverlay);
         }
-        scope['overlayHover' + random] = function() {
-          var form;
-          if (scope["" + attrs.shSubmit].$invalid) {
+        getDescendantProp = function(obj, desc) {
+          var arr, result;
+          arr = desc.split('.');
+          result = null;
+          while (arr.length) {
+            result = (result || obj)[arr.shift()];
+          }
+          return result;
+        };
+        scope.overlayInnerHover = function() {
+          var form, ref;
+          if ((ref = getDescendantProp(scope, attrs.shSubmit)) != null ? ref.$invalid : void 0) {
             form = element.parents('form').eq(0);
             if (form.length > 0) {
               form.addClass('sh-highlight-required');
@@ -948,20 +1083,82 @@ angular.module('sh.submit', []).directive('shSubmit', [
             }
           }
         };
-        return scope.$watch(attrs.shSubmit + ".$invalid", function(newValue, oldValue) {
-          if (newValue === false) {
-            return shSubmitOverlay.tooltip('destroy');
-          } else {
-            shSubmitOverlay.tooltip('destroy');
-            return shSubmitOverlay.tooltip({
-              title: shSubmitInvalid
+        scope.overlayHover = function() {
+          var ref;
+          if ((ref = getDescendantProp(scope, attrs.shSubmit)) != null ? ref.$invalid : void 0) {
+            shSubmitOverlayInner.css({
+              left: element.position().left,
+              top: element.position().top,
+              width: element.outerWidth(),
+              height: element.outerHeight(),
+              marginLeft: element.css('margin-left'),
+              marginRight: element.css('margin-right')
             });
+          }
+        };
+        return scope.$watch(function() {
+          var ref;
+          return (ref = getDescendantProp(scope, attrs.shSubmit)) != null ? ref.$invalid : void 0;
+        }, function(newVal, oldVal) {
+          if (newVal != null) {
+            if (newVal) {
+              return shSubmitOverlayInner.show();
+            } else {
+              return shSubmitOverlayInner.hide();
+            }
           }
         });
       }
     };
   }
 ]);
+
+shValidationModule.directive("validFile", [
+  '$timeout', function($timeout) {
+    return {
+      scope: {
+        validFileName: '='
+      },
+      require: 'ngModel',
+      link: function(scope, el, attrs, ngModel) {
+        scope.$watch('validFileName', function(newFile) {
+          if (newFile != null) {
+            $timeout((function() {
+              ngModel.$pristine = false;
+              ngModel.$setViewValue(scope.validFileName);
+              return ngModel.$pristine = true;
+            }), 200);
+            return $timeout((function() {
+              ngModel.$pristine = false;
+              ngModel.$setViewValue(scope.validFileName);
+              return ngModel.$pristine = true;
+            }), 2000);
+          }
+        });
+        el.bind('change', function() {
+          scope.$apply(function() {
+            ngModel.$setViewValue(el.val());
+            ngModel.$render();
+          });
+        });
+      }
+    };
+  }
+]);
+
+shValidationModule.directive('validIdNotNull', function() {
+  return {
+    require: 'ngModel',
+    link: function(scope, elem, attr, ngModel) {
+      ngModel.$formatters.unshift(function(value) {
+        if ((value != null ? value.id : void 0) == null) {
+          return null;
+        }
+        return value;
+      });
+    }
+  };
+});
 
 angular.module('sh.view.helper', []).directive('yesNo', function() {
   return {
@@ -4634,4 +4831,4 @@ shHelperModule.service("HelperService", [
 ]);
 
 'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.dialog', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.persistence', 'sh.api.module', 'sh.form.module', 'sh.helper.module', 'sh.persistence.module', 'sh.spinning.module', 'sh.table.module', 'sh.button.state', 'sh.notification', 'sh.page.service', 'sh.priv']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.persistence', 'sh.api.module', 'sh.dialog.module', 'sh.form.module', 'sh.helper.module', 'sh.persistence.module', 'sh.spinning.module', 'sh.table.module', 'sh.validation.module', 'sh.button.state', 'sh.notification', 'sh.page.service', 'sh.priv']);
