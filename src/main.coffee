@@ -58,6 +58,7 @@ angular.module 'starqle.ng.util', [
   'sh.persistence.module',
   'sh.spinning.module',
   'sh.table.module',
+  'sh.validation.module',
 
   # services
   'sh.button.state',
