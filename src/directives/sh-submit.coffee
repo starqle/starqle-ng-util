@@ -19,27 +19,78 @@
 
 "use strict"
 
-# How-To
-# Add ng-class attribute in corresponding form; example value: "{'sh-highlight-required': shHighlightRequired }"
-# Add sh-submit attribute in form button within corresponding form; example value: "{{facilityTypeForm.$invalid}}"
 
-angular.module('sh.submit',[]).directive 'shSubmit', ['$compile', ($compile) ->
+angular.module('sh.submit',[]).directive 'shSubmit', ['$compile', '$filter', ($compile, $filter) ->
   restrict: 'A'
+  scope: true
   link: (scope, element, attrs) ->
-    random = (Math.random() + '').slice(2)
-    shSubmitOverlay = angular.element('<span class="sh-submit-overlay" ng-mouseover="overlayHover'+random+'()" ng-mouseleave="overlayLeave()"></span>')
+
+    #
+    # Prepare element
+    #
+
+    # Overlay element
+    shSubmitOverlay = angular.element '''
+      <segment
+        class="sh-submit-overlay"
+        ng-mouseover="overlayHover()"
+      >
+      </segment>
+      '''
+
+    shSubmitOverlay.css
+      position: 'relative'
+      float: element.css('float')
+
+    # Overlay element inner
+    shSubmitOverlayInner = angular.element '''
+      <div
+        class="sh-submit-overlay-inner"
+        ng-mouseover="overlayInnerHover()"
+      >
+      </div>
+      '''
+    shSubmitOverlayInner.css
+      position: 'absolute'
+
+    # Append shSubmitOverlayInner to shSubmitOverlay
+    shSubmitOverlayInner.appendTo shSubmitOverlay
+
+    # Compile it
     $compile(shSubmitOverlay)(scope)
 
-    shSubmitInvalid = attrs.shSubmitInvalid or 'Please correct/fill out the highlighted fields'
+    shSubmitInvalid = attrs.shSubmitInvalid or $filter('translate')('INFO_FIELD_CORRECTION')
 
     if element.next('.sh-submit-overlay').length == 0 && element.parents('.sh-submit-overlay').length == 0
+      # Place shSubmitOverlay after the element
       shSubmitOverlay.insertAfter(element)
-      shSubmitOverlay.tooltip
-        title: shSubmitInvalid
-      element.appendTo(shSubmitOverlay)
 
-    scope['overlayHover' + random] = ->
-      if scope["#{attrs.shSubmit}"].$invalid
+      # Then prepend the element to shSubmitOverlay
+      element.prependTo(shSubmitOverlay)
+
+      #
+      shSubmitOverlayInner.tooltip(
+        title: shSubmitInvalid
+      )
+
+
+
+    #
+    # Scope methods/variables
+    #
+
+    # Workaround for dotted string
+    # http://stackoverflow.com/a/8052100
+    getDescendantProp = (obj, desc) ->
+      arr = desc.split('.')
+      result = null
+      while arr.length
+        result = (result or obj)[arr.shift()]
+
+      result
+
+    scope.overlayInnerHover = ->
+      if getDescendantProp(scope, attrs.shSubmit)?.$invalid
         form = element.parents('form').eq(0)
         if form.length > 0
           form.addClass('sh-highlight-required')
@@ -47,12 +98,26 @@ angular.module('sh.submit',[]).directive 'shSubmit', ['$compile', ($compile) ->
           angular.element("form[name='#{attrs.shSubmit}']").addClass('sh-highlight-required')
       return
 
-    scope.$watch "#{attrs.shSubmit}.$invalid", (newValue, oldValue) ->
-      # value is a string, not boolean
-      if newValue == false
-        shSubmitOverlay.tooltip 'destroy'
-      else
-        shSubmitOverlay.tooltip 'destroy'
-        shSubmitOverlay.tooltip
-          title: shSubmitInvalid
+    scope.overlayHover = ->
+      if getDescendantProp(scope, attrs.shSubmit)?.$invalid
+        shSubmitOverlayInner.css
+          left: element.position().left
+          top: element.position().top
+          width: element.outerWidth()
+          height: element.outerHeight()
+          marginLeft: element.css('margin-left')
+          marginRight: element.css('margin-right')
+      return
+
+    scope.$watch(
+      () ->
+        getDescendantProp(scope, attrs.shSubmit)?.$invalid
+      (newVal, oldVal) ->
+        if newVal?
+          if newVal
+            shSubmitOverlayInner.show()
+          else
+            shSubmitOverlayInner.hide()
+
+    )
 ]

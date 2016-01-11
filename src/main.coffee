@@ -27,7 +27,6 @@ angular.module 'starqle.ng.util', [
   'sh.bootstrap',
   'sh.collapsible',
   'sh.datepicker',
-  'sh.dialog',
   'sh.focus',
   'sh.number.format',
   'sh.segment',
@@ -53,6 +52,7 @@ angular.module 'starqle.ng.util', [
 
   # modules
   'sh.api.module',
+  'sh.dialog.module',
   'sh.form.module',
   'sh.helper.module',
   'sh.persistence.module',

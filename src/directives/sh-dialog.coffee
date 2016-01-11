@@ -18,76 +18,251 @@
 # =============================================================================
 
 "use strict"
-
-angular.module('sh.dialog', []).directive "shDialog", ['$compile', '$templateCache', ($compile, $templateCache) ->
-  restrict: 'E'
-  transclude: true
+#
+# Only responsible for displaying modal (not hiding modal).
+# If you want to hide this modal, you must call it manually
+#
+shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', '$q', ($compile, $templateCache, $timeout, $q) ->
+  restrict: 'A'
   replace: true
   scope:
-    shDialogOk: '&'
+    shDialogOk: '&?'
+    shDialogBeforeShow: '&?'
     shDialogCancel: '&?'
-    shDialogContent: '@?'
-    shDialogSrc: '@?'
+
+    shDialogHeader: '@?'
+    shDialogBody: '@?'
+    shDialogFooter: '@?'
+
+    shDialogForm: '@?'
+
     shDialogClass: '@?'
+
+    shDialogEntity: '=?'
+    shDialogLoading: '=?'
+    shDialogDisabled: '&?'
+
     title: '@?'
-  template: '''
-      <span>
-        <a title="{{getTitle()}}" ng-click="onHandleClick()" ng-transclude></a>
-      </span>
-    '''
 
   link: (scope, element, attrs) ->
-    scope.getShDialogModal = ->
-      element.find('#modal-sh-dialog')
+    #
+    #
+    #
+    angular.element(element).addClass('sh-dialog').children().eq(0).on( 'click', ->
+      onHandleClick()
+    )
 
-    scope.getShDialogContent = ->
-      scope.shDialogContent or 'Are you sure?'
+    #
+    #
+    #
+    onHandleClick = ->
+      modalIdSuffix = scope.$id
 
-    scope.getTitle = ->
-      scope.title or element.text()
+      shDialogModal = null
 
-    scope.onHandleClick = ->
-      unless scope.getShDialogModal().length > 0
+      if scope.shDialogForm?
         shDialogModal = angular.element(
+          '<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' +
+          '<div class="modal-dialog ' + (scope.shDialogClass ? 'modal-sm') + '">' +
+
+          '<form class="modal-content" novalidate="" name="' + scope.shDialogForm + '">' +
           '''
-            <div id="modal-sh-dialog" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">
-              <div class="modal-dialog {{shDialogClass || 'modal-sm'}}">
+                  <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+                    <h4 class="modal-title"></h4>
+                  </div>
+                  <div class="modal-body"></div>
+                  <div class="modal-footer"></div>
+                </form>
+              </div>
+            </div>
+          '''
+        )
+      else
+        shDialogModal = angular.element(
+          '<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' +
+          '<div class="modal-dialog ' + (scope.shDialogClass ? 'modal-sm') + '">' +
+          '''
                 <div class="modal-content">
                   <div class="modal-header">
                     <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
-                    <div class="modal-title">&nbsp;</div>
+                    <h4 class="modal-title"></h4>
                   </div>
-                  <div class="modal-body">
-                    <div class="row">
-                      <div class="col-lg-12 sh-dialog-modal-content"></div>
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button ng-click="onHandleModalOkClick()" class="btn btn-primary">OK</button>
-                    <button data-dismiss="modal" class="btn btn-default">Cancel</button>
-                  </div>
+                  <div class="modal-body"></div>
+                  <div class="modal-footer"></div>
                 </div>
               </div>
             </div>
           '''
         )
-        $compile(shDialogModal)(scope)
 
-        if scope.shDialogSrc
-          shDialogModalSrc = angular.element $templateCache.get(scope.shDialogSrc)
-          $compile(shDialogModalSrc)(scope.$parent)
-          shDialogModal.find('.sh-dialog-modal-content').append(shDialogModalSrc)
 
-        else
-          shDialogModal.find('.sh-dialog-modal-content').append(scope.getShDialogContent())
+      # Header setup
+      if scope.shDialogHeader?
+        compiledShDialogHeader = angular.element $templateCache.get(scope.shDialogHeader)
+        shDialogModal.find('.modal-title').append(compiledShDialogHeader)
+      else
+        shDialogModal.find('.modal-title').html(scope.title)
 
-        element.append(shDialogModal)
+      # Body setup
+      if scope.shDialogBody?
+        compiledShDialogBody = angular.element $templateCache.get(scope.shDialogBody)
+        shDialogModal.find('.modal-body').append(compiledShDialogBody)
 
-      scope.getShDialogModal().modal('show')
+      # Footer setup
+      if scope.shDialogFooter?
+        compiledShDialogFooter = angular.element $templateCache.get(scope.shDialogFooter)
+        shDialogModal.find('.modal-footer').append(compiledShDialogFooter)
+      else if attrs.shDialogOk?
+        buttonOkElement = '''
+          <button
+            class="btn btn-primary margin-left"
+
+            ng-disabled="
+          ''' +
+          'aliasShDialogDisabled()' +
+
+          '''
+            "
+
+            ng-click="
+          ''' +
+          'aliasShDialogOk($event)' +
+
+          '''
+            "
+
+            sh-submit="
+          ''' +
+          '{{aliasShDialogForm}}' +
+
+          '''
+            "
+
+            ng-attr-title="{{'ACTION_SUBMIT' | translate}}"
+            translate="ACTION_SUBMIT"
+            type="submit"
+          >
+          </button>
+          '''
+
+        shDialogModal.find('.modal-footer').append buttonOkElement
+
+        shDialogModal.find('.modal-footer').append '''
+          <button type="button" data-dismiss="modal" translate="ACTION_CANCEL" class="btn btn-default margin-left">
+          </button>
+        '''
+      else
+        shDialogModal.find('.modal-footer').append '''
+          <button type="button" data-dismiss="modal" translate="ACTION_CLOSE" class="btn btn-default margin-left">
+          </button>
+        '''
+
+
+      $compile(shDialogModal)(scope.$parent)
+
+      # Append modal to body
+      angular.element('body').append(shDialogModal)
+
+      #
+      # TODO:
+      #
+      scope.$parent.shDialogEntity = angular.copy(scope.shDialogEntity, {}) if scope.shDialogEntity?
+
+      shDialogModal.on(
+
+        'show.bs.modal', ->
+          scope.$parent.shDialogLoading = true
+
+          deferred = $q.defer()
+
+          $q.when(
+            (scope.shDialogBeforeShow || angular.noop)()
+          ).then(
+            (success) ->
+              scope.$parent.shDialogEntity = angular.copy(success.data, {}) if success?.data?
+
+              ### ###
+              deferred.resolve success
+            (error) ->
+              ### ###
+              # Close this modal
+              hideModal()
+              deferred.reject error
+          ).finally(
+            () ->
+              ### ###
+              scope.$parent.shDialogLoading = false
+          )
+
+          deferred.promise
+
+      ).on(
+        'hidden.bs.modal', ->
+          shDialogModal.remove()
+          scope.$parent.shDialogEntity = {}
+      )
+
+      # TODO
+      $timeout( ->
+        shDialogModal.modal('show')
+      , 20
+      )
+
+      scope.$parent.aliasShDialogDisabled = () ->
+        return true if scope.$parent.shDialogLoading
+
+        return scope.shDialogDisabled() if attrs.shDialogDisabled?
+
+        return false unless scope.shDialogForm?
+
+        scope.$parent[scope.shDialogForm]?.$pristine or
+        scope.$parent[scope.shDialogForm]?.$invalid or
+        scope.$parent[scope.shDialogForm]?.$submitted
+
+
+      scope.$parent.aliasShDialogOk = ($event) ->
+        scope.$parent.shDialogLoading = true
+        $q.when(
+          (scope.shDialogOk || angular.noop)({$event: $event})
+        ).then(
+          (success) ->
+            hideModal()
+            # It doesnt need to enable the button, the form is already hidden
+
+          (error) ->
+            # Only button enabler. do not set unstouched
+            scope.$parent[scope.shDialogForm]?.$submitted = false if scope.shDialogForm?
+
+        ).finally(
+          () ->
+            scope.$parent.shDialogLoading = false
+        )
+
+      scope.$parent.aliasShDialogForm = scope.shDialogForm
+
       return
 
-    scope.onHandleModalOkClick = ->
-      scope.getShDialogModal().modal('hide')
-      scope.shDialogOk()
+    #
+    #
+    #
+    hideModal = () ->
+      angular.element('.modal').modal('hide')
       return
+
+    scope.$watch '$parent.shDialogLoading', (newVal, oldVal) ->
+      if newVal?
+        scope.shDialogLoading = newVal if scope.shDialogLoading?
+
+    return
 ]
+
+
+shDialogModule.directive('shDialogDismissButton', ->
+  restrict: 'EA'
+  template: (element, attrs) ->
+    '''
+      <button type="button" data-dismiss="modal" translate="ACTION_CANCEL" class="btn btn-default margin-left">
+      </button>
+    '''
+)
