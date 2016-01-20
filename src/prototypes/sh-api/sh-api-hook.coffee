@@ -43,7 +43,7 @@ shApiModule.run ['$rootScope', ($rootScope) ->
       @lookup = {} unless @lookup?
       @optParams = {} unless @optParams?
 
-      @сreatedIds = []
+      @createdIds = []
       @updatedIds = []
       @deletedIds = []
 

@@ -97,14 +97,14 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # @name isRecentlyCreated
       #
       # @description
-      # Return true if given object/entity/entity-id is recently created (found in сreatedIds)
+      # Return true if given object/entity/entity-id is recently created (found in createdIds)
       #
       # @param {Object} entity Entity object or string `UUID`
       #
       # @returns {Boolean}
       ###
       @isRecentlyCreated = (obj) ->
-        @сreatedIds.indexOf(obj?.id or obj) >= 0
+        @createdIds.indexOf(obj?.id or obj) >= 0
 
 
 
