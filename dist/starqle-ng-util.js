@@ -1,4 +1,6 @@
-"use strict";
+(function () {
+   'use strict';
+
 angular.module('on.root.scope', []).config([
   "$provide", function($provide) {
     return $provide.decorator("$rootScope", [
@@ -17,7 +19,6 @@ angular.module('on.root.scope', []).config([
   }
 ]);
 
-"use strict";
 
 /**
  * @ngdoc module
@@ -30,7 +31,6 @@ var shApiModule;
 
 shApiModule = angular.module('sh.api.module', []);
 
-"use strict";
 
 /**
  * @ngdoc module
@@ -43,7 +43,6 @@ var shDialogModule;
 
 shDialogModule = angular.module('sh.dialog.module', []);
 
-"use strict";
 
 /**
  * @ngdoc module
@@ -56,7 +55,6 @@ var shFormModule;
 
 shFormModule = angular.module('sh.form.module', []);
 
-"use strict";
 
 /**
  * @ngdoc module
@@ -69,7 +67,6 @@ var shHelperModule;
 
 shHelperModule = angular.module('sh.helper.module', []);
 
-"use strict";
 
 /**
  * @ngdoc module
@@ -82,7 +79,6 @@ var shPersistenceModule;
 
 shPersistenceModule = angular.module('sh.persistence.module', []);
 
-"use strict";
 
 /**
  * @ngdoc module
@@ -95,7 +91,6 @@ var shSpinningModule;
 
 shSpinningModule = angular.module('sh.spinning.module', []);
 
-"use strict";
 
 /**
  * @ngdoc module
@@ -108,7 +103,6 @@ var shTableModule;
 
 shTableModule = angular.module('sh.table.module', []);
 
-"use strict";
 
 /**
  * @ngdoc module
@@ -121,7 +115,6 @@ var shValidationModule;
 
 shValidationModule = angular.module('sh.validation.module', []);
 
-"use strict";
 
 /**
  * @ngdoc directive
@@ -150,7 +143,6 @@ shTableModule.directive("shTablePagination", function() {
   };
 });
 
-"use strict";
 angular.module('sh.bootstrap', []).directive('shBootstrapTooltip', [
   function() {
     return {
@@ -176,7 +168,7 @@ angular.module('sh.bootstrap', []).directive('shBootstrapTooltip', [
           popoverId: null,
           timeoutFn: null,
           addTimeout: function(element) {
-            return localAttrs.timeoutFn = $timeout(function() {
+            localAttrs.timeoutFn = $timeout(function() {
               return $(element).popover('hide');
             }, 100);
           },
@@ -220,8 +212,15 @@ angular.module('sh.collapsible', []).directive("shCollapsible", function() {
     },
     controller: [
       '$scope', '$element', '$timeout', function($scope, $element, $timeout) {
+        var self;
+        self = this;
         this.shCollapse = false;
         this.bodyElements = [];
+        this.triggerResizeTimeout = function() {
+          return $timeout((function() {
+            $(window).trigger('resize');
+          }), 10);
+        };
         this.toggleCollapse = function() {
           var bodyElement, i, j, len, len1, ref, ref1;
           this.shCollapse = !this.shCollapse;
@@ -229,22 +228,14 @@ angular.module('sh.collapsible', []).directive("shCollapsible", function() {
             ref = this.bodyElements;
             for (i = 0, len = ref.length; i < len; i++) {
               bodyElement = ref[i];
-              bodyElement.slideUp('fast', function() {
-                return $timeout((function() {
-                  return $(window).trigger('resize');
-                }), 10);
-              });
+              bodyElement.slideUp('fast', self.triggerResizeTimeout);
               $element.addClass('is-collapse');
             }
           } else {
             ref1 = this.bodyElements;
             for (j = 0, len1 = ref1.length; j < len1; j++) {
               bodyElement = ref1[j];
-              bodyElement.slideDown('fast', function() {
-                return $timeout((function() {
-                  return $(window).trigger('resize');
-                }), 10);
-              });
+              bodyElement.slideDown('fast', self.triggerResizeTimeout);
               $element.removeClass('is-collapse');
             }
           }
@@ -300,7 +291,6 @@ angular.module('sh.collapsible', []).directive("shCollapsible", function() {
   };
 });
 
-"use strict";
 angular.module('sh.datepicker', []).directive("shDatepicker", [
   function() {
     return {
@@ -366,11 +356,11 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           if (initiation) {
             ngModelCtrl.$pristine = true;
           }
-          return initiation = false;
+          initiation = false;
         });
         element.bind('dp.show', function(data) {
           if (initiation) {
-            return initiation = false;
+            initiation = false;
           }
         });
         element.bind('dp.hide', function(data) {
@@ -390,7 +380,7 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
             return (ref1 = element.data('DateTimePicker')) != null ? ref1.minDate(false) : void 0;
           }
         });
-        return scope.$watch('shThruDate', function(newVal, oldVal) {
+        scope.$watch('shThruDate', function(newVal, oldVal) {
           var ref, ref1;
           if (newVal != null) {
             if (moment(new Date(newVal)).isValid()) {
@@ -465,11 +455,11 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           if (initiation) {
             ngModelCtrl.$pristine = true;
           }
-          return initiation = false;
+          initiation = false;
         });
         element.bind('dp.show', function(data) {
           if (initiation) {
-            return initiation = false;
+            initiation = false;
           }
         });
         element.bind('dp.hide', function(data) {
@@ -495,7 +485,7 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
             return (ref1 = element.data('DateTimePicker')) != null ? ref1.maxDate(false) : void 0;
           }
         });
-        return scope.$watch('shTimezone', function(newVal, oldVal) {
+        scope.$watch('shTimezone', function(newVal, oldVal) {
           var date, ref;
           if (newVal != null) {
             date = ngModelCtrl.$modelValue;
@@ -509,7 +499,6 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
   }
 ]);
 
-"use strict";
 shDialogModule.directive("shDialog", [
   '$compile', '$templateCache', '$timeout', '$q', function($compile, $templateCache, $timeout, $q) {
     return {
@@ -587,12 +576,12 @@ shDialogModule.directive("shDialog", [
             })["finally"](function() {
 
               /* */
-              return scope.$parent.shDialogLoading = false;
+              scope.$parent.shDialogLoading = false;
             });
             return deferred.promise;
           }).on('hidden.bs.modal', function() {
             shDialogModal.remove();
-            return scope.$parent.shDialogEntity = {};
+            scope.$parent.shDialogEntity = {};
           });
           $timeout(function() {
             return shDialogModal.modal('show');
@@ -611,19 +600,26 @@ shDialogModule.directive("shDialog", [
             return ((ref2 = scope.$parent[scope.shDialogForm]) != null ? ref2.$pristine : void 0) || ((ref3 = scope.$parent[scope.shDialogForm]) != null ? ref3.$invalid : void 0) || ((ref4 = scope.$parent[scope.shDialogForm]) != null ? ref4.$submitted : void 0);
           };
           scope.$parent.aliasShDialogOk = function($event) {
+            var deferred;
+            deferred = $q.defer();
             scope.$parent.shDialogLoading = true;
-            return $q.when((scope.shDialogOk || angular.noop)({
+            $q.when((scope.shDialogOk || angular.noop)({
               $event: $event
             })).then(function(success) {
-              return hideModal();
+              hideModal();
+              return deferred.resolve();
             }, function(error) {
               var ref2;
               if (scope.shDialogForm != null) {
-                return (ref2 = scope.$parent[scope.shDialogForm]) != null ? ref2.$submitted = false : void 0;
+                if ((ref2 = scope.$parent[scope.shDialogForm]) != null) {
+                  ref2.$submitted = false;
+                }
               }
+              return deferred.reject();
             })["finally"](function() {
-              return scope.$parent.shDialogLoading = false;
+              scope.$parent.shDialogLoading = false;
             });
+            return deferred.promise;
           };
           scope.$parent.aliasShDialogForm = scope.shDialogForm;
         };
@@ -633,7 +629,7 @@ shDialogModule.directive("shDialog", [
         scope.$watch('$parent.shDialogLoading', function(newVal, oldVal) {
           if (newVal != null) {
             if (scope.shDialogLoading != null) {
-              return scope.shDialogLoading = newVal;
+              scope.shDialogLoading = newVal;
             }
           }
         });
@@ -651,7 +647,6 @@ shDialogModule.directive('shDialogDismissButton', function() {
   };
 });
 
-"use strict";
 angular.module('sh.focus', []).directive("shFocus", [
   '$timeout', function($timeout) {
     return {
@@ -677,7 +672,6 @@ angular.module('sh.focus', []).directive("shFocus", [
   }
 ]);
 
-"use strict";
 angular.module('sh.number.format', []).directive("shNumberFormat", [
   '$filter', function($filter) {
     return {
@@ -688,23 +682,32 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
         shMax: '=?',
         shLowerThan: '=?',
         shGreaterThan: '=?',
+        shLowerThanEqual: '=?',
+        shGreaterThanEqual: '=?',
         shNumberInvalidMessage: '@?',
         shNumberHint: '@?',
         ngModel: '='
       },
       require: '?ngModel',
       link: function(scope, element, attributes, ngModel) {
-        var classId, shAllowZero, updatePopover;
+        var classId, ref, ref1, shAllowZero, updatePopover;
         classId = 'sh-number-' + Math.random().toString().slice(2);
         shAllowZero = scope.shAllowZero === 'false' ? false : true;
+        scope.shLowerThanEqual = (ref = scope.shLowerThanEqual) != null ? ref : scope.shMax;
+        scope.shGreaterThanEqual = (ref1 = scope.shGreaterThanEqual) != null ? ref1 : scope.shMin;
         updatePopover = function() {
-          var popoverContent, ref, ref1;
+          var popoverContent, ref2, ref3, ref4;
           popoverContent = element.attr('data-content');
           if (ngModel.$invalid) {
-            popoverContent = (ref = scope.shNumberInvalidMessage) != null ? ref : 'Invalid Number';
+            if (ngModel.$error.out_of_range) {
+              popoverContent = (ref2 = scope.shNumberInvalidMessage) != null ? ref2 : 'Invalid Number';
+            }
+            if (ngModel.$error.required) {
+              popoverContent = (ref3 = scope.shNumberInvalidMessage) != null ? ref3 : 'Please insert a number';
+            }
           } else {
             if (ngModel.$modelValue == null) {
-              popoverContent = (ref1 = scope.shNumberHint) != null ? ref1 : 'Insert valid number';
+              popoverContent = (ref4 = scope.shNumberHint) != null ? ref4 : 'Insert valid number';
             }
           }
           angular.element('.' + classId).find('.popover-content').html(popoverContent);
@@ -717,8 +720,13 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
           var number;
           number = String(value).replace(/\,/g, '');
           number = parseFloat(number);
-          if (!number) {
+          if (isNaN(number)) {
             return null;
+          }
+          if (!shAllowZero) {
+            if (number === 0) {
+              return null;
+            }
           }
           if ((scope.shMin != null) && number < parseFloat(scope.shMin)) {
             return parseFloat(scope.shMin);
@@ -731,28 +739,30 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
           return ngModel.$invalid;
         });
         scope.applyValidity = function() {
-          var valid;
+          var valid, validRequired;
+          valid = true;
+          if (scope.shLowerThanEqual != null) {
+            valid = valid && +scope.ngModel <= scope.shLowerThanEqual;
+          }
+          if (scope.shGreaterThanEqual != null) {
+            valid = valid && +scope.ngModel >= scope.shGreaterThanEqual;
+          }
+          if (scope.shLowerThan != null) {
+            valid = valid && +scope.ngModel < scope.shLowerThan;
+          }
+          if (scope.shGreaterThan != null) {
+            valid = valid && +scope.ngModel > scope.shGreaterThan;
+          }
+          if (!shAllowZero) {
+            valid = valid && +scope.ngModel !== 0;
+          }
+          ngModel.$setValidity('out_of_range', valid);
           if (attributes.required != null) {
-            valid = true;
-            if (scope.shMin != null) {
-              valid = valid && +scope.ngModel >= scope.shMin;
-            }
-            if (scope.shMax != null) {
-              valid = valid && +scope.ngModel <= scope.shMax;
-            }
-            if (!shAllowZero) {
-              valid = +scope.ngModel !== 0;
-            }
-            if (scope.shLowerThan != null) {
-              valid = +scope.ngModel < scope.shLowerThan;
-            }
-            if (scope.shGreaterThan != null) {
-              valid = +scope.ngModel > scope.shGreaterThan;
-            }
+            validRequired = true;
             if (scope.ngModel == null) {
-              valid = false;
+              validRequired = false;
             }
-            return ngModel.$setValidity('required', valid);
+            return ngModel.$setValidity('required', validRequired);
           }
         };
         element.on('focusout', function() {
@@ -768,8 +778,8 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
           return updatePopover();
         });
         element.on('keydown', function(e) {
-          var ref;
-          if ($.inArray(e.keyCode, [16, 17, 18, 46, 8, 9, 27, 13, 110, 173, 190, 189]) !== -1 || (e.keyCode >= 112 && e.keyCode <= 123) || ((ref = e.keyCode) === 65 || ref === 67 || ref === 86) && (e.ctrlKey === true || e.metaKey === true) || e.keyCode >= 35 && e.keyCode <= 40) {
+          var ref2;
+          if ($.inArray(e.keyCode, [16, 17, 18, 46, 8, 9, 27, 13, 110, 173, 190, 189]) !== -1 || (e.keyCode >= 112 && e.keyCode <= 123) || ((ref2 = e.keyCode) === 65 || ref2 === 67 || ref2 === 86) && (e.ctrlKey === true || e.metaKey === true) || e.keyCode >= 35 && e.keyCode <= 40) {
 
           } else if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
             return e.preventDefault();
@@ -781,7 +791,7 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
         element.popover({
           trigger: 'focus',
           container: 'body',
-          placement: 'top',
+          placement: 'auto top',
           template: '<div class="popover ' + classId + '" role="tooltip">' + '  <div class="arrow"></div>' + '  <h3 class="popover-title"></h3>' + '  <div class="popover-content"></div>' + '</div>'
         });
         return element.on('shown.bs.popover', function() {
@@ -821,7 +831,7 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
     link: function(scope, elem, attrs) {
       scope.height = 0;
       scope.$watch(function() {
-        return scope.height = elem.outerHeight();
+        scope.height = elem.outerHeight();
       });
       return scope.$watch('height', function(newVal, oldVal) {
         return elem.next().css('top', newVal + 'px');
@@ -835,7 +845,7 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
     link: function(scope, elem, attrs) {
       scope.height = 0;
       scope.$watch(function() {
-        return scope.height = elem.outerHeight();
+        scope.height = elem.outerHeight();
       });
       return scope.$watch('height', function(newVal, oldVal) {
         return elem.prev().css('bottom', newVal + 'px');
@@ -941,7 +951,6 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
   }
 ]);
 
-"use strict";
 shSpinningModule.directive("shSpinning", [
   'ShSpinningService', function(ShSpinningService) {
     return {
@@ -1036,7 +1045,6 @@ shSpinningModule.directive("shSpinning", [
   }
 ]);
 
-"use strict";
 angular.module('sh.submit', []).directive('shSubmit', [
   '$compile', '$filter', function($compile, $filter) {
     return {
@@ -1096,7 +1104,7 @@ angular.module('sh.submit', []).directive('shSubmit', [
             });
           }
         };
-        return scope.$watch(function() {
+        scope.$watch(function() {
           var ref;
           return (ref = getDescendantProp(scope, attrs.shSubmit)) != null ? ref.$invalid : void 0;
         }, function(newVal, oldVal) {
@@ -1126,12 +1134,12 @@ shValidationModule.directive("validFile", [
             $timeout((function() {
               ngModel.$pristine = false;
               ngModel.$setViewValue(scope.validFileName);
-              return ngModel.$pristine = true;
+              ngModel.$pristine = true;
             }), 200);
             return $timeout((function() {
               ngModel.$pristine = false;
               ngModel.$setViewValue(scope.validFileName);
-              return ngModel.$pristine = true;
+              ngModel.$pristine = true;
             }), 2000);
           }
         });
@@ -1183,7 +1191,6 @@ angular.module('sh.view.helper', []).directive('yesNo', function() {
   };
 });
 
-"use strict";
 angular.module('auth.token.handler', []).factory("AuthTokenHandler", [
   function() {
     var authToken, authTokenHandler, tokenWrapper, username;
@@ -1197,10 +1204,10 @@ angular.module('auth.token.handler', []).factory("AuthTokenHandler", [
       return authToken;
     };
     authTokenHandler.setUsername = function(newUsername) {
-      return username = newUsername;
+      username = newUsername;
     };
     authTokenHandler.setAuthToken = function(newAuthToken) {
-      return authToken = newAuthToken;
+      authToken = newAuthToken;
     };
     authTokenHandler.wrapActions = function(resource, actions) {
       var i, wrappedResource;
@@ -1215,14 +1222,14 @@ angular.module('auth.token.handler', []).factory("AuthTokenHandler", [
     tokenWrapper = function(resource, action) {
       resource['_' + action] = resource[action];
       if (action === 'save' || action === 'update') {
-        return resource[action] = function(params, data, success, error) {
+        resource[action] = function(params, data, success, error) {
           return resource['_' + action](angular.extend({}, params || {}, {
             username: authTokenHandler.getUsername(),
             authn_token: authTokenHandler.getAuthToken()
           }), data, success, error);
         };
       } else {
-        return resource[action] = function(params, success, error) {
+        resource[action] = function(params, success, error) {
           return resource["_" + action](angular.extend({}, params || {}, {
             username: authTokenHandler.getUsername(),
             authn_token: authTokenHandler.getAuthToken()
@@ -1234,7 +1241,6 @@ angular.module('auth.token.handler', []).factory("AuthTokenHandler", [
   }
 ]);
 
-"use strict";
 
 /**
  * @ngdoc object
@@ -1338,7 +1344,7 @@ shTableModule.factory('ShTableParams', [
        */
       this.sortData = function(field, direction) {
         this.$params.sorting = {};
-        return this.$params.sorting[field] = direction;
+        this.$params.sorting[field] = direction;
       };
 
       /**
@@ -1424,7 +1430,6 @@ shTableModule.factory('ShTableParams', [
   }
 ]);
 
-"use strict";
 angular.module('sh.filter.collection', []).filter("shFilterCollection", [
   function() {
     return function(collection, callback, entity) {
@@ -1437,7 +1442,6 @@ angular.module('sh.filter.collection', []).filter("shFilterCollection", [
   }
 ]);
 
-"use strict";
 angular.module('sh.floating.precision', []).filter("shFloatingPrecision", function() {
   return function(value, accuracy) {
     if (accuracy == null) {
@@ -1447,7 +1451,6 @@ angular.module('sh.floating.precision', []).filter("shFloatingPrecision", functi
   };
 });
 
-"use strict";
 angular.module('sh.remove.duplicates', []).filter("shRemoveDuplicates", [
   function() {
     return function(collection, fieldName, callback) {
@@ -1475,7 +1478,6 @@ angular.module('sh.remove.duplicates', []).filter("shRemoveDuplicates", [
   }
 ]);
 
-"use strict";
 angular.module('sh.strip.html', []).filter("shStripHtml", function() {
   return function(value) {
     if (!value) {
@@ -1486,7 +1488,6 @@ angular.module('sh.strip.html', []).filter("shStripHtml", function() {
   };
 });
 
-"use strict";
 angular.module('sh.strip.to.newline', []).filter("shStripToNewline", function() {
   return function(value) {
     if (!value) {
@@ -1497,7 +1498,6 @@ angular.module('sh.strip.to.newline', []).filter("shStripToNewline", function() 
   };
 });
 
-"use strict";
 angular.module('sh.truncate', []).filter("shTruncate", [
   function() {
     return function(text, wordwise, max, tail) {
@@ -1524,61 +1524,9 @@ angular.module('sh.truncate', []).filter("shTruncate", [
   }
 ]);
 
-"use strict";
-angular.module('sh.bulk.helper', []).run([
-  '$rootScope', function($rootScope) {
-    return $rootScope.bulkHelper = [
-      '$scope', function($scope) {
-        $scope.selectedEntities = [];
-        $scope.selectAll = function(items) {
-          var activeItems;
-          activeItems = $scope.activeItems(items);
-          if ($scope.selectedItems(activeItems).length === activeItems.length) {
-            return activeItems.forEach(function(item) {
-              return item.$selected = false;
-            });
-          } else {
-            return activeItems.forEach(function(item) {
-              return item.$selected = true;
-            });
-          }
-        };
-        $scope.updateSelectedEntities = function(items) {
-          var activeItems;
-          activeItems = $scope.activeItems(items);
-          return $scope.selectedEntities = $scope.selectedItems(activeItems);
-        };
-        $scope.activeItems = function(items) {
-          if (items instanceof Array) {
-            return items.filter(function(item) {
-              return $scope.recentlyDeletedIds.indexOf(item.id) < 0;
-            });
-          }
-        };
-        return $scope.selectedItems = function(items) {
-          var activeItems, i, j, len, ref, results;
-          if (items instanceof Array) {
-            activeItems = $scope.activeItems(items);
-            ref = activeItems.filter(function(item) {
-              return !!item.$selected;
-            });
-            results = [];
-            for (j = 0, len = ref.length; j < len; j++) {
-              i = ref[j];
-              results.push(i.id);
-            }
-            return results;
-          }
-        };
-      }
-    ];
-  }
-]);
-
-"use strict";
 angular.module('sh.init.ng.table', []).run([
   '$rootScope', '$templateCache', 'ngTableParams', function($rootScope, $templateCache, ngTableParams) {
-    return $rootScope.initNgTable = [
+    $rootScope.initNgTable = [
       '$scope', '$timeout', '$filter', function($scope, $timeout, $filter) {
         $scope.recentlyCreatedIds = [];
         $scope.recentlyUpdatedIds = [];
@@ -1652,7 +1600,7 @@ angular.module('sh.init.ng.table', []).run([
         $scope.getPagedDataAsync = function() {
           if ($scope.asyncBlock === false) {
             $scope.asyncBlock = true;
-            return $timeout((function() {
+            $timeout((function() {
               var $defer, gridParams, params;
               $scope.beforeGetPagedData();
               $defer = $scope.tableParamsGetData.defer;
@@ -1670,7 +1618,7 @@ angular.module('sh.init.ng.table', []).run([
                 $scope.asyncBlock = false;
               }, function(error) {
                 $scope.gridRefreshing = false;
-                return $scope.asyncBlock = false;
+                $scope.asyncBlock = false;
               });
             }), 100);
           }
@@ -1710,18 +1658,17 @@ angular.module('sh.init.ng.table', []).run([
           return $scope.tableParams.generatePagesArray($scope.tableParams.page(), $scope.tableParams.total(), $scope.tableParams.count());
         };
         $scope.pages = $scope.getGeneratedPagesArray();
-        return $scope.$on('ngTableAfterReloadData', function() {
-          return $scope.pages = $scope.getGeneratedPagesArray();
+        $scope.$on('ngTableAfterReloadData', function() {
+          $scope.pages = $scope.getGeneratedPagesArray();
         }, true);
       }
     ];
   }
 ]);
 
-"use strict";
 angular.module('sh.modal.persistence', []).run([
   '$rootScope', function($rootScope) {
-    return $rootScope.modalPersistence = [
+    $rootScope.modalPersistence = [
       '$scope', '$q', '$timeout', 'ShNotification', 'ShButtonState', function($scope, $q, $timeout, ShNotification, ShButtonState) {
         $scope.entity = {};
         $scope.errors = [];
@@ -1881,7 +1828,7 @@ angular.module('sh.modal.persistence', []).run([
           angular.element("#" + elementStr).modal('show');
           angular.element("#" + elementStr).on('hidden.bs.modal', function() {
             $scope.closeNewEntityModal(elementStr);
-            return $scope.modalProperties.visible = false;
+            $scope.modalProperties.visible = false;
           });
           return $scope.fetchNewEntity();
         };
@@ -1939,7 +1886,7 @@ angular.module('sh.modal.persistence', []).run([
           angular.element("#" + elementStr).modal('show');
           angular.element("#" + elementStr).on('hidden.bs.modal', function() {
             $scope.closeEditEntityModal(elementStr, id);
-            return $scope.modalProperties.visible = false;
+            $scope.modalProperties.visible = false;
           });
           return $scope.fetchEditEntity(id);
         };
@@ -2046,7 +1993,7 @@ angular.module('sh.modal.persistence', []).run([
         $scope.multipleDeleteEntity = function(ids) {
           return $scope.multipleDestroyEntity(ids);
         };
-        return $scope.rowEvent = function(entity) {
+        $scope.rowEvent = function(entity) {
           if ($scope.recentlyDeletedIds.indexOf(entity.id) >= 0) {
             return 'recently-deleted';
           } else if ($scope.recentlyUpdatedIds.indexOf(entity.id) >= 0) {
@@ -2062,10 +2009,9 @@ angular.module('sh.modal.persistence', []).run([
   }
 ]);
 
-"use strict";
 angular.module('sh.persistence', []).run([
   '$rootScope', function($rootScope) {
-    return $rootScope.persistence = [
+    $rootScope.persistence = [
       '$scope', '$timeout', '$state', 'ShNotification', 'ShButtonState', function($scope, $timeout, $state, ShNotification, ShButtonState) {
         $scope.entity = {};
         $scope.localLookup = {};
@@ -2076,11 +2022,11 @@ angular.module('sh.persistence', []).run([
         };
         $scope.removeNestedAttributes = function(objName, obj) {
           var index;
-          if (obj['id']) {
-            return obj['_destroy'] = true;
+          if (obj.id) {
+            obj._destroy = true;
           } else {
             index = $scope.entity[objName].indexOf(obj);
-            return $scope.entity[objName].splice(index, 1);
+            $scope.entity[objName].splice(index, 1);
           }
         };
         $scope.beforeNewEntity = function() {};
@@ -2139,7 +2085,7 @@ angular.module('sh.persistence', []).run([
           }).$promise.then(function(success) {
             var params;
             params = {};
-            params['id'] = success.data.id;
+            params.id = success.data.id;
             $state.transitionTo($scope.showPath, params);
             $scope.createEntitySuccess(success, $event);
             $scope.createEntitySuccessNotification(success, $event);
@@ -2162,7 +2108,7 @@ angular.module('sh.persistence', []).run([
           }).$promise.then(function(success) {
             $scope.saved = true;
             $timeout((function() {
-              return $scope.saved = false;
+              $scope.saved = false;
             }), 5000);
             $scope.updateEntitySuccess(success, $event);
             $scope.updateEntitySuccessNotification(success, $event);
@@ -2203,14 +2149,13 @@ angular.module('sh.persistence', []).run([
           }
         };
         if (!$scope.skipInit) {
-          return $scope.init();
+          $scope.init();
         }
       }
     ];
   }
 ]);
 
-"use strict";
 shApiModule.run([
   '$rootScope', function($rootScope) {
 
@@ -2221,7 +2166,7 @@ shApiModule.run([
      * @description
      * ShTableRest
      */
-    return $rootScope.shApiHook = [
+    $rootScope.shApiHook = [
       '$q', '$injector', function($q, $injector) {
         var self, shApi;
         self = this;
@@ -2237,7 +2182,7 @@ shApiModule.run([
         if (this.optParams == null) {
           this.optParams = {};
         }
-        this.сreatedIds = [];
+        this.createdIds = [];
         this.updatedIds = [];
         this.deletedIds = [];
         shApi = {
@@ -2346,13 +2291,12 @@ shApiModule.run([
           }
           return deferred.promise;
         };
-        return $injector.invoke($rootScope.shApi, shApi);
+        $injector.invoke($rootScope.shApi, shApi);
       }
     ];
   }
 ]);
 
-"use strict";
 shApiModule.run([
   '$rootScope', function($rootScope) {
 
@@ -2363,7 +2307,7 @@ shApiModule.run([
      * @description
      * ShTableRest
      */
-    return $rootScope.shApi = [
+    $rootScope.shApi = [
       '$q', function($q) {
         if (this.resource == null) {
           this.resource = null;
@@ -2525,7 +2469,7 @@ shApiModule.run([
          *
          * @returns {promise}
          */
-        return this.apiCall = function(opts) {
+        this.apiCall = function(opts) {
           var deferred;
           deferred = $q.defer();
           switch (opts.method) {
@@ -2560,7 +2504,6 @@ shApiModule.run([
   }
 ]);
 
-"use strict";
 shFormModule.run([
   '$rootScope', function($rootScope) {
 
@@ -2571,7 +2514,7 @@ shFormModule.run([
      * @description
      * ShForm
      */
-    return $rootScope.shForm = [
+    $rootScope.shForm = [
       function() {
         var self;
         self = this;
@@ -2708,7 +2651,7 @@ shFormModule.run([
          *
          * @returns {Boolean} true if `$pristine` or `$submitted`
          */
-        return this.isResetButtonDisabled = function() {
+        this.isResetButtonDisabled = function() {
           var ref, ref1;
           return ((ref = this.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = this.entityForm) != null ? ref1.$submitted : void 0);
         };
@@ -2717,7 +2660,6 @@ shFormModule.run([
   }
 ]);
 
-"use strict";
 shPersistenceModule.run([
   '$rootScope', function($rootScope) {
 
@@ -2728,28 +2670,27 @@ shPersistenceModule.run([
      * @description
      * ShTableRest
      */
-    return $rootScope.shPersistenceHookNotification = [
+    $rootScope.shPersistenceHookNotification = [
       'ShNotification', function(ShNotification) {
         var self;
         self = this;
         this.newEntityErrorHooks.push(function(error) {
-          return ShNotification.toastByResponse(error);
+          ShNotification.toastByResponse(error);
         });
         this.createEntityErrorHooks.push(function(error) {
-          return ShNotification.toastByResponse(error);
+          ShNotification.toastByResponse(error);
         });
         this.editEntityErrorHooks.push(function(error) {
-          return ShNotification.toastByResponse(error);
+          ShNotification.toastByResponse(error);
         });
-        return this.updateEntityErrorHooks.push(function(error) {
-          return ShNotification.toastByResponse(error);
+        this.updateEntityErrorHooks.push(function(error) {
+          ShNotification.toastByResponse(error);
         });
       }
     ];
   }
 ]);
 
-"use strict";
 shPersistenceModule.run([
   '$rootScope', function($rootScope) {
 
@@ -2760,7 +2701,7 @@ shPersistenceModule.run([
      * @description
      * ShTableRest
      */
-    return $rootScope.shPersistenceHook = [
+    $rootScope.shPersistenceHook = [
       '$q', '$injector', function($q, $injector) {
         var self, shApi;
         self = this;
@@ -3156,7 +3097,6 @@ shPersistenceModule.run([
   }
 ]);
 
-"use strict";
 shPersistenceModule.run([
   '$rootScope', function($rootScope) {
 
@@ -3167,7 +3107,7 @@ shPersistenceModule.run([
      * @description
      * shTable
      */
-    return $rootScope.shPersistence = [
+    $rootScope.shPersistence = [
       '$injector', '$q', function($injector, $q) {
         var self;
         self = this;
@@ -3184,13 +3124,12 @@ shPersistenceModule.run([
             id: "desc"
           };
         }
-        return $injector.invoke($rootScope.shPersistenceHook, this);
+        $injector.invoke($rootScope.shPersistenceHook, this);
       }
     ];
   }
 ]);
 
-"use strict";
 shTableModule.run([
   '$rootScope', function($rootScope) {
 
@@ -3201,7 +3140,7 @@ shTableModule.run([
      * @description
      * shTableHelper
      */
-    return $rootScope.shTableFilter = [
+    $rootScope.shTableFilter = [
       '$filter', '$injector', '$rootScope', 'HelperService', function($filter, $injector, $rootScope, HelperService) {
         var dateParams, numberParams, self;
         self = this;
@@ -3316,43 +3255,43 @@ shTableModule.run([
           /* */
         };
         this.filterDateToday = function(shFilter) {
-          return dateParams[shFilter + "_eqdate"] = moment().format('YYYY-MM-DD');
+          dateParams[shFilter + "_eqdate"] = moment().format('YYYY-MM-DD');
         };
         this.filterDatePastNDays = function(shFilter, n) {
           dateParams[shFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
-          return dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'days').format('YYYY-MM-DD');
+          dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'days').format('YYYY-MM-DD');
         };
         this.filterDatePastNWeeks = function(shFilter, n) {
           dateParams[shFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
-          return dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'weeks').format('YYYY-MM-DD');
+          dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'weeks').format('YYYY-MM-DD');
         };
         this.filterDatePastNMonths = function(shFilter, n) {
           dateParams[shFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
-          return dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'months').format('YYYY-MM-DD');
+          dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'months').format('YYYY-MM-DD');
         };
         this.filterDatePastNYears = function(shFilter, n) {
           dateParams[shFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
-          return dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'years').format('YYYY-MM-DD');
+          dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'years').format('YYYY-MM-DD');
         };
         this.filterDateNextNDays = function(shFilter, n) {
           dateParams[shFilter + "_lteqdate"] = moment().add(n, 'days').format('YYYY-MM-DD');
-          return dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
+          dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
         };
         this.filterDateNextNWeeks = function(shFilter, n) {
           dateParams[shFilter + "_lteqdate"] = moment().add(n, 'weeks').format('YYYY-MM-DD');
-          return dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
+          dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
         };
         this.filterDateNextNMonths = function(shFilter, n) {
           dateParams[shFilter + "_lteqdate"] = moment().add(n, 'months').format('YYYY-MM-DD');
-          return dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
+          dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
         };
         this.filterDateNextNYears = function(shFilter, n) {
           dateParams[shFilter + "_lteqdate"] = moment().add(n, 'years').format('YYYY-MM-DD');
-          return dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
+          dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
         };
         this.filterDateRange = function(shFilter, fromDate, thruDate) {
           dateParams[shFilter + "_gteqdate"] = fromDate;
-          return dateParams[shFilter + "_lteqdate"] = thruDate;
+          dateParams[shFilter + "_lteqdate"] = thruDate;
         };
         numberParams = {};
         this.prepareFilterNumber = function(shFilter) {
@@ -3438,12 +3377,9 @@ shTableModule.run([
           this.filterLabel[shFilter] = this.filterNumberLabel(keyword, shFilter);
           return this.executeFilterNumber();
         };
-        this.filterNumberAny = function(shFilter) {
-
-          /* */
-        };
+        this.filterNumberAny = function(shFilter) {};
         this.filterNumberSpecific = function(shFilter, number) {
-          return numberParams[shFilter + "_eq"] = number;
+          numberParams[shFilter + "_eq"] = number;
         };
         this.filterNumberRange = function(shFilter, leftNumber, rightNumber) {
           if (leftNumber != null) {
@@ -3454,7 +3390,7 @@ shTableModule.run([
           }
           if ((leftNumber != null) && (rightNumber != null) && leftNumber > rightNumber) {
             numberParams[shFilter + "_gteq"] = rightNumber;
-            return numberParams[shFilter + "_lteq"] = leftNumber;
+            numberParams[shFilter + "_lteq"] = leftNumber;
           }
         };
         this.filterTextCont = function(shFilter) {
@@ -3553,7 +3489,7 @@ shTableModule.run([
           return HelperService.isRowSelectionEmpty(this.filterCollection[shFilter]);
         };
         this.toggleFilterRegion = function() {
-          return this.filterRegion.visible = !this.filterRegion.visible;
+          this.filterRegion.visible = !this.filterRegion.visible;
         };
         this.resetFilter = function() {
           var k, ref, v;
@@ -3566,7 +3502,7 @@ shTableModule.run([
           }
           return this.refreshGrid();
         };
-        return this.isNoFilter = function() {
+        this.isNoFilter = function() {
           return $.isEmptyObject(this.filterParams);
         };
       }
@@ -3574,7 +3510,6 @@ shTableModule.run([
   }
 ]);
 
-"use strict";
 shTableModule.run([
   '$rootScope', function($rootScope) {
 
@@ -3585,7 +3520,7 @@ shTableModule.run([
      * @description
      * shTableHelper
      */
-    return $rootScope.shTableHelper = [
+    $rootScope.shTableHelper = [
       '$q', function($q) {
 
         /**
@@ -3625,7 +3560,7 @@ shTableModule.run([
           var newDirection;
           newDirection = this.tableParams.isSortBy(fieldName, 'asc') ? 'desc' : 'asc';
           this.tableParams.sortData(fieldName, newDirection);
-          return this.refreshGrid();
+          this.refreshGrid();
         };
 
         /**
@@ -3658,14 +3593,14 @@ shTableModule.run([
          * @name isRecentlyCreated
          *
          * @description
-         * Return true if given object/entity/entity-id is recently created (found in сreatedIds)
+         * Return true if given object/entity/entity-id is recently created (found in createdIds)
          *
          * @param {Object} entity Entity object or string `UUID`
          *
          * @returns {Boolean}
          */
         this.isRecentlyCreated = function(obj) {
-          return this.сreatedIds.indexOf((obj != null ? obj.id : void 0) || obj) >= 0;
+          return this.createdIds.indexOf((obj != null ? obj.id : void 0) || obj) >= 0;
         };
 
         /**
@@ -3694,7 +3629,7 @@ shTableModule.run([
          *
          * @returns {Boolean}
          */
-        return this.isRecentlyDeleted = function(obj) {
+        this.isRecentlyDeleted = function(obj) {
           return this.deletedIds.indexOf((obj != null ? obj.id : void 0) || obj) >= 0;
         };
       }
@@ -3702,7 +3637,6 @@ shTableModule.run([
   }
 ]);
 
-"use strict";
 shTableModule.run([
   '$rootScope', function($rootScope) {
 
@@ -3713,34 +3647,33 @@ shTableModule.run([
      * @description
      * ShTableRest
      */
-    return $rootScope.shTableHookNotification = [
+    $rootScope.shTableHookNotification = [
       'ShNotification', function(ShNotification) {
         var self;
         self = this;
         this.getEntitiesErrorHooks.push(function(error) {
-          return ShNotification.toastByResponse(error);
+          ShNotification.toastByResponse(error);
         });
         this.newEntityErrorHooks.push(function(error) {
-          return ShNotification.toastByResponse(error);
+          ShNotification.toastByResponse(error);
         });
         this.createEntityErrorHooks.push(function(error) {
-          return ShNotification.toastByResponse(error);
+          ShNotification.toastByResponse(error);
         });
         this.editEntityErrorHooks.push(function(error) {
-          return ShNotification.toastByResponse(error);
+          ShNotification.toastByResponse(error);
         });
         this.updateEntityErrorHooks.push(function(error) {
-          return ShNotification.toastByResponse(error);
+          ShNotification.toastByResponse(error);
         });
-        return this.deleteEntityErrorHooks.push(function(error) {
-          return ShNotification.toastByResponse(error);
+        this.deleteEntityErrorHooks.push(function(error) {
+          ShNotification.toastByResponse(error);
         });
       }
     ];
   }
 ]);
 
-"use strict";
 shTableModule.run([
   '$rootScope', function($rootScope) {
 
@@ -3751,7 +3684,7 @@ shTableModule.run([
      * @description
      * ShTableRest
      */
-    return $rootScope.shTableHook = [
+    $rootScope.shTableHook = [
       '$q', '$injector', function($q, $injector) {
         var self, shApi;
         self = this;
@@ -3767,7 +3700,7 @@ shTableModule.run([
         if (this.optParams == null) {
           this.optParams = {};
         }
-        this.сreatedIds = [];
+        this.createdIds = [];
         this.updatedIds = [];
         this.deletedIds = [];
         shApi = {
@@ -3921,7 +3854,7 @@ shTableModule.run([
           }
           shApi.create(this.optParams, data).then(function(success) {
             var j, len1, ref1;
-            self.сreatedIds.push(success.data.id);
+            self.createdIds.push(success.data.id);
             self.entity = success.data;
             if (success.lookup != null) {
               self.lookup = success.lookup;
@@ -4140,7 +4073,6 @@ shTableModule.run([
   }
 ]);
 
-"use strict";
 shTableModule.run([
   '$rootScope', function($rootScope) {
 
@@ -4151,7 +4083,7 @@ shTableModule.run([
      * @description
      * ShTableRest
      */
-    return $rootScope.shTableParamsHook = [
+    $rootScope.shTableParamsHook = [
       '$injector', '$q', function($injector, $q) {
         var self;
         self = this;
@@ -4174,7 +4106,7 @@ shTableModule.run([
             this.tableParams.$params.perPage = perPage || this.tableParams.$params.perPage;
             this.tableParams.$params.pageNumber = pageNumber;
           }
-          return this.refreshGrid();
+          this.refreshGrid();
         };
 
         /**
@@ -4232,7 +4164,7 @@ shTableModule.run([
          *
          * @returns {promise}
          */
-        return this.getPagedDataAsync = function() {
+        this.getPagedDataAsync = function() {
           var deferred;
           deferred = $q.defer();
           this.getEntities().then(function(success) {
@@ -4248,7 +4180,6 @@ shTableModule.run([
   }
 ]);
 
-"use strict";
 shTableModule.run([
   '$rootScope', function($rootScope) {
 
@@ -4260,7 +4191,7 @@ shTableModule.run([
      * shTableProcessor
      *
      */
-    return $rootScope.shTableProcessor = [
+    $rootScope.shTableProcessor = [
       '$injector', function($injector) {
 
         /**
@@ -4309,7 +4240,7 @@ shTableModule.run([
          *
          * @returns Array class for CSS usage
          */
-        return this.getProcessedColumnDefs = function(columnDefs) {
+        this.getProcessedColumnDefs = function(columnDefs) {
           var columnDef, i, len, processedColumnDefs;
           processedColumnDefs = [];
           for (i = 0, len = columnDefs.length; i < len; i++) {
@@ -4327,7 +4258,6 @@ shTableModule.run([
   }
 ]);
 
-"use strict";
 shTableModule.run([
   '$rootScope', function($rootScope) {
 
@@ -4338,7 +4268,7 @@ shTableModule.run([
      * @description
      * shTable
      */
-    return $rootScope.shTable = [
+    $rootScope.shTable = [
       '$injector', '$q', 'ShTableParams', function($injector, $q, ShTableParams) {
         var self, shTableProcessor;
         self = this;
@@ -4359,7 +4289,7 @@ shTableModule.run([
         $injector.invoke($rootScope.shTableHook, this);
         $injector.invoke($rootScope.shTableParamsHook, this);
         $injector.invoke($rootScope.shTableProcessor, shTableProcessor);
-        return this.tableParams = new ShTableParams({
+        this.tableParams = new ShTableParams({
           pageNumber: 1,
           perPage: 10,
           sortInfo: 'this is sort info',
@@ -4380,7 +4310,6 @@ shTableModule.run([
   }
 ]);
 
-"use strict";
 angular.module('sh.button.state', []).service("ShButtonState", [
   '$timeout', function($timeout) {
     this.initializeEvent = function($event, defaultValue) {
@@ -4394,19 +4323,19 @@ angular.module('sh.button.state', []).service("ShButtonState", [
         target.prop('disabled', !enabled);
         if (target.is('form')) {
           btn = target.find('button[type="submit"]');
-          return btn.prop('disabled', !enabled);
+          btn.prop('disabled', !enabled);
         } else if (target.is('a')) {
           if (enabled) {
-            return target.removeClass('disabled');
+            target.removeClass('disabled');
           } else {
-            return target.addClass('disabled');
+            target.addClass('disabled');
           }
         } else if (target.is('span')) {
           target = target.parent();
           if (enabled) {
-            return target.removeClass('disabled');
+            target.removeClass('disabled');
           } else {
-            return target.addClass('disabled');
+            target.addClass('disabled');
           }
         }
       }
@@ -4424,7 +4353,6 @@ angular.module('sh.button.state', []).service("ShButtonState", [
   }
 ]);
 
-"use strict";
 angular.module('sh.notification', []).service("ShNotification", [
   '$timeout', '$interval', function($timeout, $interval) {
     var defaultDuration, defaultLifetime;
@@ -4458,10 +4386,10 @@ angular.module('sh.notification', []).service("ShNotification", [
       }
       opts.beforeAdd.call(this);
       this.toasts.unshift(opts.toast);
-      return opts.afterAdd.call(this);
+      opts.afterAdd.call(this);
     };
     this.removeOldestToast = function() {
-      return this.removeToast(this.toasts.length - 1);
+      this.removeToast(this.toasts.length - 1);
     };
     this.removeToast = function(options, lifetimeOpt, durationOpt) {
       var opts, toasts;
@@ -4489,13 +4417,13 @@ angular.module('sh.notification', []).service("ShNotification", [
         height: 0,
         opacity: 0
       }, opts.duration);
-      return $timeout(function() {
+      $timeout(function() {
         toasts.splice(opts.index, 1);
         return opts.afterRemove.call(this);
       }, opts.duration + 1);
     };
     this.runInterval = function(self) {
-      return $interval(function() {
+      $interval(function() {
         var i, j, len, ref, ref1, results, toast;
         ref = self.toasts;
         results = [];
@@ -4531,7 +4459,7 @@ angular.module('sh.notification', []).service("ShNotification", [
       }
       opts.beforeAdd.call(this);
       this.notifications.unshift(opts.notification);
-      return opts.afterAdd.call(this);
+      opts.afterAdd.call(this);
     };
     this.removeNotification = function(options, durationOpt) {
       var notifications, opts;
@@ -4555,56 +4483,54 @@ angular.module('sh.notification', []).service("ShNotification", [
         height: 0,
         opacity: 0
       }, opts.duration);
-      return $timeout(function() {
+      $timeout(function() {
         notifications.splice(opts.index, 1);
         return opts.afterRemove.call(this);
       }, opts.duration);
     };
     this.toastByResponse = function(response, defaultToast) {
-      var j, k, len, len1, n, ref, ref1, results, results1;
+      var fn, fn1, j, k, len, len1, n, ref, ref1;
       if (response.notification) {
         ref = response.notification.notifications;
-        results = [];
+        fn = (function(_this) {
+          return function(n) {
+            return _this.addToast({
+              type: n.type,
+              data: response,
+              message: n.message,
+              field: n.field
+            });
+          };
+        })(this);
         for (j = 0, len = ref.length; j < len; j++) {
           n = ref[j];
-          results.push((function(_this) {
-            return function(n) {
-              return _this.addToast({
-                type: n.type,
-                data: response,
-                message: n.message,
-                field: n.field
-              });
-            };
-          })(this)(n));
+          fn(n);
         }
-        return results;
       } else if (response.data && response.data.error) {
         ref1 = response.data.error.errors;
-        results1 = [];
+        fn1 = (function(_this) {
+          return function(n) {
+            return _this.addToast({
+              type: 'danger',
+              data: response,
+              message: n.message,
+              field: n.field
+            });
+          };
+        })(this);
         for (k = 0, len1 = ref1.length; k < len1; k++) {
           n = ref1[k];
-          results1.push((function(_this) {
-            return function(n) {
-              return _this.addToast({
-                type: 'danger',
-                data: response,
-                message: n.message,
-                field: n.field
-              });
-            };
-          })(this)(n));
+          fn1(n);
         }
-        return results1;
       } else if (defaultToast) {
-        return this.addToast({
+        this.addToast({
           type: defaultToast.type,
           data: response,
           message: defaultToast.message,
           field: defaultToast.field
         });
       } else {
-        return this.addToast({
+        this.addToast({
           type: 'danger',
           data: response,
           message: response.data
@@ -4616,7 +4542,6 @@ angular.module('sh.notification', []).service("ShNotification", [
   }
 ]);
 
-"use strict";
 angular.module("sh.page.service", []).service("ShPageService", [
   '$window', function($window) {
     var _appName, _pageTitle;
@@ -4625,7 +4550,7 @@ angular.module("sh.page.service", []).service("ShPageService", [
     this.setPageTitle = function(pageTitle) {
       _pageTitle = pageTitle;
       $window.document.title = this.getAppName() + ' - ' + this.getPageTitle();
-      return this.getPageTitle();
+      this.getPageTitle();
     };
     this.getPageTitle = function() {
       return _pageTitle;
@@ -4633,7 +4558,7 @@ angular.module("sh.page.service", []).service("ShPageService", [
     this.setAppName = function(appName) {
       _appName = appName;
       $window.document.title = this.getAppName() + ' - ' + this.getPageTitle();
-      return this.getAppName();
+      this.getAppName();
     };
     this.getAppName = function() {
       return _appName;
@@ -4642,7 +4567,6 @@ angular.module("sh.page.service", []).service("ShPageService", [
   }
 ]);
 
-"use strict";
 angular.module("sh.priv", []).service("ShPriv", function() {
   this.can = function(privileges, ability) {
     return privileges.indexOf(ability) !== -1;
@@ -4650,7 +4574,6 @@ angular.module("sh.priv", []).service("ShPriv", function() {
   return this;
 });
 
-"use strict";
 shSpinningModule.service("ShSpinningService", function() {
   var spinningStates;
   spinningStates = {};
@@ -4672,9 +4595,9 @@ shSpinningModule.service("ShSpinningService", function() {
       spinning = true;
     }
     if (spinning) {
-      return spinningStates[key] = true;
+      spinningStates[key] = true;
     } else {
-      return this.stop(key);
+      this.stop(key);
     }
   };
 
@@ -4691,7 +4614,7 @@ shSpinningModule.service("ShSpinningService", function() {
    * @returns {*} class for CSS usage
    */
   this.stop = function(key) {
-    return delete spinningStates[key];
+    delete spinningStates[key];
   };
 
   /**
@@ -4711,45 +4634,31 @@ shSpinningModule.service("ShSpinningService", function() {
   return this;
 });
 
-"use strict";
 shHelperModule.service("shElementFinder", function() {
   this.findById = function(source, id) {
-    var obj;
-    obj = void 0;
-    return obj = source.filter(function(obj) {
+    return source.filter(function(obj) {
       return +obj.id === +id;
     });
   };
   this.findFirstById = function(source, id) {
-    var obj;
-    obj = void 0;
-    obj = source.filter(function(obj) {
+    var ref;
+    return (ref = source.filter(function(obj) {
       return +obj.id === +id;
-    })[0];
-    if (obj != null) {
-      return obj;
-    } else {
-      return obj = {};
-    }
+    })[0]) != null ? ref : {};
   };
   this.findByField = function(source, value) {
-    var obj;
-    obj = void 0;
-    return obj = source.filter(function(obj) {
+    return source.filter(function(obj) {
       return obj.field === value;
     });
   };
   this.findByElmt = function(source, elmt) {
-    var obj;
-    obj = void 0;
-    return obj = source.filter(function(obj) {
+    return source.filter(function(obj) {
       return +obj === +elmt;
     });
   };
   return this;
 });
 
-"use strict";
 shHelperModule.service("HelperService", [
   function() {
     this.rowSelect = function(obj, collections, key) {
@@ -4762,7 +4671,7 @@ shHelperModule.service("HelperService", [
         idx = collections.indexOf(obj);
       }
       if (idx < 0) {
-        return collections.push(obj);
+        collections.push(obj);
       }
     };
     this.rowDeselect = function(obj, collections, key) {
@@ -4775,17 +4684,17 @@ shHelperModule.service("HelperService", [
         idx = collections.indexOf(obj);
       }
       if (idx >= 0) {
-        return collections.splice(idx, 1);
+        collections.splice(idx, 1);
       }
     };
     this.clearRowSelection = function(collections) {
-      return collections.splice(0);
+      collections.splice(0);
     };
     this.rowToggle = function(obj, collections, key) {
       if (this.isRowSelected(obj, collections, key)) {
-        return this.rowDeselect(obj, collections, key);
+        this.rowDeselect(obj, collections, key);
       } else {
-        return this.rowSelect(obj, collections, key);
+        this.rowSelect(obj, collections, key);
       }
     };
     this.isRowSelected = function(obj, collections, key) {
@@ -4830,5 +4739,6 @@ shHelperModule.service("HelperService", [
   }
 ]);
 
-'use strict';
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.bulk.helper', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.persistence', 'sh.api.module', 'sh.dialog.module', 'sh.form.module', 'sh.helper.module', 'sh.persistence.module', 'sh.spinning.module', 'sh.table.module', 'sh.validation.module', 'sh.button.state', 'sh.notification', 'sh.page.service', 'sh.priv']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.persistence', 'sh.api.module', 'sh.dialog.module', 'sh.form.module', 'sh.helper.module', 'sh.persistence.module', 'sh.spinning.module', 'sh.table.module', 'sh.validation.module', 'sh.button.state', 'sh.notification', 'sh.page.service', 'sh.priv']);
+
+}());
