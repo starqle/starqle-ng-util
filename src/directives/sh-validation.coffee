@@ -19,6 +19,7 @@
 
 # http://stackoverflow.com/questions/16207202/required-attribute-not-working-with-file-input-in-angular-js
 
+
 shValidationModule.directive "validFile", ['$timeout', ($timeout) ->
   scope:
     validFileName: '='

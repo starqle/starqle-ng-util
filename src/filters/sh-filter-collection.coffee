@@ -17,7 +17,6 @@
 # @note This file contains shFilterCollection filter.
 # =============================================================================
 
-"use strict"
 
 angular.module('sh.filter.collection', []).filter "shFilterCollection", [ ->
   (collection, callback, entity) ->

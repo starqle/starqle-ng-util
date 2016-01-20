@@ -17,7 +17,6 @@
 # @note This file contains shTruncate filter.
 # =============================================================================
 
-"use strict"
 
 angular.module('sh.truncate', []).filter "shTruncate", [ ->
   (text, wordwise, max, tail) ->

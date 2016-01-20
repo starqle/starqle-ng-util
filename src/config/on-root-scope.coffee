@@ -17,7 +17,6 @@
 # @note application-wide method for monitoring event in rootScope.
 # =============================================================================
 
-"use strict"
 
 angular.module('on.root.scope', []).config ["$provide", ($provide) ->
   $provide.decorator "$rootScope", ["$delegate", ($delegate) ->

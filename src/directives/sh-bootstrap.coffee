@@ -17,7 +17,6 @@
 # @note This file contains shTooltip directive
 # =============================================================================
 
-"use strict"
 
 angular.module(
   'sh.bootstrap', []

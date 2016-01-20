@@ -17,7 +17,6 @@
 # @note This file contains shStripToNewline filter
 # =============================================================================
 
-"use strict"
 
 angular.module('sh.strip.to.newline',[]).filter "shStripToNewline", ->
   (value) ->

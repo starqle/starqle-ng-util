@@ -17,7 +17,6 @@
 # @note This file contains shButtonState service.
 # =============================================================================
 
-"use strict"
 
 angular.module('sh.button.state',[]).service "ShButtonState", ['$timeout', ($timeout) ->
 

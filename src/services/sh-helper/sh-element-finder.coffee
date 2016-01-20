@@ -17,7 +17,6 @@
 # @note This file contains shElementFinder service
 # =============================================================================
 
-"use strict"
 
 shHelperModule.service "shElementFinder", ->
 

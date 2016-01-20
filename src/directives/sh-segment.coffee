@@ -20,6 +20,7 @@
 #
 # sh-collapsible
 #
+
 angular.module('sh.segment', []
 
 ).directive("wideTableContainer", ->

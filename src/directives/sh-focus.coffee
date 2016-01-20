@@ -17,7 +17,6 @@
 # @note This file contains shFocus directive (based-on http://stackoverflow.com/questions/14833326/how-to-set-focus-on-input-field)
 # =============================================================================
 
-"use strict"
 
 angular.module('sh.focus', []).directive "shFocus", ['$timeout', ($timeout) ->
   scope:

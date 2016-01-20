@@ -17,7 +17,7 @@
 # @note This file contains shDialog directive
 # =============================================================================
 
-"use strict"
+
 #
 # Only responsible for displaying modal (not hiding modal).
 # If you want to hide this modal, you must call it manually

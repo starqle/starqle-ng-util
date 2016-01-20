@@ -17,8 +17,6 @@
 # @note This file contains shSubmit directive
 # =============================================================================
 
-"use strict"
-
 
 angular.module('sh.submit',[]).directive 'shSubmit', ['$compile', '$filter', ($compile, $filter) ->
   restrict: 'A'

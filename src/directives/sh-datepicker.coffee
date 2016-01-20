@@ -17,7 +17,6 @@
 # @note This file contains shDatepicker directive
 # =============================================================================
 
-"use strict"
 
 angular.module('sh.datepicker', []
 

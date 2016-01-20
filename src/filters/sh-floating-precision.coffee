@@ -17,9 +17,7 @@
 # @note This file contains Floating Precision filter
 # =============================================================================
 
-"use strict"
 
-# TODO: Move it to ng-util
 # Avoid floating-point error like 0.30000000000001
 angular.module('sh.floating.precision', []).filter "shFloatingPrecision", ->
   (value, accuracy=12) ->

@@ -17,8 +17,6 @@
 # @note This file contains entry point for Starqle Angular utilities
 # =============================================================================
 
-'use strict'
-
 angular.module 'starqle.ng.util', [
   # config
   'on.root.scope',

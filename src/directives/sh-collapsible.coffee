@@ -20,6 +20,7 @@
 #
 # sh-collapsible
 #
+
 angular.module('sh.collapsible', []).directive("shCollapsible", ->
   restrict: 'AEC'
   scope:

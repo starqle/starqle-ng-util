@@ -17,7 +17,6 @@
 # @note This file contains Lookup Service service.
 # =============================================================================
 
-"use strict"
 
 shHelperModule.service "HelperService", [ ->
   # Select Deselect

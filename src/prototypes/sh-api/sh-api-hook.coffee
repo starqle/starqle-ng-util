@@ -17,7 +17,6 @@
 # @note This file contains prototype for controlling api hook.
 # =============================================================================
 
-"use strict"
 
 shApiModule.run ['$rootScope', ($rootScope) ->
 

@@ -17,8 +17,6 @@
 # @note This file contains ShTableParams for holding tableParams data inspired by ng-table
 # =============================================================================
 
-"use strict"
-
 ###*
 # @ngdoc object
 # @name ShTableParams

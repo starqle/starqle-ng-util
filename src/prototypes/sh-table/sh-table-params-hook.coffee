@@ -17,7 +17,6 @@
 # @note This file contains prototype for controlling stTableParam feature data.
 # =============================================================================
 
-"use strict"
 
 shTableModule.run ['$rootScope', ($rootScope) ->
 

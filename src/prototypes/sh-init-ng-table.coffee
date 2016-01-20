@@ -17,7 +17,6 @@
 # @note This file contains prototype for controllers that utilize ng-table.
 # =============================================================================
 
-"use strict"
 
 angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngTableParams', ($rootScope, $templateCache, ngTableParams) ->
 

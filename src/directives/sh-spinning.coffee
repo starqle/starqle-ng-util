@@ -17,7 +17,6 @@
 # @note This file contains shSpinning directive
 # =============================================================================
 
-"use strict"
 
 shSpinningModule.directive "shSpinning", ['ShSpinningService', (ShSpinningService) ->
   restrict: 'A'

@@ -17,7 +17,6 @@
 # @note This file contains ShSpinningService service.
 # =============================================================================
 
-"use strict";
 
 shSpinningModule.service "ShSpinningService", ->
 

@@ -17,7 +17,6 @@
 # @note This file contains sh-table-pagination directive
 # =============================================================================
 
-"use strict"
 
 ###*
 # @ngdoc directive

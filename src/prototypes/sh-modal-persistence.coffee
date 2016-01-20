@@ -17,7 +17,6 @@
 # @note This file contains prototype for controllers that utilize modal-based CRUD persistence
 # =============================================================================
 
-"use strict"
 
 angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
 

@@ -17,7 +17,6 @@
 # @note This file contains prototype for table filter
 # =============================================================================
 
-"use strict"
 
 shTableModule.run ['$rootScope', ($rootScope) ->
 

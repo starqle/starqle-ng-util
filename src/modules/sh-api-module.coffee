@@ -17,7 +17,6 @@
 # @note This file contains module variable that will be used as a root for others shApi derivatives
 # =============================================================================
 
-"use strict"
 
 ###*
 # @ngdoc module

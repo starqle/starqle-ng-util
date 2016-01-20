@@ -17,7 +17,6 @@
 # @note This file contains prototype for controlling api request on persistence-like data.
 # =============================================================================
 
-"use strict"
 
 shPersistenceModule.run ['$rootScope', ($rootScope) ->
 

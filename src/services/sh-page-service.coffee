@@ -17,7 +17,6 @@
 # @note This file contains Page Service service.
 # =============================================================================
 
-"use strict"
 
 angular.module("sh.page.service", []).service "ShPageService", ['$window', ($window) ->
   _pageTitle = ''

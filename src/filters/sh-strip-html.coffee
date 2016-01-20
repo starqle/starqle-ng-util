@@ -17,7 +17,6 @@
 # @note This file contains shStripHtml filter
 # =============================================================================
 
-"use strict"
 
 angular.module('sh.strip.html',[]).filter "shStripHtml", ->
   (value) ->

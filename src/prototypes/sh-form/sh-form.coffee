@@ -17,7 +17,6 @@
 # @note This file contains shForm Prototype
 # =============================================================================
 
-"use strict"
 
 shFormModule.run ['$rootScope', ($rootScope) ->
 

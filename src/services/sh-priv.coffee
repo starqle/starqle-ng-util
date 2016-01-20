@@ -17,7 +17,6 @@
 # @note This file contains ShPriv service
 # =============================================================================
 
-"use strict"
 
 angular.module("sh.priv", []).service "ShPriv", ->
   @can = (privileges, ability) ->

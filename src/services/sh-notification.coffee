@@ -17,7 +17,6 @@
 # @note This file contains shNotification service.
 # =============================================================================
 
-"use strict";
 
 angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$interval', ($timeout, $interval) ->
 

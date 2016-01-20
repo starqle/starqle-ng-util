@@ -17,7 +17,6 @@
 # @note This file contains prototype for controllers that utilize CRUD persistence
 # =============================================================================
 
-"use strict"
 
 angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
 

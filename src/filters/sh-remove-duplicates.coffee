@@ -17,7 +17,6 @@
 # @note This file contains shRemoveDuplicates filter.
 # =============================================================================
 
-"use strict"
 
 angular.module('sh.remove.duplicates', []).filter "shRemoveDuplicates", [ ->
   (collection, fieldName, callback) ->

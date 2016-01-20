@@ -17,7 +17,6 @@
 # @note This file contains shNumberFormat directive
 # =============================================================================
 
-"use strict"
 
 angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($filter) ->
   restrict: 'A'

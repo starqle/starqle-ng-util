@@ -18,7 +18,6 @@
 #   AuthToken.
 # =============================================================================
 
-"use strict"
 
 angular.module('auth.token.handler',[]).factory "AuthTokenHandler", [ ->
   authTokenHandler = {}

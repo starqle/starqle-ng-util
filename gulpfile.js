@@ -3,6 +3,7 @@ require('events').EventEmitter.prototype._maxListeners = 99;
 var gulp = require('gulp'),
     gulpCoffee = require('gulp-coffee'),
     gulpConcat = require('gulp-concat'),
+    gulpIf = require('gulp-if'),
     gulpUtil = require('gulp-util'),
     rimraf = require('rimraf');
 
@@ -20,6 +21,7 @@ gulp.task('build-clean', function(callback) {
 
 gulp.task('build-coffee', ['build-clean'], function() {
   source = [
+    'src/intro.js',
     'src/config/**/*.coffee',
     'src/modules/**/*.coffee',
     'src/directives/**/*.coffee',
@@ -27,10 +29,11 @@ gulp.task('build-coffee', ['build-clean'], function() {
     'src/filters/**/*.coffee',
     'src/prototypes/**/*.coffee',
     'src/services/**/*.coffee',
-    'src/main.coffee'
+    'src/main.coffee',
+    'src/outro.js'
   ]
   return gulp.src(source)
-    .pipe(gulpCoffee({bare: true, map: true, compile: true}))
+    .pipe(gulpIf('*.coffee', gulpCoffee({bare: true, map: true, compile: true})))
     .pipe(gulpConcat("starqle-ng-util.js"))
     // .pipe(gulp.dest('dist/'));
     .pipe(gulp.dest('../eproc-webapp/.tmp/bower_components/starqle-ng-util/dist/'));

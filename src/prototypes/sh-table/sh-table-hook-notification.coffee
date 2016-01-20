@@ -17,7 +17,6 @@
 # @note This file contains prototype for controlling api request on table-like data.
 # =============================================================================
 
-"use strict"
 
 shTableModule.run ['$rootScope', ($rootScope) ->
 
