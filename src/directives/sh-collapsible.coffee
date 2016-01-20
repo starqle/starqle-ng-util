@@ -28,26 +28,25 @@ angular.module('sh.collapsible', []).directive("shCollapsible", ->
     shCollapsibleCollapseFn: '&'
     shCollapsibleExpandFn: '&'
   controller: ['$scope', '$element', '$timeout', ($scope, $element, $timeout) ->
+    self = this
+
     @shCollapse = false
     @bodyElements = []
+    @triggerResizeTimeout = () ->
+      $timeout (->
+        $(window).trigger('resize')
+        return
+      ), 10
 
     @toggleCollapse = () ->
       @shCollapse = not @shCollapse
       if @isCollapse()
         for bodyElement in @bodyElements
-          bodyElement.slideUp('fast', () ->
-            $timeout (->
-              $(window).trigger('resize')
-            ), 10
-          )
+          bodyElement.slideUp('fast', self.triggerResizeTimeout)
           $element.addClass('is-collapse')
       else
         for bodyElement in @bodyElements
-          bodyElement.slideDown('fast', () ->
-            $timeout (->
-              $(window).trigger('resize')
-            ), 10
-          )
+          bodyElement.slideDown('fast', self.triggerResizeTimeout)
           $element.removeClass('is-collapse')
 
 
