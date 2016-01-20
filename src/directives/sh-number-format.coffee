@@ -22,10 +22,12 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
   restrict: 'A'
   scope:
     shAllowZero: '@?'
-    shMin: '=?'
+    shMin: '=?' # Not for validation, only for autolimit if model value is out of range
     shMax: '=?'
-    shLowerThan: '=?'
+    shLowerThan: '=?' # for validation purpose, also applied for shGreaterThan, shLowerThanEqual, shGreaterThanEqual
     shGreaterThan: '=?'
+    shLowerThanEqual: '=?'
+    shGreaterThanEqual: '=?'
     shNumberInvalidMessage: '@?'
     shNumberHint: '@?'
     ngModel: '='
@@ -34,11 +36,16 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
     classId = 'sh-number-' + Math.random().toString().slice(2)
 
     shAllowZero = if scope.shAllowZero is 'false' then false else true
+    scope.shLowerThanEqual = scope.shLowerThanEqual ? scope.shMax
+    scope.shGreaterThanEqual = scope.shGreaterThanEqual ? scope.shMin
 
     updatePopover = ->
       popoverContent = element.attr('data-content')
       if ngModel.$invalid
-        popoverContent = scope.shNumberInvalidMessage ? 'Invalid Number'
+        if ngModel.$error.out_of_range
+          popoverContent = scope.shNumberInvalidMessage ? 'Invalid Number'
+        if ngModel.$error.required
+          popoverContent = scope.shNumberInvalidMessage ? 'Please insert a number'
       else
         popoverContent = (scope.shNumberHint ? 'Insert valid number') unless ngModel.$modelValue?
       angular.element('.' + classId).find('.popover-content').html(popoverContent)
@@ -50,8 +57,11 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
     ngModel.$parsers.push (value) ->
       number = String(value).replace(/\,/g, '')
       number = parseFloat number
-      if !number
+      if isNaN(number)
         return null
+
+      unless shAllowZero
+        return null if number is 0
 
       if scope.shMin? and number < parseFloat(scope.shMin)
         return parseFloat(scope.shMin)
@@ -63,21 +73,21 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
       ngModel.$invalid
 
     scope.applyValidity = ->
+      valid = true
+
+      # shMin equals to GreaterThanOrEqual (>=)
+      # shGreaterThan equals to GreaterThan (>)
+      valid = valid and +scope.ngModel <= scope.shLowerThanEqual if scope.shLowerThanEqual?
+      valid = valid and +scope.ngModel >= scope.shGreaterThanEqual if scope.shGreaterThanEqual?
+      valid = valid and +scope.ngModel < scope.shLowerThan if scope.shLowerThan?
+      valid = valid and +scope.ngModel > scope.shGreaterThan if scope.shGreaterThan?
+      valid = valid and +scope.ngModel isnt 0 unless shAllowZero
+      ngModel.$setValidity 'out_of_range', valid
+
       if attributes.required?
-        valid = true
-        valid = valid && +scope.ngModel >= scope.shMin if scope.shMin?
-        valid = valid && +scope.ngModel <= scope.shMax if scope.shMax?
-        unless shAllowZero
-          valid = +scope.ngModel isnt 0
-
-        if scope.shLowerThan?
-          valid = +scope.ngModel < scope.shLowerThan
-
-        if scope.shGreaterThan?
-          valid = +scope.ngModel > scope.shGreaterThan
-
-        valid = false unless scope.ngModel?
-        ngModel.$setValidity 'required', valid
+        validRequired = true
+        validRequired = false unless scope.ngModel?
+        ngModel.$setValidity 'required', validRequired
 
     element.on 'focusout', ->
       ngModel.$viewValue = if ngModel.$modelValue? then String($filter('number') ngModel.$modelValue) else ''
@@ -109,7 +119,7 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
     element.popover(
       trigger: 'focus'
       container: 'body'
-      placement: 'top'
+      placement: 'auto top'
       template:
         '<div class="popover ' + classId + '" role="tooltip">' +
         '  <div class="arrow"></div>' +
