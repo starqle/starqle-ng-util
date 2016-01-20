@@ -43,7 +43,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @lookup = {} unless @lookup?
       @optParams = {} unless @optParams?
 
-      @сreatedIds = []
+      @createdIds = []
       @updatedIds = []
       @deletedIds = []
 
@@ -178,7 +178,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
           data
         ).then(
           (success) ->
-            self.сreatedIds.push success.data.id
+            self.createdIds.push success.data.id
             self.entity = success.data
             self.lookup = success.lookup if success.lookup?
             self.refreshGrid()
@@ -347,11 +347,13 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       $injector.invoke $rootScope.shTableHookNotification, self
 
 
-
       return
 
 
   ]
+
+
+  return
 
 
 ]
