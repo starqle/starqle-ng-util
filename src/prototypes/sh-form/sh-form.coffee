@@ -156,5 +156,16 @@ shFormModule.run ['$rootScope', ($rootScope) ->
       @isResetButtonDisabled = () ->
         @entityForm?.$pristine or
         @entityForm?.$submitted
+
+
+
+      return
+
+
   ]
+
+
+  return
+
+
 ]

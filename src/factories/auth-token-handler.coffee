@@ -31,8 +31,10 @@ angular.module('auth.token.handler',[]).factory "AuthTokenHandler", [ ->
     return authToken
   authTokenHandler.setUsername = (newUsername) ->
     username = newUsername
+    return
   authTokenHandler.setAuthToken = (newAuthToken) ->
     authToken = newAuthToken
+    return
 
   # Wrap every actions in a resource with tokenWrapper function
   # Returns wrappedResource
@@ -64,5 +66,10 @@ angular.module('auth.token.handler',[]).factory "AuthTokenHandler", [ ->
           authn_token: authTokenHandler.getAuthToken()
         ), success, error
 
+    return
+
+
   return authTokenHandler
+
+
 ]

@@ -34,6 +34,7 @@ angular.module("sh.page.service", []).service "ShPageService", ['$window', ($win
     _pageTitle = pageTitle
     $window.document.title = @getAppName() + ' - ' + @getPageTitle()
     @getPageTitle()
+    return
 
   @getPageTitle = () ->
     _pageTitle
@@ -44,6 +45,7 @@ angular.module("sh.page.service", []).service "ShPageService", ['$window', ($win
     _appName = appName
     $window.document.title = @getAppName() + ' - ' + @getPageTitle()
     @getAppName()
+    return
 
   @getAppName = () ->
     _appName

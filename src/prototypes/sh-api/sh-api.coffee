@@ -263,7 +263,12 @@ shApiModule.run ['$rootScope', ($rootScope) ->
         deferred.promise
 
 
+      return
+
   ]
+
+
+  return
 
 
 ]

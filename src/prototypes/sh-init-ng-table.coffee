@@ -119,8 +119,12 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
           , (error) ->
             $scope.gridRefreshing = false
             $scope.asyncBlock = false
+            return
           )
         ), 100
+
+      return
+
 
     $scope.getProcessedColumnDefs = (columnDefs) ->
       processedColumnDefs = []
@@ -137,6 +141,7 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
 
     $scope.getPagedDataAsyncSuccess = (response) ->
       # Overide in children controller
+      return
 
     # =========================================================================
     # Additional Methods
@@ -168,6 +173,17 @@ angular.module('sh.init.ng.table', []).run ['$rootScope', '$templateCache', 'ngT
     # Explicitely assign pages when ng-table reloaded
     $scope.$on('ngTableAfterReloadData', () ->
       $scope.pages = $scope.getGeneratedPagesArray()
+      return
     , true)
+
+
+    return
+
+
   ]
+
+
+  return
+
+
 ]

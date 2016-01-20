@@ -58,6 +58,7 @@ angular.module('sh.segment', []
 
     scope.$watch ->
       scope.height = elem.outerHeight()
+      return
 
     scope.$watch 'height', (newVal, oldVal) ->
       elem.next().css( 'top', newVal + 'px' )
@@ -75,6 +76,7 @@ angular.module('sh.segment', []
 
     scope.$watch ->
       scope.height = elem.outerHeight()
+      return
 
     scope.$watch 'height', (newVal, oldVal) ->
       elem.prev().css( 'bottom', newVal + 'px' )

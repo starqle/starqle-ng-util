@@ -86,10 +86,12 @@ angular.module('sh.datepicker', []
 
       ngModelCtrl.$pristine = true if initiation
       initiation = false
+      return
 
 
     element.bind 'dp.show', (data) ->
       initiation = false if initiation
+      return
 
 
     element.bind 'dp.hide', (data) ->
@@ -113,6 +115,9 @@ angular.module('sh.datepicker', []
           element.data('DateTimePicker')?.maxDate(moment(new Date(newVal)))
       else
         element.data('DateTimePicker')?.maxDate(false)
+
+
+    return
 
 
 ]).directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
@@ -178,10 +183,12 @@ angular.module('sh.datepicker', []
 
       ngModelCtrl.$pristine = true if initiation
       initiation = false
+      return
 
 
     element.bind 'dp.show', (data) ->
       initiation = false if initiation
+      return
 
     element.bind 'dp.hide', (data) ->
       unless moment(ngModelCtrl.$viewValue, 'DD-MM-YYYY, HH:mm (z)').isValid()
@@ -208,4 +215,7 @@ angular.module('sh.datepicker', []
         date = ngModelCtrl.$modelValue
         if angular.isDefined(date) and date != null
           element.data('DateTimePicker')?.date moment.tz(moment(+date).format(), scope.shTimezone)
+
+    return
+
 ])

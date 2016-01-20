@@ -179,6 +179,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       angular.element("##{elementStr}").on 'hidden.bs.modal', () ->
         $scope.closeNewEntityModal elementStr
         $scope.modalProperties.visible = false
+        return
       $scope.fetchNewEntity()
 
     $scope.fetchNewEntity = ->
@@ -243,6 +244,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
       angular.element("##{elementStr}").on 'hidden.bs.modal', () ->
         $scope.closeEditEntityModal elementStr, id
         $scope.modalProperties.visible = false
+        return
       $scope.fetchEditEntity(id)
 
     $scope.fetchEditEntity = (id) ->
@@ -358,5 +360,15 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
         'recently-created'
       else
         'else'
+
+
+    return
+
+
   ]
+
+
+  return
+
+
 ]

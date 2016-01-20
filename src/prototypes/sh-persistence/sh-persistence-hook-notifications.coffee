@@ -40,18 +40,27 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
 
       @newEntityErrorHooks.push (error) ->
         ShNotification.toastByResponse error
+        return
 
       @createEntityErrorHooks.push (error) ->
         ShNotification.toastByResponse error
+        return
 
       @editEntityErrorHooks.push (error) ->
         ShNotification.toastByResponse error
+        return
 
       @updateEntityErrorHooks.push (error) ->
         ShNotification.toastByResponse error
+        return
 
+
+      return
 
   ]
+
+
+  return
 
 
 ]

@@ -41,6 +41,7 @@ shSpinningModule.service "ShSpinningService", ->
       spinningStates[key] = true
     else
       @stop(key)
+    return
 
 
   ###*
@@ -57,6 +58,7 @@ shSpinningModule.service "ShSpinningService", ->
   ###
   @stop = (key) ->
     delete spinningStates[key]
+    return
 
 
   ###*

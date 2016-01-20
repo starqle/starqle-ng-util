@@ -58,6 +58,7 @@ angular.module(
           $(element).popover('hide')
         , 100
         )
+        return
       cancelTimeout: () ->
         $timeout.cancel localAttrs.timeoutFn
 

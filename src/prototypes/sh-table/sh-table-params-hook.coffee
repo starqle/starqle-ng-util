@@ -60,6 +60,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
         # Manually refresh with current page
         @refreshGrid()
+        return
 
 
       ###*
@@ -114,7 +115,13 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         deferred.promise
 
 
+      return
+
+
   ]
+
+
+  return
 
 
 ]

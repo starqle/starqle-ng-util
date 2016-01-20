@@ -145,7 +145,12 @@ shApiModule.run ['$rootScope', ($rootScope) ->
       $injector.invoke $rootScope.shApi, shApi
 
 
+      return
+
   ]
+
+
+  return
 
 
 ]

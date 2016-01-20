@@ -36,12 +36,14 @@ shValidationModule.directive "validFile", ['$timeout', ($timeout) ->
           ngModel.$pristine = false
           ngModel.$setViewValue scope.validFileName
           ngModel.$pristine = true
+          return
         ), 200
 
         $timeout (->
           ngModel.$pristine = false
           ngModel.$setViewValue scope.validFileName
           ngModel.$pristine = true
+          return
         ), 2000
 
     el.bind 'change', ->

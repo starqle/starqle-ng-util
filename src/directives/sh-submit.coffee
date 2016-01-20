@@ -118,4 +118,8 @@ angular.module('sh.submit',[]).directive 'shSubmit', ['$compile', '$filter', ($c
             shSubmitOverlayInner.hide()
 
     )
+
+
+    return
+
 ]

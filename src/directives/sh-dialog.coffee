@@ -193,6 +193,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
             () ->
               ### ###
               scope.$parent.shDialogLoading = false
+              return
           )
 
           deferred.promise
@@ -201,6 +202,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
         'hidden.bs.modal', ->
           shDialogModal.remove()
           scope.$parent.shDialogEntity = {}
+          return
       )
 
       # TODO
@@ -222,6 +224,8 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
 
 
       scope.$parent.aliasShDialogOk = ($event) ->
+        deferred = $q.defer()
+
         scope.$parent.shDialogLoading = true
         $q.when(
           (scope.shDialogOk || angular.noop)({$event: $event})
@@ -229,15 +233,20 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
           (success) ->
             hideModal()
             # It doesnt need to enable the button, the form is already hidden
+            deferred.resolve()
 
           (error) ->
             # Only button enabler. do not set unstouched
             scope.$parent[scope.shDialogForm]?.$submitted = false if scope.shDialogForm?
+            deferred.reject()
 
         ).finally(
           () ->
             scope.$parent.shDialogLoading = false
+            return
         )
+
+        deferred.promise
 
       scope.$parent.aliasShDialogForm = scope.shDialogForm
 
@@ -253,6 +262,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
     scope.$watch '$parent.shDialogLoading', (newVal, oldVal) ->
       if newVal?
         scope.shDialogLoading = newVal if scope.shDialogLoading?
+      return
 
     return
 ]

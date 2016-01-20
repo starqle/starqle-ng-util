@@ -23,31 +23,26 @@ shHelperModule.service "shElementFinder", ->
   # find within array of hash (object)
   # by id
   @findById = (source, id) ->
-    obj = undefined
-    obj = source.filter((obj) ->
+    source.filter((obj) ->
       +obj.id is +id
     )
 
   @findFirstById = (source, id) ->
-    obj = undefined
-    obj = source.filter((obj) ->
+    source.filter((obj) ->
       +obj.id is +id
-    )[0]
-    (if obj? then obj else obj = {})
+    )[0] ? {}
 
   # find within array of hash (object)
   # by field
   @findByField = (source, value) ->
-    obj = undefined
-    obj = source.filter((obj) ->
+    source.filter((obj) ->
       obj.field is value
     )
 
   # find within array of element
   # by element
   @findByElmt = (source, elmt) ->
-    obj = undefined
-    obj = source.filter((obj) ->
+    source.filter((obj) ->
       +obj is +elmt
     )
 

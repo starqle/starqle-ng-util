@@ -52,7 +52,13 @@ shPersistenceModule.run ['$rootScope', ($rootScope) ->
       $injector.invoke $rootScope.shPersistenceHook, this
 
 
+      return
+
+
   ]
+
+
+  return
 
 
 ]

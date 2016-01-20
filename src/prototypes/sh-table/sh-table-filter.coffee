@@ -176,45 +176,55 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
       @filterDateToday = (shFilter) ->
         dateParams[shFilter+"_eqdate"] = moment().format('YYYY-MM-DD')
+        return
 
 
       @filterDatePastNDays = (shFilter, n) ->
         dateParams[shFilter+"_lteqdate"] = moment().format('YYYY-MM-DD')
         dateParams[shFilter+"_gteqdate"] = moment().subtract(n, 'days').format('YYYY-MM-DD')
+        return
 
       @filterDatePastNWeeks = (shFilter, n) ->
         dateParams[shFilter+"_lteqdate"] = moment().format('YYYY-MM-DD')
         dateParams[shFilter+"_gteqdate"] = moment().subtract(n, 'weeks').format('YYYY-MM-DD')
+        return
 
       @filterDatePastNMonths = (shFilter, n) ->
         dateParams[shFilter+"_lteqdate"] = moment().format('YYYY-MM-DD')
         dateParams[shFilter+"_gteqdate"] = moment().subtract(n, 'months').format('YYYY-MM-DD')
+        return
 
       @filterDatePastNYears = (shFilter, n) ->
         dateParams[shFilter+"_lteqdate"] = moment().format('YYYY-MM-DD')
         dateParams[shFilter+"_gteqdate"] = moment().subtract(n, 'years').format('YYYY-MM-DD')
+        return
 
 
       @filterDateNextNDays = (shFilter, n) ->
         dateParams[shFilter+"_lteqdate"] = moment().add(n, 'days').format('YYYY-MM-DD')
         dateParams[shFilter+"_gteqdate"] = moment().format('YYYY-MM-DD')
+        return
 
       @filterDateNextNWeeks = (shFilter, n) ->
         dateParams[shFilter+"_lteqdate"] = moment().add(n, 'weeks').format('YYYY-MM-DD')
         dateParams[shFilter+"_gteqdate"] = moment().format('YYYY-MM-DD')
+        return
 
       @filterDateNextNMonths = (shFilter, n) ->
         dateParams[shFilter+"_lteqdate"] = moment().add(n, 'months').format('YYYY-MM-DD')
         dateParams[shFilter+"_gteqdate"] = moment().format('YYYY-MM-DD')
+        return
 
       @filterDateNextNYears = (shFilter, n) ->
         dateParams[shFilter+"_lteqdate"] = moment().add(n, 'years').format('YYYY-MM-DD')
         dateParams[shFilter+"_gteqdate"] = moment().format('YYYY-MM-DD')
+        return
 
 
       @filterDateRange = (shFilter, fromDate, thruDate) ->
         dateParams[shFilter+"_gteqdate"] = fromDate
         dateParams[shFilter+"_lteqdate"] = thruDate
+        return
 
 
 
@@ -308,10 +318,11 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
 
       @filterNumberAny = (shFilter) ->
-        ### ###
+        return
 
       @filterNumberSpecific = (shFilter, number) ->
         numberParams[shFilter+"_eq"] = number
+        return
 
       @filterNumberRange = (shFilter, leftNumber, rightNumber) ->
         numberParams[shFilter+"_gteq"] = leftNumber if leftNumber?
@@ -319,6 +330,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         if leftNumber? and rightNumber? and leftNumber > rightNumber
           numberParams[shFilter+"_gteq"] = rightNumber
           numberParams[shFilter+"_lteq"] = leftNumber
+        return
 
 
 
@@ -404,6 +416,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
       @toggleFilterRegion = ->
         @filterRegion.visible = !@filterRegion.visible
+        return
 
       @resetFilter = () ->
         @filterParams = {}
@@ -418,7 +431,14 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # Return true if there's no filter
       @isNoFilter = () ->
         $.isEmptyObject @filterParams
+
+
+      return
+
   ]
+
+
+  return
 
 
 ]

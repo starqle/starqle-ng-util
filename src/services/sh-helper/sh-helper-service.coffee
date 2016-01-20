@@ -28,6 +28,7 @@ shHelperModule.service "HelperService", [ ->
 
     if idx < 0
       collections.push obj
+    return
 
   @rowDeselect = (obj, collections, key) ->
     if key?
@@ -37,9 +38,11 @@ shHelperModule.service "HelperService", [ ->
 
     if idx >= 0
       collections.splice(idx, 1)
+    return
 
   @clearRowSelection = (collections) ->
     collections.splice(0)
+    return
 
   #
   @rowToggle = (obj, collections, key) ->
@@ -47,6 +50,7 @@ shHelperModule.service "HelperService", [ ->
       @rowDeselect(obj, collections, key)
     else
       @rowSelect(obj, collections, key)
+    return
 
   #
   @isRowSelected = (obj, collections, key) ->

@@ -91,7 +91,13 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         return processedColumnDefs
 
 
+      return
+
+
   ]
+
+
+  return
 
 
 ]

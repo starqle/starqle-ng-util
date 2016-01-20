@@ -61,11 +61,14 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
     @toasts.unshift opts.toast
     opts.afterAdd.call this
 
+    return
+
   #
   # Removing oldest toast
   #
   @removeOldestToast = () ->
     @removeToast(@toasts.length - 1)
+    return
 
   #
   # Removing toast
@@ -107,6 +110,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
       opts.afterRemove.call this
     , opts.duration + 1
     # , opts.lifetime
+    return
 
   #
   # Periodic checking
@@ -120,6 +124,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
     , 500
     , 0
     , false
+    return
 
   #
   # Adding notification
@@ -149,6 +154,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
     opts.beforeAdd.call this
     @notifications.unshift opts.notification
     opts.afterAdd.call this
+    return
 
   #
   # Removing notification
@@ -187,6 +193,8 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
       opts.afterRemove.call this
     , opts.duration
 
+    return
+
   #
   #
   #
@@ -218,7 +226,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
         type: 'danger'
         data: response
         message: response.data
-
+    return
   #
   #
   #

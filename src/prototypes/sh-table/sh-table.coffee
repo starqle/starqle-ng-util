@@ -80,7 +80,13 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       )
 
 
+      return
+
+
   ]
+
+
+  return
 
 
 ]

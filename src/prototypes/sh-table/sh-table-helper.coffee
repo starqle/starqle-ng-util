@@ -70,6 +70,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         newDirection = if @tableParams.isSortBy(fieldName, 'asc') then 'desc' else 'asc'
         @tableParams.sortData(fieldName, newDirection)
         @refreshGrid()
+        return
 
 
       ###*
@@ -137,7 +138,14 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @isRecentlyDeleted = (obj) ->
         @deletedIds.indexOf(obj?.id or obj) >= 0
 
+
+      return
+
+
   ]
+
+
+  return
 
 
 ]

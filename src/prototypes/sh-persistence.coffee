@@ -39,11 +39,12 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
       $scope.entity[objName].push {}
 
     $scope.removeNestedAttributes = (objName, obj) ->
-      if obj['id']
-        obj['_destroy'] = true
+      if obj.id
+        obj._destroy = true
       else
         index = $scope.entity[objName].indexOf(obj)
         $scope.entity[objName].splice(index, 1)
+      return
 
     # =========================================================================
     # Default Callbacks
@@ -123,7 +124,7 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
 
         # Generate params parameter
         params = {}
-        params['id'] = success.data.id
+        params.id = success.data.id
 
         # Change state
         $state.transitionTo $scope.showPath, params
@@ -161,6 +162,7 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
         $scope.saved = true
         $timeout (->
           $scope.saved = false
+          return
         ), 5000
 
         # Callback
@@ -212,5 +214,15 @@ angular.module('sh.persistence', []).run ['$rootScope', ($rootScope) ->
 
     # Call the initializer function
     $scope.init() if !($scope.skipInit)
+
+
+    return
+
+
   ]
+
+
+  return
+
+
 ]
