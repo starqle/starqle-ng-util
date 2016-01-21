@@ -257,7 +257,7 @@ shApiModule.run ['$rootScope', ($rootScope) ->
                 deferred.reject(error)
             )
           else
-            console.log 'STARQLE_NG_UTIL: Unknown Method'
+            console.error 'STARQLE_NG_UTIL: Unknown Method'
             deferred.reject({})
 
         deferred.promise

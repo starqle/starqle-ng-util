@@ -58,10 +58,6 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # Date filters
       # =========================================================================
 
-      # @filterDateAnyday = (shFilter) ->
-      #   $.extend @filterParams,
-      #     shFilter
-
       dateParams = {}
       @filterLabel = {}
       @filterCollection = {}
@@ -73,7 +69,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         delete @filterParams[shFilter+"_gteqdate"]
 
       @executeFilterDate = () ->
-        $.extend @filterParams, dateParams
+        jQuery.extend @filterParams, dateParams
         @tableParams.$params.pageNumber = 1
         @refreshGrid()
 
@@ -242,7 +238,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         delete @filterParams[shFilter+"_gteq"]
 
       @executeFilterNumber = () ->
-        $.extend @filterParams, numberParams
+        jQuery.extend @filterParams, numberParams
         @tableParams.$params.pageNumber = 1
         @refreshGrid()
 
@@ -340,7 +336,6 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # =========================================================================
 
       @filterTextCont = (shFilter) ->
-        console.log 'bar'
         @tableParams.$params.pageNumber = 1
         @refreshGrid()
 
@@ -357,7 +352,6 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         @refreshGrid()
 
       @filterMonthBetween = (shFilter, month) ->
-        console.log 'month', month
         if @filterParams[shFilter + '_year']
           year = @filterParams[shFilter + '_year']
           month = ('00' + month).slice(-2)
@@ -430,7 +424,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
       # Return true if there's no filter
       @isNoFilter = () ->
-        $.isEmptyObject @filterParams
+        jQuery.isEmptyObject @filterParams
 
 
       return

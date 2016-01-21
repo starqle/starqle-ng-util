@@ -62,7 +62,7 @@ angular.module('sh.datepicker', []
     #
     ngModelCtrl.$render = ->
       date = ngModelCtrl.$viewValue
-      if angular.isDefined(date) and date != null
+      if date?
         element.data('DateTimePicker')?.date moment(date, 'YYYY-MM-DD')
       ngModelCtrl.$viewValue
 
@@ -162,7 +162,7 @@ angular.module('sh.datepicker', []
     #
     ngModelCtrl.$render = ->
       date = ngModelCtrl.$viewValue
-      if angular.isDefined(date) and date != null
+      if date?
         element.data('DateTimePicker')?.date moment.tz(moment(+date).format(), scope.shTimezone)
 
     ngModelCtrl.$parsers.push (data) ->
@@ -213,7 +213,7 @@ angular.module('sh.datepicker', []
     scope.$watch 'shTimezone', (newVal, oldVal) ->
       if newVal?
         date = ngModelCtrl.$modelValue
-        if angular.isDefined(date) and date != null
+        if date?
           element.data('DateTimePicker')?.date moment.tz(moment(+date).format(), scope.shTimezone)
 
     return

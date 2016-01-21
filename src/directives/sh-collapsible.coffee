@@ -34,7 +34,7 @@ angular.module('sh.collapsible', []).directive("shCollapsible", ->
     @bodyElements = []
     @triggerResizeTimeout = () ->
       $timeout (->
-        $(window).trigger('resize')
+        angular.element(window).triggerHandler('resize')
         return
       ), 10
 

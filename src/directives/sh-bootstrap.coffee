@@ -28,17 +28,17 @@ angular.module(
     #
     # Events
     #
-    $(element).on('click', ->
+    angular.element(element).on('click', ->
       # workaround if somehow, the element is clicked. In this case, mouseleave is not enough
-      $(element).tooltip 'hide'
+      angular.element(element).tooltip 'hide'
       return
 
     ).on('mouseenter', ->
-      $(element).tooltip 'show'
+      angular.element(element).tooltip 'show'
       return
 
     ).on('mouseleave', ->
-      $(element).tooltip 'hide'
+      angular.element(element).tooltip 'hide'
 
       return
     )
@@ -55,7 +55,7 @@ angular.module(
       timeoutFn: null
       addTimeout: (element) ->
         localAttrs.timeoutFn = $timeout(->
-          $(element).popover('hide')
+          angular.element(element).popover('hide')
         , 100
         )
         return
@@ -72,12 +72,12 @@ angular.module(
     #
     # Events
     #
-    $(element).on('mouseenter', ->
+    angular.element(element).on('mouseenter', ->
       localAttrs.cancelTimeout()
 
-      if angular.isUndefined($(element).attr('aria-describedby'))
+      if angular.isUndefined(angular.element(element).attr('aria-describedby'))
         # show popover
-        $(element).popover('show')
+        angular.element(element).popover('show')
       return
 
     ).on('mouseleave', ->
@@ -86,14 +86,14 @@ angular.module(
 
     ).on('shown.bs.popover', ->
       # delete timeout on popover
-      localAttrs.popoverId = $(element).attr('aria-describedby')
+      localAttrs.popoverId = angular.element(element).attr('aria-describedby')
 
-      $('#' + localAttrs.popoverId).on 'mouseenter', cancelTimeout
-      $('#' + localAttrs.popoverId).on 'mouseleave', addTimeout
+      angular.element('#' + localAttrs.popoverId).on 'mouseenter', cancelTimeout
+      angular.element('#' + localAttrs.popoverId).on 'mouseleave', addTimeout
 
     ).on('hide.bs.popover', ->
-      $('#' + localAttrs.popoverId).off 'mouseenter', cancelTimeout
-      $('#' + localAttrs.popoverId).off 'mouseleave', addTimeout
+      angular.element('#' + localAttrs.popoverId).off 'mouseenter', cancelTimeout
+      angular.element('#' + localAttrs.popoverId).off 'mouseleave', addTimeout
     )
 
     return

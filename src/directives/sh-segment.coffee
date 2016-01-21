@@ -92,7 +92,7 @@ angular.module('sh.segment', []
   link: (scope, element, attrs) ->
 
     assignBaseCss = (elmt, left) ->
-      parent = $(elmt).parent()
+      parent = angular.element(elmt).parent()
       parentRow = parent.parents('tr')
 
       paddingTop = parent.css('padding-top')
@@ -103,7 +103,7 @@ angular.module('sh.segment', []
 
       reduction = 1
 
-      $(elmt).css
+      angular.element(elmt).css
         top: 0
         left: left
         marginTop: '-' + paddingTop
@@ -118,17 +118,17 @@ angular.module('sh.segment', []
 
 
     assignShadowCss = (elmt, scrollSize, shadowDirection) ->
-      parent = $(elmt).parent()
+      parent = angular.element(elmt).parent()
       paddingRight = parent.css('padding-right')
       if shadowDirection > 0
         # Left freeze
         unless parent.next().hasClass('td-fixed')
           if scrollSize > 0
-            $(elmt).css
+            angular.element(elmt).css
               boxShadow: '1px 0 0 rgba(0, 0, 0, 0.05), -1px 0 0 rgba(0, 0, 0, 0.1), ' + (shadowDirection * 5) + 'px 0px 0px 0px rgba(0, 0, 0, 0.03)'
               borderColor: 'rgba(0, 0, 0, 0.1)'
           else
-            $(elmt).css
+            angular.element(elmt).css
               boxShadow: '1px 0 0 rgba(0, 0, 0, 0.05), -1px 0 0 rgba(0, 0, 0, 0.05)'
               borderColor: 'rgba(0, 0, 0, 0.05)'
 
@@ -136,22 +136,24 @@ angular.module('sh.segment', []
         # right freeze
         unless parent.prev().hasClass('td-fixed')
           if scrollSize > 0
-            $(elmt).css
+            angular.element(elmt).css
               boxShadow: '-1px 0 0 rgba(0, 0, 0, 0.1), ' + (shadowDirection * 5) + 'px 0px 0px 0px rgba(0, 0, 0, 0.03)'
               borderColor: 'rgba(0, 0, 0, 0.1)'
           else
-            $(elmt).css
+            angular.element(elmt).css
               boxShadow: 'none'
               borderColor: 'rgba(0, 0, 0, 0.05)'
 
 
     refreshFreezedPane = () ->
-      elementParent = $(element).parent()
-      scrollTop = $(element).scrollTop()
-      scrollLeft = $(element).scrollLeft()
+      elementParent = element.parent()
+      # jqLite doesnt provide scrollTop & scrollLeft
+      scrollTop = jQuery(element).scrollTop()
+      scrollLeft = jQuery(element).scrollLeft()
 
-      width = $(element)[0].clientWidth
-      tableWidth = $(element).find('table.table').width()
+      width = element[0].clientWidth
+      # jqLite find is limited to finding element tag, not class
+      tableWidth = element.find('table').width()
       left = (width - tableWidth) + scrollLeft
 
       # TH & TD for lefty freeze
@@ -172,7 +174,7 @@ angular.module('sh.segment', []
         bottom: -scrollTop
 
 
-    $(element).on('scroll', ->
+    angular.element(element).on('scroll', ->
       refreshFreezedPane()
       return
     )

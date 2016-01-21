@@ -101,7 +101,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
 
     $scope.destroyEntityFailure = (response, $event) ->
     $scope.destroyEntityFailureNotification = (response, $event) ->
-      if response.data.error.message != null
+      if response.data.error?.message?
         ShNotification.toastByResponse response,
           type: 'danger'
           message: response.data.error.message
@@ -119,7 +119,7 @@ angular.module('sh.modal.persistence', []).run ['$rootScope', ($rootScope) ->
 
     $scope.multipleDestroyEntityFailure = (response) ->
     $scope.multipleDestroyEntityFailureNotification = (response) ->
-      if response.data.error.message != null
+      if response.data.error?.message?
         ShNotification.toastByResponse response,
           type: 'danger'
           message: response.data.error.message

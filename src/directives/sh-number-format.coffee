@@ -102,12 +102,14 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
       updatePopover()
 
     element.on 'keydown', (e) ->
-      if $.inArray(e.keyCode, [
-        16, 17, 18, 46, 8, 9, 27, 13, 110, 173, 190, 189
-        ]) != -1 or (e.keyCode >= 112 and e.keyCode <= 123) or e.keyCode in [65, 67, 86] and (e.ctrlKey == true or e.metaKey == true) or e.keyCode >= 35 and e.keyCode <= 40
-        # let it happen, don't do anything
-      else if (e.shiftKey or e.keyCode < 48 or e.keyCode > 57) and (e.keyCode < 96 or e.keyCode > 105)
-        e.preventDefault()
+      if e.keyCode in [16, 17, 18, 46, 8, 9, 27, 13, 110, 173, 190, 189] or
+        (e.keyCode >= 112 and e.keyCode <= 123) or
+        (e.keyCode in [65, 67, 86] and (e.ctrlKey == true or e.metaKey == true)) or
+        (e.keyCode >= 35 and e.keyCode <= 40)
+          ###let it happen, don't do anything###
+      else if (e.shiftKey or e.keyCode < 48 or e.keyCode > 57) and
+        (e.keyCode < 96 or e.keyCode > 105)
+          e.preventDefault()
 
     scope.$watch 'ngModel', (newValue, oldValue) ->
       # Always apply validity eventhough newVal equals oldVal

@@ -71,11 +71,11 @@ shApiModule.run ['$rootScope', ($rootScope) ->
         deferred = $q.defer()
 
         unless opts.method? and opts.method in ['GET', 'POST', 'PUT', 'DELETE']
-          console.log 'STARQLE_NG_UTIL: Unknown Method'
+          console.error 'STARQLE_NG_UTIL: Unknown Method'
           deferred.reject({})
 
         else unless opts.name?
-          console.log 'STARQLE_NG_UTIL: Options name is required'
+          console.error 'STARQLE_NG_UTIL: Options name is required'
           deferred.reject({})
 
         else
@@ -89,12 +89,12 @@ shApiModule.run ['$rootScope', ($rootScope) ->
           switch opts.method
             when 'GET', 'DELETE'
               if opts.entity?
-                console.log 'STARQLE_NG_UTIL: Options entity should not be provided'
+                console.error 'STARQLE_NG_UTIL: Options entity should not be provided'
                 deferred.reject({})
 
             when 'POST', 'PUT'
               unless opts.entity?
-                console.log 'STARQLE_NG_UTIL: Options entity is required'
+                console.error 'STARQLE_NG_UTIL: Options entity is required'
                 deferred.reject({})
 
               else

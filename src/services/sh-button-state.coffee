@@ -26,7 +26,7 @@ angular.module('sh.button.state',[]).service "ShButtonState", ['$timeout', ($tim
 
   @setEnable = ($event, enabled) ->
     if $event?
-      target = $( $event.target )
+      target = jQuery($event.target)
       target.prop('disabled', !enabled)
 
       if target.is 'form'
