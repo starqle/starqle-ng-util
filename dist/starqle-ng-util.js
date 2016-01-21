@@ -148,12 +148,12 @@ angular.module('sh.bootstrap', []).directive('shBootstrapTooltip', [
     return {
       restrict: 'A',
       link: function(scope, element, attrs) {
-        $(element).on('click', function() {
-          $(element).tooltip('hide');
+        angular.element(element).on('click', function() {
+          angular.element(element).tooltip('hide');
         }).on('mouseenter', function() {
-          $(element).tooltip('show');
+          angular.element(element).tooltip('show');
         }).on('mouseleave', function() {
-          $(element).tooltip('hide');
+          angular.element(element).tooltip('hide');
         });
       }
     };
@@ -169,7 +169,7 @@ angular.module('sh.bootstrap', []).directive('shBootstrapTooltip', [
           timeoutFn: null,
           addTimeout: function(element) {
             localAttrs.timeoutFn = $timeout(function() {
-              return $(element).popover('hide');
+              return angular.element(element).popover('hide');
             }, 100);
           },
           cancelTimeout: function() {
@@ -182,20 +182,20 @@ angular.module('sh.bootstrap', []).directive('shBootstrapTooltip', [
         addTimeout = function() {
           return localAttrs.addTimeout(element);
         };
-        $(element).on('mouseenter', function() {
+        angular.element(element).on('mouseenter', function() {
           localAttrs.cancelTimeout();
-          if (angular.isUndefined($(element).attr('aria-describedby'))) {
-            $(element).popover('show');
+          if (angular.isUndefined(angular.element(element).attr('aria-describedby'))) {
+            angular.element(element).popover('show');
           }
         }).on('mouseleave', function() {
           return localAttrs.addTimeout(element);
         }).on('shown.bs.popover', function() {
-          localAttrs.popoverId = $(element).attr('aria-describedby');
-          $('#' + localAttrs.popoverId).on('mouseenter', cancelTimeout);
-          return $('#' + localAttrs.popoverId).on('mouseleave', addTimeout);
+          localAttrs.popoverId = angular.element(element).attr('aria-describedby');
+          angular.element('#' + localAttrs.popoverId).on('mouseenter', cancelTimeout);
+          return angular.element('#' + localAttrs.popoverId).on('mouseleave', addTimeout);
         }).on('hide.bs.popover', function() {
-          $('#' + localAttrs.popoverId).off('mouseenter', cancelTimeout);
-          return $('#' + localAttrs.popoverId).off('mouseleave', addTimeout);
+          angular.element('#' + localAttrs.popoverId).off('mouseenter', cancelTimeout);
+          return angular.element('#' + localAttrs.popoverId).off('mouseleave', addTimeout);
         });
       }
     };
@@ -218,7 +218,7 @@ angular.module('sh.collapsible', []).directive("shCollapsible", function() {
         this.bodyElements = [];
         this.triggerResizeTimeout = function() {
           return $timeout((function() {
-            $(window).trigger('resize');
+            angular.element(window).triggerHandler('resize');
           }), 10);
         };
         this.toggleCollapse = function() {
@@ -329,7 +329,7 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
         ngModelCtrl.$render = function() {
           var date, ref;
           date = ngModelCtrl.$viewValue;
-          if (angular.isDefined(date) && date !== null) {
+          if (date != null) {
             if ((ref = element.data('DateTimePicker')) != null) {
               ref.date(moment(date, 'YYYY-MM-DD'));
             }
@@ -432,7 +432,7 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
         ngModelCtrl.$render = function() {
           var date, ref;
           date = ngModelCtrl.$viewValue;
-          if (angular.isDefined(date) && date !== null) {
+          if (date != null) {
             return (ref = element.data('DateTimePicker')) != null ? ref.date(moment.tz(moment(+date).format(), scope.shTimezone)) : void 0;
           }
         };
@@ -489,7 +489,7 @@ angular.module('sh.datepicker', []).directive("shDatepicker", [
           var date, ref;
           if (newVal != null) {
             date = ngModelCtrl.$modelValue;
-            if (angular.isDefined(date) && date !== null) {
+            if (date != null) {
               return (ref = element.data('DateTimePicker')) != null ? ref.date(moment.tz(moment(+date).format(), scope.shTimezone)) : void 0;
             }
           }
@@ -778,9 +778,10 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
           return updatePopover();
         });
         element.on('keydown', function(e) {
-          var ref2;
-          if ($.inArray(e.keyCode, [16, 17, 18, 46, 8, 9, 27, 13, 110, 173, 190, 189]) !== -1 || (e.keyCode >= 112 && e.keyCode <= 123) || ((ref2 = e.keyCode) === 65 || ref2 === 67 || ref2 === 86) && (e.ctrlKey === true || e.metaKey === true) || e.keyCode >= 35 && e.keyCode <= 40) {
+          var ref2, ref3;
+          if (((ref2 = e.keyCode) === 16 || ref2 === 17 || ref2 === 18 || ref2 === 46 || ref2 === 8 || ref2 === 9 || ref2 === 27 || ref2 === 13 || ref2 === 110 || ref2 === 173 || ref2 === 190 || ref2 === 189) || (e.keyCode >= 112 && e.keyCode <= 123) || (((ref3 = e.keyCode) === 65 || ref3 === 67 || ref3 === 86) && (e.ctrlKey === true || e.metaKey === true)) || (e.keyCode >= 35 && e.keyCode <= 40)) {
 
+            /*let it happen, don't do anything */
           } else if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
             return e.preventDefault();
           }
@@ -861,7 +862,7 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
         var assignBaseCss, assignShadowCss, refreshFreezedPane;
         assignBaseCss = function(elmt, left) {
           var outerHeight, paddingBottom, paddingLeft, paddingRight, paddingTop, parent, parentRow, reduction;
-          parent = $(elmt).parent();
+          parent = angular.element(elmt).parent();
           parentRow = parent.parents('tr');
           paddingTop = parent.css('padding-top');
           paddingLeft = parent.css('padding-left');
@@ -869,7 +870,7 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
           paddingBottom = parent.css('padding-bottom');
           outerHeight = parentRow.outerHeight();
           reduction = 1;
-          return $(elmt).css({
+          return angular.element(elmt).css({
             top: 0,
             left: left,
             marginTop: '-' + paddingTop,
@@ -885,17 +886,17 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
         };
         assignShadowCss = function(elmt, scrollSize, shadowDirection) {
           var paddingRight, parent;
-          parent = $(elmt).parent();
+          parent = angular.element(elmt).parent();
           paddingRight = parent.css('padding-right');
           if (shadowDirection > 0) {
             if (!parent.next().hasClass('td-fixed')) {
               if (scrollSize > 0) {
-                return $(elmt).css({
+                return angular.element(elmt).css({
                   boxShadow: '1px 0 0 rgba(0, 0, 0, 0.05), -1px 0 0 rgba(0, 0, 0, 0.1), ' + (shadowDirection * 5) + 'px 0px 0px 0px rgba(0, 0, 0, 0.03)',
                   borderColor: 'rgba(0, 0, 0, 0.1)'
                 });
               } else {
-                return $(elmt).css({
+                return angular.element(elmt).css({
                   boxShadow: '1px 0 0 rgba(0, 0, 0, 0.05), -1px 0 0 rgba(0, 0, 0, 0.05)',
                   borderColor: 'rgba(0, 0, 0, 0.05)'
                 });
@@ -904,12 +905,12 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
           } else {
             if (!parent.prev().hasClass('td-fixed')) {
               if (scrollSize > 0) {
-                return $(elmt).css({
+                return angular.element(elmt).css({
                   boxShadow: '-1px 0 0 rgba(0, 0, 0, 0.1), ' + (shadowDirection * 5) + 'px 0px 0px 0px rgba(0, 0, 0, 0.03)',
                   borderColor: 'rgba(0, 0, 0, 0.1)'
                 });
               } else {
-                return $(elmt).css({
+                return angular.element(elmt).css({
                   boxShadow: 'none',
                   borderColor: 'rgba(0, 0, 0, 0.05)'
                 });
@@ -919,11 +920,11 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
         };
         refreshFreezedPane = function() {
           var elementParent, left, scrollLeft, scrollTop, tableWidth, width;
-          elementParent = $(element).parent();
-          scrollTop = $(element).scrollTop();
-          scrollLeft = $(element).scrollLeft();
-          width = $(element)[0].clientWidth;
-          tableWidth = $(element).find('table.table').width();
+          elementParent = element.parent();
+          scrollTop = jQuery(element).scrollTop();
+          scrollLeft = jQuery(element).scrollLeft();
+          width = element[0].clientWidth;
+          tableWidth = element.find('table').width();
           left = (width - tableWidth) + scrollLeft;
           elementParent.find('.td-fixed > .td-fixed-body.td-fixed-body-left').each(function() {
             assignBaseCss(this, scrollLeft);
@@ -940,7 +941,7 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
             bottom: -scrollTop
           });
         };
-        $(element).on('scroll', function() {
+        angular.element(element).on('scroll', function() {
           refreshFreezedPane();
         });
         return scope.$watch(function() {
@@ -1738,7 +1739,8 @@ angular.module('sh.modal.persistence', []).run([
         };
         $scope.destroyEntityFailure = function(response, $event) {};
         $scope.destroyEntityFailureNotification = function(response, $event) {
-          if (response.data.error.message !== null) {
+          var ref;
+          if (((ref = response.data.error) != null ? ref.message : void 0) != null) {
             return ShNotification.toastByResponse(response, {
               type: 'danger',
               message: response.data.error.message
@@ -1760,7 +1762,8 @@ angular.module('sh.modal.persistence', []).run([
         };
         $scope.multipleDestroyEntityFailure = function(response) {};
         $scope.multipleDestroyEntityFailureNotification = function(response) {
-          if (response.data.error.message !== null) {
+          var ref;
+          if (((ref = response.data.error) != null ? ref.message : void 0) != null) {
             return ShNotification.toastByResponse(response, {
               type: 'danger',
               message: response.data.error.message
@@ -2208,10 +2211,10 @@ shApiModule.run([
           var apiParameters, base, base1, base2, base3, data, deferred, hook, i, len, name, name1, name2, name3, ref, ref1;
           deferred = $q.defer();
           if (!((opts.method != null) && ((ref = opts.method) === 'GET' || ref === 'POST' || ref === 'PUT' || ref === 'DELETE'))) {
-            console.log('STARQLE_NG_UTIL: Unknown Method');
+            console.error('STARQLE_NG_UTIL: Unknown Method');
             deferred.reject({});
           } else if (opts.name == null) {
-            console.log('STARQLE_NG_UTIL: Options name is required');
+            console.error('STARQLE_NG_UTIL: Options name is required');
             deferred.reject({});
           } else {
             apiParameters = {
@@ -2226,14 +2229,14 @@ shApiModule.run([
               case 'GET':
               case 'DELETE':
                 if (opts.entity != null) {
-                  console.log('STARQLE_NG_UTIL: Options entity should not be provided');
+                  console.error('STARQLE_NG_UTIL: Options entity should not be provided');
                   deferred.reject({});
                 }
                 break;
               case 'POST':
               case 'PUT':
                 if (opts.entity == null) {
-                  console.log('STARQLE_NG_UTIL: Options entity is required');
+                  console.error('STARQLE_NG_UTIL: Options entity is required');
                   deferred.reject({});
                 } else {
                   data = {
@@ -2494,7 +2497,7 @@ shApiModule.run([
               });
               break;
             default:
-              console.log('STARQLE_NG_UTIL: Unknown Method');
+              console.error('STARQLE_NG_UTIL: Unknown Method');
               deferred.reject({});
           }
           return deferred.promise;
@@ -3162,7 +3165,7 @@ shTableModule.run([
           return delete this.filterParams[shFilter + "_gteqdate"];
         };
         this.executeFilterDate = function() {
-          $.extend(this.filterParams, dateParams);
+          jQuery.extend(this.filterParams, dateParams);
           this.tableParams.$params.pageNumber = 1;
           return this.refreshGrid();
         };
@@ -3301,7 +3304,7 @@ shTableModule.run([
           return delete this.filterParams[shFilter + "_gteq"];
         };
         this.executeFilterNumber = function() {
-          $.extend(this.filterParams, numberParams);
+          jQuery.extend(this.filterParams, numberParams);
           this.tableParams.$params.pageNumber = 1;
           return this.refreshGrid();
         };
@@ -3394,7 +3397,6 @@ shTableModule.run([
           }
         };
         this.filterTextCont = function(shFilter) {
-          console.log('bar');
           this.tableParams.$params.pageNumber = 1;
           return this.refreshGrid();
         };
@@ -3410,7 +3412,6 @@ shTableModule.run([
         };
         this.filterMonthBetween = function(shFilter, month) {
           var mDate, year;
-          console.log('month', month);
           if (this.filterParams[shFilter + '_year']) {
             year = this.filterParams[shFilter + '_year'];
             month = ('00' + month).slice(-2);
@@ -3503,7 +3504,7 @@ shTableModule.run([
           return this.refreshGrid();
         };
         this.isNoFilter = function() {
-          return $.isEmptyObject(this.filterParams);
+          return jQuery.isEmptyObject(this.filterParams);
         };
       }
     ];
@@ -4319,7 +4320,7 @@ angular.module('sh.button.state', []).service("ShButtonState", [
     this.setEnable = function($event, enabled) {
       var btn, target;
       if ($event != null) {
-        target = $($event.target);
+        target = jQuery($event.target);
         target.prop('disabled', !enabled);
         if (target.is('form')) {
           btn = target.find('button[type="submit"]');
