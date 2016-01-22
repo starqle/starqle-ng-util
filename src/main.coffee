@@ -43,7 +43,6 @@ angular.module 'starqle.ng.util', [
   'sh.truncate',
 
   # prototypes
-  'sh.init.ng.table',
   'sh.modal.persistence',
   'sh.persistence',
 
