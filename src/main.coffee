@@ -42,9 +42,6 @@ angular.module 'starqle.ng.util', [
   'sh.strip.to.newline',
   'sh.truncate',
 
-  # prototypes
-  'sh.persistence',
-
   # modules
   'sh.api.module',
   'sh.dialog.module',
