@@ -22,4 +22,4 @@ angular.module("sh.priv", []).service "ShPriv", ->
   @can = (privileges, ability) ->
     privileges.indexOf(ability) isnt -1
 
-  return this
+  return

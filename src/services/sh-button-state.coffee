@@ -54,5 +54,5 @@ angular.module('sh.button.state',[]).service "ShButtonState", ['$timeout', ($tim
   @enable = ($event) ->
     @setEnable $event, true
 
-  return this
+  return
 ]

@@ -46,4 +46,4 @@ shHelperModule.service "shElementFinder", ->
       +obj is +elmt
     )
 
-  return this
+  return

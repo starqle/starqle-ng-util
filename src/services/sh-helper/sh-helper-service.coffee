@@ -86,5 +86,5 @@ shHelperModule.service "HelperService", [ ->
     else
       object
 
-  return this
+  return
 ]
