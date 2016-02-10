@@ -24,7 +24,6 @@ angular.module 'starqle.ng.util', [
   # directives
   'sh.bootstrap',
   'sh.collapsible',
-  'sh.datepicker',
   'sh.focus',
   'sh.number.format',
   'sh.segment',
@@ -44,6 +43,7 @@ angular.module 'starqle.ng.util', [
 
   # modules
   'sh.api.module',
+  'sh.datepicker.module',
   'sh.dialog.module',
   'sh.form.module',
   'sh.helper.module',
