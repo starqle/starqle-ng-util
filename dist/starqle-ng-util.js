@@ -34,6 +34,18 @@ shApiModule = angular.module('sh.api.module', []);
 
 /**
  * @ngdoc module
+ * @name shTableModule
+ *
+ * @description
+ * shTableModule
+ */
+var shDatepickerModule;
+
+shDatepickerModule = angular.module('sh.datepicker.module', []);
+
+
+/**
+ * @ngdoc module
  * @name shDialogModule
  *
  * @description
@@ -291,207 +303,233 @@ angular.module('sh.collapsible', []).directive("shCollapsible", function() {
   };
 });
 
-angular.module('sh.datepicker', []).directive("shDatepicker", [
+shDatepickerModule.directive("shDatepicker", [
   function() {
     return {
       restrict: 'A',
       scope: {
+        shDisplayFormat: '@?',
         shFromDate: '=?',
+        shIcons: '=?',
         shThruDate: '=?',
-        shTimezone: '@',
         widgetVerticalPosition: '@?'
       },
       require: '?ngModel',
       link: function(scope, element, attrs, ngModelCtrl) {
-        var initiation;
-        initiation = true;
-        element.datetimepicker({
-          timeZone: scope.shTimezone,
-          showClear: true,
-          showTodayButton: true,
-          useCurrent: false,
-          format: 'DD-MM-YYYY',
-          widgetPositioning: {
-            vertical: scope.widgetVerticalPosition || 'auto'
-          },
-          icons: {
-            time: 'fa fa-clock-o',
-            date: 'fa fa-calendar',
-            up: 'fa fa-chevron-up',
-            down: 'fa fa-chevron-down',
-            previous: 'fa fa-chevron-left',
-            next: 'fa fa-chevron-right',
-            today: 'fa fa-crosshairs',
-            clear: 'fa fa-trash',
-            close: 'fa fa-times'
-          }
-        });
-        ngModelCtrl.$render = function() {
-          var date, ref;
-          date = ngModelCtrl.$viewValue;
-          if (date != null) {
-            if ((ref = element.data('DateTimePicker')) != null) {
-              ref.date(moment(date, 'YYYY-MM-DD'));
-            }
-          }
-          return ngModelCtrl.$viewValue;
-        };
-        ngModelCtrl.$parsers.push(function(data) {
-          if (moment(data, 'DD-MM-YYYY').isValid()) {
-            return moment(data, 'DD-MM-YYYY').format('YYYY-MM-DD');
+        var displayFormat, dpChange, formatter, parser, ref, setupDatepicker, updateDate, updateIcon, updateMaxDate, updateMinDate, valueFormat;
+        valueFormat = 'YYYY-MM-DD';
+        displayFormat = (ref = scope.shDisplayFormat) != null ? ref : 'DD-MM-YYYY';
+        formatter = function(value) {
+          if (value != null) {
+            return moment(value).format(displayFormat);
           } else {
-            data = null;
+            return null;
+          }
+        };
+        ngModelCtrl.$formatters.push(formatter);
+        parser = function(value) {
+          if (moment(value, displayFormat).isValid()) {
+            return moment(value, displayFormat).format(valueFormat);
+          } else {
+            value = null;
             return void 0;
           }
-        });
-        element.bind('dp.change', function(data) {
-          if (initiation) {
-            ngModelCtrl.$pristine = false;
+        };
+        ngModelCtrl.$parsers.push(parser);
+        setupDatepicker = function(value) {
+          var ref1;
+          element.unbind('dp.change', dpChange);
+          if ((ref1 = element.data('DateTimePicker')) != null) {
+            ref1.destroy();
           }
-          if (data.date) {
-            ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY'));
+          element.datetimepicker({
+            format: displayFormat,
+            showClear: true,
+            showClose: true,
+            showTodayButton: false,
+            useCurrent: false,
+            useStrict: true,
+            widgetPositioning: {
+              vertical: scope.widgetVerticalPosition || 'auto'
+            }
+          });
+          updateDate(value);
+          updateIcon(scope.shIcons);
+          updateMinDate(scope.shFromDate);
+          updateMaxDate(scope.shThruDate);
+          element.bind('dp.change', dpChange);
+        };
+        updateDate = function(value) {
+          if (value != null) {
+            element.data('DateTimePicker').date(moment(value));
           } else {
-            ngModelCtrl.$setViewValue(null);
+            element.data('DateTimePicker').clear();
           }
-          if (initiation) {
-            ngModelCtrl.$pristine = true;
-          }
-          initiation = false;
-        });
-        element.bind('dp.show', function(data) {
-          if (initiation) {
-            initiation = false;
-          }
-        });
-        element.bind('dp.hide', function(data) {
-          var ref;
-          if (!moment(ngModelCtrl.$viewValue, 'DD-MM-YYYY').isValid()) {
-            ngModelCtrl.$setViewValue(null);
-            return (ref = element.data('DateTimePicker')) != null ? ref.date(null) : void 0;
-          }
-        });
-        scope.$watch('shFromDate', function(newVal, oldVal) {
-          var ref, ref1;
-          if (newVal != null) {
-            if (moment(new Date(newVal)).isValid()) {
-              return (ref = element.data('DateTimePicker')) != null ? ref.minDate(moment(new Date(newVal))) : void 0;
+        };
+        updateMinDate = function(value) {
+          var ref1, ref2;
+          if (value != null) {
+            if ((ref1 = element.data('DateTimePicker')) != null) {
+              ref1.minDate(moment(value));
             }
           } else {
-            return (ref1 = element.data('DateTimePicker')) != null ? ref1.minDate(false) : void 0;
+            if ((ref2 = element.data('DateTimePicker')) != null) {
+              ref2.minDate(false);
+            }
           }
+        };
+        updateMaxDate = function(value) {
+          var ref1, ref2;
+          if (value != null) {
+            if ((ref1 = element.data('DateTimePicker')) != null) {
+              ref1.maxDate(moment(value));
+            }
+          } else {
+            if ((ref2 = element.data('DateTimePicker')) != null) {
+              ref2.maxDate(false);
+            }
+          }
+        };
+        updateIcon = function(obj) {
+          if (obj != null) {
+            element.data('DateTimePicker').icons(obj);
+          }
+        };
+        dpChange = function(data) {
+          if (data.date) {
+            ngModelCtrl.$setViewValue(data.date.format(displayFormat));
+          } else {
+            ngModelCtrl.$setViewValue(null);
+          }
+        };
+        scope.$watch('shFromDate', function(newVal, oldVal) {
+          updateMinDate(newVal);
         });
         scope.$watch('shThruDate', function(newVal, oldVal) {
-          var ref, ref1;
+          updateMaxDate(newVal);
+        });
+        scope.$watch(function() {
+          return moment.defaultZone.name;
+        }, function(newVal, oldVal) {
           if (newVal != null) {
-            if (moment(new Date(newVal)).isValid()) {
-              return (ref = element.data('DateTimePicker')) != null ? ref.maxDate(moment(new Date(newVal))) : void 0;
-            }
-          } else {
-            return (ref1 = element.data('DateTimePicker')) != null ? ref1.maxDate(false) : void 0;
+            setupDatepicker(ngModelCtrl.$modelValue);
           }
         });
       }
     };
   }
-]).directive("shDatetimepicker", [
+]);
+
+shDatepickerModule.directive("shDatetimepicker", [
   'dateFilter', function(dateFilter) {
     return {
       restrict: 'A',
       scope: {
+        shDisplayFormat: '@?',
         shFromTime: '=?',
+        shIcons: '=?',
         shThruTime: '=?',
-        shTimezone: '@',
         widgetVerticalPosition: '@?'
       },
       require: '?ngModel',
       link: function(scope, element, attrs, ngModelCtrl) {
-        var initiation;
-        initiation = true;
-        element.datetimepicker({
-          timeZone: scope.shTimezone,
-          showClose: true,
-          showClear: true,
-          useCurrent: false,
-          showTodayButton: false,
-          format: 'DD-MM-YYYY, HH:mm (z)',
-          widgetPositioning: {
-            vertical: scope.widgetVerticalPosition || 'auto'
-          },
-          icons: {
-            time: 'fa fa-clock-o',
-            date: 'fa fa-calendar',
-            up: 'fa fa-chevron-up',
-            down: 'fa fa-chevron-down',
-            previous: 'fa fa-chevron-left',
-            next: 'fa fa-chevron-right',
-            today: 'fa fa-crosshairs',
-            clear: 'fa fa-trash',
-            close: 'fa fa-times'
-          }
-        });
-        ngModelCtrl.$render = function() {
-          var date, ref;
-          date = ngModelCtrl.$viewValue;
-          if (date != null) {
-            return (ref = element.data('DateTimePicker')) != null ? ref.date(moment.tz(moment(+date).format(), scope.shTimezone)) : void 0;
+        var displayFormat, dpChange, formatter, parser, ref, setupDatepicker, updateDate, updateIcon, updateMaxDate, updateMinDate, valueFormat;
+        valueFormat = 'x';
+        displayFormat = (ref = scope.shDisplayFormat) != null ? ref : 'DD-MM-YYYY, HH:mm (z)';
+        formatter = function(value) {
+          if (value != null) {
+            return moment(value * 1).tz(moment.defaultZone.name).format(displayFormat);
+          } else {
+            return null;
           }
         };
-        ngModelCtrl.$parsers.push(function(data) {
-          if (moment.tz(data, 'DD-MM-YYYY, HH:mm', scope.shTimezone).isValid()) {
-            return moment.tz(data, 'DD-MM-YYYY, HH:mm', scope.shTimezone).format('x');
+        ngModelCtrl.$formatters.push(formatter);
+        parser = function(value) {
+          if (moment.tz(value, displayFormat, moment.defaultZone.name).isValid()) {
+            return moment.tz(value, displayFormat, moment.defaultZone.name).format(valueFormat);
           } else {
+            value = null;
             return void 0;
           }
-        });
-        element.bind('dp.change', function(data) {
-          if (initiation) {
-            ngModelCtrl.$pristine = false;
+        };
+        ngModelCtrl.$parsers.push(parser);
+        setupDatepicker = function(value) {
+          var ref1;
+          element.unbind('dp.change', dpChange);
+          if ((ref1 = element.data('DateTimePicker')) != null) {
+            ref1.destroy();
           }
+          element.datetimepicker({
+            format: displayFormat,
+            showClear: true,
+            showClose: true,
+            showTodayButton: false,
+            timeZone: moment.defaultZone.name,
+            useStrict: true,
+            widgetPositioning: {
+              vertical: scope.widgetVerticalPosition || 'auto'
+            }
+          });
+          updateDate(value);
+          updateIcon(scope.shIcons);
+          updateMinDate(scope.shFromTime);
+          updateMaxDate(scope.shThruTime);
+          element.bind('dp.change', dpChange);
+        };
+        updateDate = function(value) {
+          if (value != null) {
+            element.data('DateTimePicker').date(moment(value * 1).tz(moment.defaultZone.name));
+          } else {
+            element.data('DateTimePicker').clear();
+          }
+        };
+        updateMinDate = function(value) {
+          var ref1, ref2;
+          if (value != null) {
+            if ((ref1 = element.data('DateTimePicker')) != null) {
+              ref1.minDate(moment(value * 1).tz(moment.defaultZone.name));
+            }
+          } else {
+            if ((ref2 = element.data('DateTimePicker')) != null) {
+              ref2.minDate(false);
+            }
+          }
+        };
+        updateMaxDate = function(value) {
+          var ref1, ref2;
+          if (value != null) {
+            if ((ref1 = element.data('DateTimePicker')) != null) {
+              ref1.maxDate(moment(value * 1).tz(moment.defaultZone.name));
+            }
+          } else {
+            if ((ref2 = element.data('DateTimePicker')) != null) {
+              ref2.maxDate(false);
+            }
+          }
+        };
+        updateIcon = function(obj) {
+          if (obj != null) {
+            element.data('DateTimePicker').icons(obj);
+          }
+        };
+        dpChange = function(data) {
           if (data.date) {
-            ngModelCtrl.$setViewValue(data.date.tz(scope.shTimezone).format('DD-MM-YYYY, HH:mm (z)'));
+            ngModelCtrl.$setViewValue(data.date.tz(moment.defaultZone.name).format(displayFormat));
           } else {
             ngModelCtrl.$setViewValue(null);
           }
-          if (initiation) {
-            ngModelCtrl.$pristine = true;
-          }
-          initiation = false;
-        });
-        element.bind('dp.show', function(data) {
-          if (initiation) {
-            initiation = false;
-          }
-        });
-        element.bind('dp.hide', function(data) {
-          var ref;
-          if (!moment(ngModelCtrl.$viewValue, 'DD-MM-YYYY, HH:mm (z)').isValid()) {
-            ngModelCtrl.$setViewValue(null);
-            return (ref = element.data('DateTimePicker')) != null ? ref.date(null) : void 0;
-          }
-        });
+        };
         scope.$watch('shFromTime', function(newVal, oldVal) {
-          var ref, ref1;
-          if (newVal != null) {
-            return (ref = element.data('DateTimePicker')) != null ? ref.minDate(moment.tz(newVal * 1, scope.shTimezone)) : void 0;
-          } else {
-            return (ref1 = element.data('DateTimePicker')) != null ? ref1.minDate(false) : void 0;
-          }
+          updateMinDate(newVal);
         });
         scope.$watch('shThruTime', function(newVal, oldVal) {
-          var ref, ref1;
-          if (newVal != null) {
-            return (ref = element.data('DateTimePicker')) != null ? ref.maxDate(moment.tz(newVal * 1, scope.shTimezone)) : void 0;
-          } else {
-            return (ref1 = element.data('DateTimePicker')) != null ? ref1.maxDate(false) : void 0;
-          }
+          updateMaxDate(newVal);
         });
-        scope.$watch('shTimezone', function(newVal, oldVal) {
-          var date, ref;
+        scope.$watch(function() {
+          return moment.defaultZone.name;
+        }, function(newVal, oldVal) {
           if (newVal != null) {
-            date = ngModelCtrl.$modelValue;
-            if (date != null) {
-              return (ref = element.data('DateTimePicker')) != null ? ref.date(moment.tz(moment(+date).format(), scope.shTimezone)) : void 0;
-            }
+            setupDatepicker(ngModelCtrl.$modelValue);
           }
         });
       }
@@ -516,21 +554,27 @@ shDialogModule.directive("shDialog", [
         shDialogEntity: '=?',
         shDialogLoading: '=?',
         shDialogDisabled: '&?',
+        shDialogLabelOk: '@?',
+        shDialogLabelClose: '@?',
+        shDialogLabelCancel: '@?',
         title: '@?'
       },
       link: function(scope, element, attrs) {
-        var hideModal, onHandleClick;
+        var hideModal, onHandleClick, ref, ref1, ref2, shDialogLabelCancel, shDialogLabelClose, shDialogLabelOk;
+        shDialogLabelOk = (ref = scope.shDialogLabelOk) != null ? ref : 'Submit';
+        shDialogLabelClose = (ref1 = scope.shDialogLabelClose) != null ? ref1 : 'Close';
+        shDialogLabelCancel = (ref2 = scope.shDialogLabelCancel) != null ? ref2 : 'Cancel';
         angular.element(element).addClass('sh-dialog').children().eq(0).on('click', function() {
           return onHandleClick();
         });
         onHandleClick = function() {
-          var buttonOkElement, compiledShDialogBody, compiledShDialogFooter, compiledShDialogHeader, modalIdSuffix, ref, ref1, shDialogModal;
+          var buttonOkElement, compiledShDialogBody, compiledShDialogFooter, compiledShDialogHeader, modalIdSuffix, ref3, ref4, shDialogModal;
           modalIdSuffix = scope.$id;
           shDialogModal = null;
           if (scope.shDialogForm != null) {
-            shDialogModal = angular.element('<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' + '<div class="modal-dialog ' + ((ref = scope.shDialogClass) != null ? ref : 'modal-sm') + '">' + '<form class="modal-content" novalidate="" name="' + scope.shDialogForm + '">' + '      <div class="modal-header">\n        <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>\n        <h4 class="modal-title"></h4>\n      </div>\n      <div class="modal-body"></div>\n      <div class="modal-footer"></div>\n    </form>\n  </div>\n</div>');
+            shDialogModal = angular.element('<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' + '<div class="modal-dialog ' + ((ref3 = scope.shDialogClass) != null ? ref3 : 'modal-sm') + '">' + '<form class="modal-content" novalidate="" name="' + scope.shDialogForm + '">' + "      <div class=\"modal-header\">\n        <button type=\"button\" data-dismiss=\"modal\" aria-hidden=\"true\" class=\"close\">&times;</button>\n        <h4 class=\"modal-title\"></h4>\n      </div>\n      <div class=\"modal-body\"></div>\n      <div class=\"modal-footer\"></div>\n    </form>\n  </div>\n</div>");
           } else {
-            shDialogModal = angular.element('<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' + '<div class="modal-dialog ' + ((ref1 = scope.shDialogClass) != null ? ref1 : 'modal-sm') + '">' + '    <div class="modal-content">\n      <div class="modal-header">\n        <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>\n        <h4 class="modal-title"></h4>\n      </div>\n      <div class="modal-body"></div>\n      <div class="modal-footer"></div>\n    </div>\n  </div>\n</div>');
+            shDialogModal = angular.element('<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' + '<div class="modal-dialog ' + ((ref4 = scope.shDialogClass) != null ? ref4 : 'modal-sm') + '">' + "    <div class=\"modal-content\">\n      <div class=\"modal-header\">\n        <button type=\"button\" data-dismiss=\"modal\" aria-hidden=\"true\" class=\"close\">&times;</button>\n        <h4 class=\"modal-title\"></h4>\n      </div>\n      <div class=\"modal-body\"></div>\n      <div class=\"modal-footer\"></div>\n    </div>\n  </div>\n</div>");
           }
           if (scope.shDialogHeader != null) {
             compiledShDialogHeader = angular.element($templateCache.get(scope.shDialogHeader));
@@ -546,11 +590,11 @@ shDialogModule.directive("shDialog", [
             compiledShDialogFooter = angular.element($templateCache.get(scope.shDialogFooter));
             shDialogModal.find('.modal-footer').append(compiledShDialogFooter);
           } else if (attrs.shDialogOk != null) {
-            buttonOkElement = '<button\n  class="btn btn-primary margin-left"\n\n  ng-disabled="' + 'aliasShDialogDisabled()' + '"\n\nng-click="' + 'aliasShDialogOk($event)' + '"\n\nsh-submit="' + '{{aliasShDialogForm}}' + '  "\n\n  ng-attr-title="{{\'ACTION_SUBMIT\' | translate}}"\n  translate="ACTION_SUBMIT"\n  type="submit"\n>\n</button>';
+            buttonOkElement = "<button\n  class=\"btn btn-primary margin-left\"\n\n  ng-disabled=\"" + 'aliasShDialogDisabled()' + "\"\n\nng-click=\"" + 'aliasShDialogOk($event)' + "\"\n\nsh-submit=\"" + '{{aliasShDialogForm}}' + ("  \"\n\n  ng-attr-title=\"" + shDialogLabelOk + "\"\n  type=\"submit\"\n>\n" + shDialogLabelOk + "\n</button>");
             shDialogModal.find('.modal-footer').append(buttonOkElement);
-            shDialogModal.find('.modal-footer').append('<button type="button" data-dismiss="modal" translate="ACTION_CANCEL" class="btn btn-default margin-left">\n</button>');
+            shDialogModal.find('.modal-footer').append("<button type=\"button\" data-dismiss=\"modal\" class=\"btn btn-default margin-left\">\n  " + shDialogLabelCancel + "\n</button>");
           } else {
-            shDialogModal.find('.modal-footer').append('<button type="button" data-dismiss="modal" translate="ACTION_CLOSE" class="btn btn-default margin-left">\n</button>');
+            shDialogModal.find('.modal-footer').append("<button type=\"button\" data-dismiss=\"modal\" class=\"btn btn-default margin-left\">\n  " + shDialogLabelClose + "\n</button>");
           }
           $compile(shDialogModal)(scope.$parent);
           angular.element('body').append(shDialogModal);
@@ -587,7 +631,7 @@ shDialogModule.directive("shDialog", [
             return shDialogModal.modal('show');
           }, 20);
           scope.$parent.aliasShDialogDisabled = function() {
-            var ref2, ref3, ref4;
+            var ref5, ref6, ref7;
             if (scope.$parent.shDialogLoading) {
               return true;
             }
@@ -597,7 +641,7 @@ shDialogModule.directive("shDialog", [
             if (scope.shDialogForm == null) {
               return false;
             }
-            return ((ref2 = scope.$parent[scope.shDialogForm]) != null ? ref2.$pristine : void 0) || ((ref3 = scope.$parent[scope.shDialogForm]) != null ? ref3.$invalid : void 0) || ((ref4 = scope.$parent[scope.shDialogForm]) != null ? ref4.$submitted : void 0);
+            return ((ref5 = scope.$parent[scope.shDialogForm]) != null ? ref5.$pristine : void 0) || ((ref6 = scope.$parent[scope.shDialogForm]) != null ? ref6.$invalid : void 0) || ((ref7 = scope.$parent[scope.shDialogForm]) != null ? ref7.$submitted : void 0);
           };
           scope.$parent.aliasShDialogOk = function($event) {
             var deferred;
@@ -609,10 +653,10 @@ shDialogModule.directive("shDialog", [
               hideModal();
               return deferred.resolve();
             }, function(error) {
-              var ref2;
+              var ref5;
               if (scope.shDialogForm != null) {
-                if ((ref2 = scope.$parent[scope.shDialogForm]) != null) {
-                  ref2.$submitted = false;
+                if ((ref5 = scope.$parent[scope.shDialogForm]) != null) {
+                  ref5.$submitted = false;
                 }
               }
               return deferred.reject();
@@ -642,7 +686,7 @@ shDialogModule.directive('shDialogDismissButton', function() {
   return {
     restrict: 'EA',
     template: function(element, attrs) {
-      return '<button type="button" data-dismiss="modal" translate="ACTION_CANCEL" class="btn btn-default margin-left">\n</button>';
+      return "<button type=\"button\" data-dismiss=\"modal\" class=\"btn btn-default margin-left\">\n  " + shDialogLabelCancel + "\n</button>";
     }
   };
 });
@@ -3677,49 +3721,6 @@ shTableModule.run([
   }
 ]);
 
-angular.module('sh.button.state', []).service("ShButtonState", [
-  '$timeout', function($timeout) {
-    this.initializeEvent = function($event, defaultValue) {
-      defaultValue = (typeof defaultValue === "undefined" ? null : defaultValue);
-      return (typeof $event === "undefined" ? defaultValue : $event);
-    };
-    this.setEnable = function($event, enabled) {
-      var btn, target;
-      if ($event != null) {
-        target = jQuery($event.target);
-        target.prop('disabled', !enabled);
-        if (target.is('form')) {
-          btn = target.find('button[type="submit"]');
-          btn.prop('disabled', !enabled);
-        } else if (target.is('a')) {
-          if (enabled) {
-            target.removeClass('disabled');
-          } else {
-            target.addClass('disabled');
-          }
-        } else if (target.is('span')) {
-          target = target.parent();
-          if (enabled) {
-            target.removeClass('disabled');
-          } else {
-            target.addClass('disabled');
-          }
-        }
-      }
-    };
-    this.disable = function($event) {
-      return this.setEnable($event, false);
-    };
-    this.loading = function($event) {
-      return this.disable($event);
-    };
-    this.enable = function($event) {
-      return this.setEnable($event, true);
-    };
-    return this;
-  }
-]);
-
 angular.module('sh.notification', []).service("ShNotification", [
   '$timeout', '$interval', function($timeout, $interval) {
     var defaultDuration, defaultLifetime;
@@ -3905,7 +3906,6 @@ angular.module('sh.notification', []).service("ShNotification", [
       }
     };
     this.runInterval(this);
-    return this;
   }
 ]);
 
@@ -3930,16 +3930,8 @@ angular.module("sh.page.service", []).service("ShPageService", [
     this.getAppName = function() {
       return _appName;
     };
-    return this;
   }
 ]);
-
-angular.module("sh.priv", []).service("ShPriv", function() {
-  this.can = function(privileges, ability) {
-    return privileges.indexOf(ability) !== -1;
-  };
-  return this;
-});
 
 shSpinningModule.service("ShSpinningService", function() {
   var spinningStates;
@@ -3998,32 +3990,6 @@ shSpinningModule.service("ShSpinningService", function() {
   this.isSpinning = function(key) {
     return spinningStates[key] === true;
   };
-  return this;
-});
-
-shHelperModule.service("shElementFinder", function() {
-  this.findById = function(source, id) {
-    return source.filter(function(obj) {
-      return +obj.id === +id;
-    });
-  };
-  this.findFirstById = function(source, id) {
-    var ref;
-    return (ref = source.filter(function(obj) {
-      return +obj.id === +id;
-    })[0]) != null ? ref : {};
-  };
-  this.findByField = function(source, value) {
-    return source.filter(function(obj) {
-      return obj.field === value;
-    });
-  };
-  this.findByElmt = function(source, elmt) {
-    return source.filter(function(obj) {
-      return +obj === +elmt;
-    });
-  };
-  return this;
 });
 
 shHelperModule.service("HelperService", [
@@ -4102,10 +4068,30 @@ shHelperModule.service("HelperService", [
         return object;
       }
     };
-    return this;
+    this.findById = function(source, id) {
+      return source.filter(function(obj) {
+        return +obj.id === +id;
+      });
+    };
+    this.findFirstById = function(source, id) {
+      var ref;
+      return (ref = source.filter(function(obj) {
+        return +obj.id === +id;
+      })[0]) != null ? ref : {};
+    };
+    this.findByField = function(source, value) {
+      return source.filter(function(obj) {
+        return obj.field === value;
+      });
+    };
+    this.findByElmt = function(source, elmt) {
+      return source.filter(function(obj) {
+        return +obj === +elmt;
+      });
+    };
   }
 ]);
 
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.api.module', 'sh.dialog.module', 'sh.form.module', 'sh.helper.module', 'sh.persistence.module', 'sh.spinning.module', 'sh.table.module', 'sh.validation.module', 'sh.button.state', 'sh.notification', 'sh.page.service', 'sh.priv']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.api.module', 'sh.datepicker.module', 'sh.dialog.module', 'sh.form.module', 'sh.helper.module', 'sh.persistence.module', 'sh.spinning.module', 'sh.table.module', 'sh.validation.module', 'sh.notification', 'sh.page.service']);
 
 }());
