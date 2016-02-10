@@ -53,8 +53,6 @@ angular.module 'starqle.ng.util', [
   'sh.validation.module',
 
   # services
-  'sh.button.state',
   'sh.notification',
-  'sh.page.service',
-  'sh.priv'
+  'sh.page.service'
 ]
