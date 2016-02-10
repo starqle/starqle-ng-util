@@ -42,9 +42,18 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
     shDialogLoading: '=?'
     shDialogDisabled: '&?'
 
+    shDialogLabelOk: '@?'
+    shDialogLabelClose: '@?'
+    shDialogLabelCancel: '@?'
+
     title: '@?'
 
   link: (scope, element, attrs) ->
+    # Default label
+    shDialogLabelOk = scope.shDialogLabelOk ? 'Submit'
+    shDialogLabelClose = scope.shDialogLabelClose ? 'Close'
+    shDialogLabelCancel = scope.shDialogLabelCancel ? 'Cancel'
+
     #
     #
     #
@@ -66,7 +75,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
           '<div class="modal-dialog ' + (scope.shDialogClass ? 'modal-sm') + '">' +
 
           '<form class="modal-content" novalidate="" name="' + scope.shDialogForm + '">' +
-          '''
+          """
                   <div class="modal-header">
                     <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
                     <h4 class="modal-title"></h4>
@@ -76,13 +85,13 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
                 </form>
               </div>
             </div>
-          '''
+          """
         )
       else
         shDialogModal = angular.element(
           '<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' +
           '<div class="modal-dialog ' + (scope.shDialogClass ? 'modal-sm') + '">' +
-          '''
+          """
                 <div class="modal-content">
                   <div class="modal-header">
                     <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
@@ -93,7 +102,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
                 </div>
               </div>
             </div>
-          '''
+          """
         )
 
 
@@ -114,49 +123,51 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
         compiledShDialogFooter = angular.element $templateCache.get(scope.shDialogFooter)
         shDialogModal.find('.modal-footer').append(compiledShDialogFooter)
       else if attrs.shDialogOk?
-        buttonOkElement = '''
+        buttonOkElement = """
           <button
             class="btn btn-primary margin-left"
 
             ng-disabled="
-          ''' +
+          """ +
           'aliasShDialogDisabled()' +
 
-          '''
+          """
             "
 
             ng-click="
-          ''' +
+          """ +
           'aliasShDialogOk($event)' +
 
-          '''
+          """
             "
 
             sh-submit="
-          ''' +
+          """ +
           '{{aliasShDialogForm}}' +
 
-          '''
+          """
             "
 
-            ng-attr-title="{{'ACTION_SUBMIT' | translate}}"
-            translate="ACTION_SUBMIT"
+            ng-attr-title="#{shDialogLabelOk}"
             type="submit"
           >
+          #{shDialogLabelOk}
           </button>
-          '''
+          """
 
         shDialogModal.find('.modal-footer').append buttonOkElement
 
-        shDialogModal.find('.modal-footer').append '''
-          <button type="button" data-dismiss="modal" translate="ACTION_CANCEL" class="btn btn-default margin-left">
+        shDialogModal.find('.modal-footer').append """
+          <button type="button" data-dismiss="modal" class="btn btn-default margin-left">
+            #{shDialogLabelCancel}
           </button>
-        '''
+        """
       else
-        shDialogModal.find('.modal-footer').append '''
-          <button type="button" data-dismiss="modal" translate="ACTION_CLOSE" class="btn btn-default margin-left">
+        shDialogModal.find('.modal-footer').append """
+          <button type="button" data-dismiss="modal" class="btn btn-default margin-left">
+            #{shDialogLabelClose}
           </button>
-        '''
+        """
 
 
       $compile(shDialogModal)(scope.$parent)
@@ -271,8 +282,9 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
 shDialogModule.directive('shDialogDismissButton', ->
   restrict: 'EA'
   template: (element, attrs) ->
-    '''
-      <button type="button" data-dismiss="modal" translate="ACTION_CANCEL" class="btn btn-default margin-left">
+    """
+      <button type="button" data-dismiss="modal" class="btn btn-default margin-left">
+        #{shDialogLabelCancel}
       </button>
-    '''
+    """
 )
