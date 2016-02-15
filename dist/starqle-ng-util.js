@@ -930,11 +930,13 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
   '$timeout', function($timeout) {
     return {
       restrict: 'C',
-      scope: {},
+      scope: {
+        tableScrollBodyReduction: '@?'
+      },
       link: function(scope, element, attrs) {
         var assignBaseCss, assignShadowCss, refreshFreezedPane;
         assignBaseCss = function(elmt, left) {
-          var outerHeight, paddingBottom, paddingLeft, paddingRight, paddingTop, parent, parentRow, reduction;
+          var outerHeight, paddingBottom, paddingLeft, paddingRight, paddingTop, parent, parentRow, reduction, ref;
           parent = angular.element(elmt).parent();
           parentRow = parent.parents('tr');
           paddingTop = parent.css('padding-top');
@@ -942,7 +944,8 @@ angular.module('sh.segment', []).directive("wideTableContainer", function() {
           paddingRight = parent.css('padding-right');
           paddingBottom = parent.css('padding-bottom');
           outerHeight = parentRow.outerHeight();
-          reduction = 1;
+          reduction = (ref = scope.tableScrollBodyReduction) != null ? ref : '1';
+          reduction = reduction * 1;
           return angular.element(elmt).css({
             top: 0,
             left: left,
