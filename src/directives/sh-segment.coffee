@@ -88,7 +88,9 @@ angular.module('sh.segment', []
   #
   #
   restrict: 'C'
-  scope: {}
+  scope:
+    tableScrollBodyReduction: '@?'
+
   link: (scope, element, attrs) ->
 
     assignBaseCss = (elmt, left) ->
@@ -101,7 +103,8 @@ angular.module('sh.segment', []
       paddingBottom = parent.css('padding-bottom')
       outerHeight = parentRow.outerHeight()
 
-      reduction = 1
+      reduction = scope.tableScrollBodyReduction ? '1'
+      reduction = reduction * 1
 
       angular.element(elmt).css
         top: 0
