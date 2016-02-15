@@ -295,3 +295,27 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     return
 
 ])
+
+
+
+shDatepickerModule.directive("shDatetime", [ ->
+  restrict: 'A'
+  scope:
+    shDatetime: '='
+    shDatetimeFormat: '@?'
+  template:
+    '<span title="{{getFormattedShDatetime()}}">{{getFormattedShDatetime()}}</span>'
+  link: (scope, element, attrs) ->
+    scope.getFormattedShDatetime = ->
+      shDatetimeFormat = scope.shDatetimeFormat ? 'DD MMM YYYY, HH:mm (z)'
+      if scope.shDatetime
+        if Number.isNaN(+scope.shDatetime)
+          moment(scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat)
+        else
+          moment(+scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat)
+      else
+        '-'
+
+    return
+
+])

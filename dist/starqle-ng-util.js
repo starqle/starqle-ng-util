@@ -537,6 +537,34 @@ shDatepickerModule.directive("shDatetimepicker", [
   }
 ]);
 
+shDatepickerModule.directive("shDatetime", [
+  function() {
+    return {
+      restrict: 'A',
+      scope: {
+        shDatetime: '=',
+        shDatetimeFormat: '@?'
+      },
+      template: '<span title="{{getFormattedShDatetime()}}">{{getFormattedShDatetime()}}</span>',
+      link: function(scope, element, attrs) {
+        scope.getFormattedShDatetime = function() {
+          var ref, shDatetimeFormat;
+          shDatetimeFormat = (ref = scope.shDatetimeFormat) != null ? ref : 'DD MMM YYYY, HH:mm (z)';
+          if (scope.shDatetime) {
+            if (Number.isNaN(+scope.shDatetime)) {
+              return moment(scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat);
+            } else {
+              return moment(+scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat);
+            }
+          } else {
+            return '-';
+          }
+        };
+      }
+    };
+  }
+]);
+
 shDialogModule.directive("shDialog", [
   '$compile', '$templateCache', '$timeout', '$q', function($compile, $templateCache, $timeout, $q) {
     return {
