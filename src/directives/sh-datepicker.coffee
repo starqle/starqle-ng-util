@@ -215,6 +215,7 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
         showClose: true
         showTodayButton: false
         timeZone: moment.defaultZone.name
+        useCurrent: false
         useStrict: true
         widgetPositioning:
           vertical: scope.widgetVerticalPosition or 'auto'
