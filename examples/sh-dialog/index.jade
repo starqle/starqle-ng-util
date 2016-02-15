@@ -1,0 +1,99 @@
+link(
+  rel='stylesheet prefetch'
+  property='stylesheet'
+  href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'
+)
+link(
+  rel='stylesheet prefetch'
+  property='stylesheet'
+  href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css'
+)
+
+//- Intentionally exclude html, head and body tags to make syncing with codepen become a lot easier.
+
+div(ng-app='exampleApp')
+  script(type='text/ng-template' id='/template_name_for_body_dialog.html')
+    alert.alert-info
+      | This is sh-dialog-body content
+
+  .col-lg-12(ng-controller='ShDialogExampleController as exampleCtrl1')
+    .panel.panel-default
+      .panel-heading
+        | Basic
+      .panel-body
+        div(
+          sh-dialog
+          sh-dialog-body='/template_name_for_body_dialog.html'
+          sh-dialog-ok='exampleCtrl1.sayHello("World")'
+          title='This is Sh Dialog Title'
+        )
+          a.btn.btn-primary Say Hello
+
+
+    .panel.panel-default
+      .panel-heading
+        | Using sh-dialog-before-show
+      .panel-body
+        div(
+          sh-dialog
+          sh-dialog-before-show='exampleCtrl1.beforeSayHello()'
+          sh-dialog-body='/template_name_for_body_dialog.html'
+          sh-dialog-class='modal-md'
+          sh-dialog-ok='exampleCtrl1.sayHello("World")'
+          title='Sh Dialog Title'
+        )
+          a.btn.btn-primary Get ready to say Hello
+
+  .col-lg-12(ng-controller='ShDialogExampleController as exampleCtrl1')
+    .panel.panel-default
+      .panel-heading
+        div Custom label
+      .panel-body
+        div(
+          sh-dialog
+          sh-dialog-body='/template_name_for_body_dialog.html'
+          sh-dialog-ok='exampleCtrl1.sayHello("World")'
+          title='Custom submit label Dialog Title'
+          sh-dialog-label-ok='Done...!'
+          sh-dialog-label-cancel='Quit'
+        )
+          a.btn.btn-primary Custom submit label
+
+  script(type='text/ng-template' id='/template_name_for_header_dialog.html')
+    span This is custom footer&nbsp;
+    a(href='https://www.wikipedia.org') with link
+
+  script(type='text/ng-template' id='/template_name_for_footer_dialog.html')
+    a(
+      href='https://www.google.com/'
+    ) Google
+    a.btn.btn-primary(
+      href='https://www.wikipedia.org'
+    ) Wiki
+    a.btn.btn-success Anything
+    a.btn.btn-danger(
+      ng-click='exampleCtrl1.customAlert()'
+    ) Alert
+
+  .col-lg-12(ng-controller='ShDialogExampleController as exampleCtrl1')
+    .panel.panel-default
+      .panel-heading
+        | Large modal with custom Header & Footer
+      .panel-body
+        div(
+          sh-dialog
+          sh-dialog-header='/template_name_for_header_dialog.html'
+          sh-dialog-body='/template_name_for_body_dialog.html'
+          sh-dialog-footer='/template_name_for_footer_dialog.html'
+          sh-dialog-ok='exampleCtrl1.sayHello("World")'
+          sh-dialog-class='modal-lg'
+          title='This is Sh Dialog Title'
+        )
+          a.btn.btn-primary Large modal
+
+
+script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js')
+script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js')
+script(src='https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js')
+script(src='http://ralibi.com/cdn/starqle/starqle-ng-util/v0.3.0-rc1/dist/starqle-ng-util.js')
+script(src='script.js')
