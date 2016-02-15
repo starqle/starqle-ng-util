@@ -8,6 +8,7 @@ var gulp = require('gulp'),
     gulpIf = require('gulp-if'),
     gulpJade = require('gulp-jade'),
     gulpPlumber = require('gulp-plumber'),
+    gulpSass = require('gulp-sass'),
     gulpUtil = require('gulp-util'),
     gulpWatch = require('gulp-watch'),
     modRewrite = require('connect-modrewrite'),
@@ -90,11 +91,19 @@ gulp.task('build-coffee', ['build-clean'], function() {
   return gulp.src(source)
     .pipe(gulpIf('*.coffee', gulpCoffee({bare: true, map: true, compile: true})))
     .pipe(gulpConcat("starqle-ng-util.js"))
-    // .pipe(gulp.dest('dist/'));
-    .pipe(gulp.dest('../eproc-webapp/.tmp/bower_components/starqle-ng-util/dist/'));
+    .pipe(gulp.dest('dist/'));
 });
 
-gulp.task('build', ['build-coffee']);
+
+gulp.task('build-sass', [], function() {
+  return gulp.src(['styles/starqle-ng-util.scss'])
+    .pipe(gulpPlumber({errorHandler:errorHandler}))
+    .pipe(gulpSass())
+    .pipe(gulpPlumber.stop())
+    .pipe(gulp.dest('dist/'));
+});
+
+gulp.task('build', ['build-coffee', 'build-sass']);
 
 gulp.task('examples', ['serve', 'watch']);
 
