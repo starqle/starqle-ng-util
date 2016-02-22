@@ -11,3 +11,42 @@
     background-color: white;
     opacity: 0.7;
     z-index: 10; }
+
+.toast-group {
+  position: absolute;
+  top: 60px;
+  z-index: 9999;
+  width: 600px;
+  position: absolute;
+  left: 50%;
+  margin-left: -300px;
+  text-align: center; }
+  .toast-group .toast-group-item .panel {
+    display: inline-block;
+    text-align: left;
+    margin-bottom: 10px; }
+    .toast-group .toast-group-item .panel .panel-heading {
+      padding: 5px 25px 5px 20px;
+      position: relative; }
+      .toast-group .toast-group-item .panel .panel-heading .toast-group-item-icon {
+        float: left;
+        margin-top: -3px;
+        margin-left: -5px;
+        font-size: large; }
+      .toast-group .toast-group-item .panel .panel-heading .toast-group-item-body {
+        margin-right: 20px;
+        margin-left: 20px; }
+      .toast-group .toast-group-item .panel .panel-heading .toast-group-item-dismiss {
+        position: absolute;
+        padding: 4px 6px;
+        top: 1px;
+        right: 5px;
+        font-size: large;
+        line-height: 16px;
+        cursor: pointer;
+        opacity: 0.2; }
+        .toast-group .toast-group-item .panel .panel-heading .toast-group-item-dismiss i {
+          width: 16px;
+          height: 16px; }
+        .toast-group .toast-group-item .panel .panel-heading .toast-group-item-dismiss:hover {
+          opacity: 1; }
