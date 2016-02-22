@@ -33,10 +33,9 @@ gulp.task('serve', function() {
     port: 9000,
     middleware: function(connect, options) {
       var middlewares = [];
-      // middlewares.push(modRewrite(['^[^\\.]*$ /examples/index.html [L]']));
       middlewares.push(modRewrite([
-        '^/examples/(.*)$ /examples/$1/index.html [L]',
-        '^[^\\.]*$ /examples/index.html [L]'
+        '^/examples/([a-z,\-]*)/(.*)$ /examples/$1/$2 [L]',
+        '^/examples/([a-z,\-]*)$ /examples/$1/index.html [L]'
       ]));
       middlewares.push(connect.static('.tmp'));
       return middlewares;
