@@ -67,7 +67,7 @@ shTableModule.factory(
       #
       # @param {}
       #
-      # @returns promise
+      # @returns {promise}
       #
       # @description
       # ShTableParams factory
@@ -110,7 +110,7 @@ shTableModule.factory(
       #
       # @param {}
       #
-      # @returns promise
+      # @returns {promise}
       #
       # @description
       # ShTableParams factory
@@ -127,7 +127,7 @@ shTableModule.factory(
       #
       # @param {}
       #
-      # @returns promise
+      # @returns {promise}
       #
       # @description
       # ShTableParams factory
