@@ -19,6 +19,8 @@ var errorHandler = function(error) {
   gulpUtil.log(error);
 }
 
+var dest = 'dist/';
+
 // ----------------------------------------------------------------------------
 // Production tasks
 // ----------------------------------------------------------------------------
@@ -90,7 +92,7 @@ gulp.task('build-coffee', ['build-clean'], function() {
   return gulp.src(source)
     .pipe(gulpIf('*.coffee', gulpCoffee({bare: true, map: true, compile: true})))
     .pipe(gulpConcat("starqle-ng-util.js"))
-    .pipe(gulp.dest('dist/'));
+    .pipe(gulp.dest(dest));
 });
 
 
@@ -99,7 +101,7 @@ gulp.task('build-sass', [], function() {
     .pipe(gulpPlumber({errorHandler:errorHandler}))
     .pipe(gulpSass())
     .pipe(gulpPlumber.stop())
-    .pipe(gulp.dest('dist/'));
+    .pipe(gulp.dest(dest));
 });
 
 gulp.task('build', ['build-coffee', 'build-sass']);
