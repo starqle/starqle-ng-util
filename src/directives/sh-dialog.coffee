@@ -46,6 +46,8 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
     shDialogLabelClose: '@?'
     shDialogLabelCancel: '@?'
 
+    shDialogParent: '=?'
+
     title: '@?'
 
   link: (scope, element, attrs) ->
@@ -58,7 +60,9 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
     #
     #
     angular.element(element).addClass('sh-dialog').children().eq(0).on( 'click', ->
-      onHandleClick()
+      unless angular.element(this).find('> *:first-child').attr('disabled') is 'disabled'
+        onHandleClick()
+      return
     )
 
     #
@@ -169,8 +173,9 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
           </button>
         """
 
+      parent = scope.shDialogParent ? scope.$parent
 
-      $compile(shDialogModal)(scope.$parent)
+      $compile(shDialogModal)(parent)
 
       # Append modal to body
       angular.element('body').append(shDialogModal)
@@ -178,12 +183,12 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
       #
       # TODO:
       #
-      scope.$parent.shDialogEntity = angular.copy(scope.shDialogEntity, {}) if scope.shDialogEntity?
+      parent.shDialogEntity = angular.copy(scope.shDialogEntity, {}) if scope.shDialogEntity?
 
       shDialogModal.on(
 
         'show.bs.modal', ->
-          scope.$parent.shDialogLoading = true
+          parent.shDialogLoading = true
 
           deferred = $q.defer()
 
@@ -191,7 +196,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
             (scope.shDialogBeforeShow || angular.noop)()
           ).then(
             (success) ->
-              scope.$parent.shDialogEntity = angular.copy(success.data, {}) if success?.data?
+              parent.shDialogEntity = angular.copy(success.data, {}) if success?.data?
 
               ### ###
               deferred.resolve success
@@ -203,7 +208,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
           ).finally(
             () ->
               ### ###
-              scope.$parent.shDialogLoading = false
+              parent.shDialogLoading = false
               return
           )
 
@@ -212,7 +217,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
       ).on(
         'hidden.bs.modal', ->
           shDialogModal.remove()
-          scope.$parent.shDialogEntity = {}
+          parent.shDialogEntity = {}
           return
       )
 
@@ -222,22 +227,22 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
       , 20
       )
 
-      scope.$parent.aliasShDialogDisabled = () ->
-        return true if scope.$parent.shDialogLoading
+      parent.aliasShDialogDisabled = () ->
+        return true if parent.shDialogLoading
 
         return scope.shDialogDisabled() if attrs.shDialogDisabled?
 
         return false unless scope.shDialogForm?
 
-        scope.$parent[scope.shDialogForm]?.$pristine or
-        scope.$parent[scope.shDialogForm]?.$invalid or
-        scope.$parent[scope.shDialogForm]?.$submitted
+        parent[scope.shDialogForm]?.$pristine or
+        parent[scope.shDialogForm]?.$invalid or
+        parent[scope.shDialogForm]?.$submitted
 
 
-      scope.$parent.aliasShDialogOk = ($event) ->
+      parent.aliasShDialogOk = ($event) ->
         deferred = $q.defer()
 
-        scope.$parent.shDialogLoading = true
+        parent.shDialogLoading = true
         $q.when(
           (scope.shDialogOk || angular.noop)({$event: $event})
         ).then(
@@ -248,18 +253,18 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
 
           (error) ->
             # Only button enabler. do not set unstouched
-            scope.$parent[scope.shDialogForm]?.$submitted = false if scope.shDialogForm?
+            parent[scope.shDialogForm]?.$submitted = false if scope.shDialogForm?
             deferred.reject()
 
         ).finally(
           () ->
-            scope.$parent.shDialogLoading = false
+            parent.shDialogLoading = false
             return
         )
 
         deferred.promise
 
-      scope.$parent.aliasShDialogForm = scope.shDialogForm
+      parent.aliasShDialogForm = scope.shDialogForm
 
       return
 
