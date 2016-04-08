@@ -182,7 +182,11 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     #
     formatter = (value) ->
       if value?
-        moment(value * 1).tz(moment.defaultZone.name).format(displayFormat)
+        unless (isNaN(value) and moment(value, moment.ISO_8601).isValid())
+          # should be millisecond from epoch
+          value *= 1
+
+        moment(value).tz(moment.defaultZone.name).format(displayFormat)
       else
         null
 
@@ -232,7 +236,10 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
 
     updateDate = (value) ->
       if value?
-        element.data('DateTimePicker').date(moment(value * 1).tz(moment.defaultZone.name))
+        unless (isNaN(value) and moment(value, moment.ISO_8601).isValid())
+          # should be millisecond from epoch
+          value *= 1
+        element.data('DateTimePicker').date(moment(value).tz(moment.defaultZone.name))
       else
         element.data('DateTimePicker').clear()
 
@@ -241,7 +248,10 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
 
     updateMinDate = (value)  ->
       if value?
-        element.data('DateTimePicker')?.minDate(moment(value * 1).tz(moment.defaultZone.name))
+        unless (isNaN(value) and moment(value, moment.ISO_8601).isValid())
+          # should be millisecond from epoch
+          value *= 1
+        element.data('DateTimePicker')?.minDate(moment(value).tz(moment.defaultZone.name))
       else
         element.data('DateTimePicker')?.minDate(false)
       return
@@ -249,7 +259,10 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
 
     updateMaxDate = (value)  ->
       if value?
-        element.data('DateTimePicker')?.maxDate(moment(value * 1).tz(moment.defaultZone.name))
+        unless (isNaN(value) and moment(value, moment.ISO_8601).isValid())
+          # should be millisecond from epoch
+          value *= 1
+        element.data('DateTimePicker')?.maxDate(moment(value).tz(moment.defaultZone.name))
       else
         element.data('DateTimePicker')?.maxDate(false)
       return
@@ -309,13 +322,64 @@ shDatepickerModule.directive("shDatetime", [ ->
   link: (scope, element, attrs) ->
     scope.getFormattedShDatetime = ->
       shDatetimeFormat = scope.shDatetimeFormat ? 'DD MMM YYYY, HH:mm (z)'
-      if scope.shDatetime
-        if Number.isNaN(+scope.shDatetime)
-          moment(scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat)
-        else
-          moment(+scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat)
+      if scope.shDatetime?
+        unless (isNaN(scope.shDatetime) and moment(scope.shDatetime, moment.ISO_8601).isValid())
+          # should be millisecond from epoch
+          scope.shDatetime *= 1
+        moment(scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat)
       else
         '-'
+
+    return
+
+])
+
+
+
+shDatepickerModule.directive("shTimepicker", [ ->
+  restrict: 'A'
+  scope:
+    shTimepicker: '='
+  template:
+    '''
+    <select name="duration-hour" ng-model="duration.hour" ng-options="n as n for n in ([] | shRange:0:24)" class="form-control">
+      <option value="0">0</option>
+    </select>&colon;
+    <select name="duration-minute" ng-model="duration.minute" ng-options="n as n for n in ([] | shRange:0:60:5)" class="form-control">
+      <option value="0">0</option>
+    </select>
+    '''
+  require: '?ngModel'
+  link: (scope, element, attrs, ngModelCtrl) ->
+
+    scope.duration =
+      hour: Math.floor(scope.shTimepicker / (60 * 60))
+      minute: scope.shTimepicker % (60 * 60)
+
+    #
+    # ngModelCtrl: Formatter
+    #
+    formatter = (value) ->
+      if value?
+        scope.duration.hour = Math.floor(value / (60 * 60))
+        scope.duration.minute = Math.floor(value / 60) % 60
+      else
+        scope.duration.hour = 0
+        scope.duration.minute = 5
+
+      value
+
+    ngModelCtrl.$formatters.push formatter
+
+
+    scope.$watchCollection(
+      'duration'
+      (newVal, oldVal) ->
+        if newVal?
+          ngModelCtrl.$setViewValue(scope.duration.hour * (60 * 60) + scope.duration.minute * (60))
+        return
+    )
+
 
     return
 
