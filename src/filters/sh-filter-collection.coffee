@@ -18,9 +18,33 @@
 # =============================================================================
 
 
-angular.module('sh.filter.collection', []).filter "shFilterCollection", [ ->
-  (collection, callback, entity) ->
-    if collection && entity
-      collection.filter (item) ->
-        return callback(item, entity)
-]
+angular.module(
+  'sh.filter.collection'
+  []
+).filter(
+
+  "shFilterCollection"
+  () ->
+    (collection, callback, entity) ->
+      if collection && entity
+        collection.filter (item) ->
+          return callback(item, entity)
+
+).filter(
+
+  'searchAnyIn'
+  [
+    '$filter'
+    ($filter) ->
+      (collection, fields, query) ->
+        unless query
+          collection
+        else
+          collection.filter (item) ->
+            result = false
+            for field in fields
+              result = result or item[field].toLowerCase().indexOf(query.toLowerCase()) >= 0 unless result
+            result
+  ]
+
+)
