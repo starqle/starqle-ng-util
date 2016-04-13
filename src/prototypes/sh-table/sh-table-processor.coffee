@@ -56,13 +56,14 @@ shTableModule.run ['$rootScope', ($rootScope) ->
           directions.push params.sorting[property]
 
         gridParams =
-          column_defs: JSON.stringify @getProcessedColumnDefs(opts.columnDefs)
           page: params.pageNumber
           per_page: params.perPage
           sort_info: JSON.stringify
             fields: fields
             directions: directions
           filter_params: {}
+
+        gridParams.column_defs = JSON.stringify @getProcessedColumnDefs(opts.columnDefs) if opts.columnDefs?.length > 0
 
         if opts.filterParams
           angular.extend gridParams.filter_params, opts.filterParams
