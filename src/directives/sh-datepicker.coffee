@@ -317,16 +317,23 @@ shDatepickerModule.directive("shDatetime", [ ->
   scope:
     shDatetime: '='
     shDatetimeFormat: '@?'
+    shDateFormat: '@?'
   template:
     '<span title="{{getFormattedShDatetime()}}">{{getFormattedShDatetime()}}</span>'
   link: (scope, element, attrs) ->
     scope.getFormattedShDatetime = ->
-      shDatetimeFormat = scope.shDatetimeFormat ? 'DD MMM YYYY, HH:mm (z)'
       if scope.shDatetime?
-        unless (isNaN(scope.shDatetime) and moment(scope.shDatetime, moment.ISO_8601).isValid())
-          # should be millisecond from epoch
-          scope.shDatetime *= 1
-        moment(scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat)
+        if moment(scope.shDatetime, 'YYYY-MM-DD').isValid()
+          # Date
+          shDateFormat = scope.shDateFormat ? 'DD-MM-YYYY'
+          moment(scope.shDatetime).format(shDateFormat)
+        else
+          # Time or Millisecond
+          unless (isNaN(scope.shDatetime) and moment(scope.shDatetime, moment.ISO_8601).isValid())
+            # should be millisecond from epoch
+            scope.shDatetime *= 1
+          shDatetimeFormat = scope.shDatetimeFormat ? 'DD MMM YYYY, HH:mm (z)'
+          moment(scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat)
       else
         '-'
 
