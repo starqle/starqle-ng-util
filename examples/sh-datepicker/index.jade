@@ -45,6 +45,11 @@ link(
                     )
                 .col-md-6
                   pre {{exampleCtrl1.entity.basic_date}}
+                  .panel.panel-default
+                    .panel-heading Display using shDatetime
+                    .panel-body
+                      span(sh-datetime='exampleCtrl1.entity.basic_date')
+
 
 
         .col-md-12(ng-controller='ShDatepickerExampleController as exampleCtrl1')
@@ -91,6 +96,10 @@ link(
                     )
                 .col-md-6
                   pre {{exampleCtrl1.entity.basic_datetime}}
+                  .panel.panel-default
+                    .panel-heading Display using shDatetime
+                    .panel-body
+                      span(sh-datetime='exampleCtrl1.entity.basic_datetime')
 
         .col-md-12(ng-controller='ShDatepickerExampleController as exampleCtrl1')
           .panel.panel-default
