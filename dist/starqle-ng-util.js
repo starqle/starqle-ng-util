@@ -438,7 +438,10 @@ shDatepickerModule.directive("shDatetimepicker", [
         displayFormat = (ref = scope.shDisplayFormat) != null ? ref : 'DD-MM-YYYY, HH:mm (z)';
         formatter = function(value) {
           if (value != null) {
-            return moment(value * 1).tz(moment.defaultZone.name).format(displayFormat);
+            if (!(isNaN(value) && moment(value, moment.ISO_8601).isValid())) {
+              value *= 1;
+            }
+            return moment(value).tz(moment.defaultZone.name).format(displayFormat);
           } else {
             return null;
           }
@@ -479,7 +482,10 @@ shDatepickerModule.directive("shDatetimepicker", [
         };
         updateDate = function(value) {
           if (value != null) {
-            element.data('DateTimePicker').date(moment(value * 1).tz(moment.defaultZone.name));
+            if (!(isNaN(value) && moment(value, moment.ISO_8601).isValid())) {
+              value *= 1;
+            }
+            element.data('DateTimePicker').date(moment(value).tz(moment.defaultZone.name));
           } else {
             element.data('DateTimePicker').clear();
           }
@@ -487,8 +493,11 @@ shDatepickerModule.directive("shDatetimepicker", [
         updateMinDate = function(value) {
           var ref1, ref2;
           if (value != null) {
+            if (!(isNaN(value) && moment(value, moment.ISO_8601).isValid())) {
+              value *= 1;
+            }
             if ((ref1 = element.data('DateTimePicker')) != null) {
-              ref1.minDate(moment(value * 1).tz(moment.defaultZone.name));
+              ref1.minDate(moment(value).tz(moment.defaultZone.name));
             }
           } else {
             if ((ref2 = element.data('DateTimePicker')) != null) {
@@ -499,8 +508,11 @@ shDatepickerModule.directive("shDatetimepicker", [
         updateMaxDate = function(value) {
           var ref1, ref2;
           if (value != null) {
+            if (!(isNaN(value) && moment(value, moment.ISO_8601).isValid())) {
+              value *= 1;
+            }
             if ((ref1 = element.data('DateTimePicker')) != null) {
-              ref1.maxDate(moment(value * 1).tz(moment.defaultZone.name));
+              ref1.maxDate(moment(value).tz(moment.defaultZone.name));
             }
           } else {
             if ((ref2 = element.data('DateTimePicker')) != null) {
@@ -544,23 +556,64 @@ shDatepickerModule.directive("shDatetime", [
       restrict: 'A',
       scope: {
         shDatetime: '=',
-        shDatetimeFormat: '@?'
+        shDatetimeFormat: '@?',
+        shDateFormat: '@?'
       },
       template: '<span title="{{getFormattedShDatetime()}}">{{getFormattedShDatetime()}}</span>',
       link: function(scope, element, attrs) {
         scope.getFormattedShDatetime = function() {
-          var ref, shDatetimeFormat;
-          shDatetimeFormat = (ref = scope.shDatetimeFormat) != null ? ref : 'DD MMM YYYY, HH:mm (z)';
-          if (scope.shDatetime) {
-            if (Number.isNaN(+scope.shDatetime)) {
-              return moment(scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat);
+          var ref, ref1, shDateFormat, shDatetimeFormat;
+          if (scope.shDatetime != null) {
+            if (moment(scope.shDatetime, 'YYYY-MM-DD').isValid()) {
+              shDateFormat = (ref = scope.shDateFormat) != null ? ref : 'DD-MM-YYYY';
+              return moment(scope.shDatetime).format(shDateFormat);
             } else {
-              return moment(+scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat);
+              if (!(isNaN(scope.shDatetime) && moment(scope.shDatetime, moment.ISO_8601).isValid())) {
+                scope.shDatetime *= 1;
+              }
+              shDatetimeFormat = (ref1 = scope.shDatetimeFormat) != null ? ref1 : 'DD MMM YYYY, HH:mm (z)';
+              return moment(scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat);
             }
           } else {
             return '-';
           }
         };
+      }
+    };
+  }
+]);
+
+shDatepickerModule.directive("shTimepicker", [
+  function() {
+    return {
+      restrict: 'A',
+      scope: {
+        shTimepicker: '='
+      },
+      template: '<select name="duration-hour" ng-model="duration.hour" ng-options="n as n for n in ([] | shRange:0:24)" class="form-control">\n  <option value="0">0</option>\n</select>&colon;\n<select name="duration-minute" ng-model="duration.minute" ng-options="n as n for n in ([] | shRange:0:60:5)" class="form-control">\n  <option value="0">0</option>\n</select>',
+      require: '?ngModel',
+      link: function(scope, element, attrs, ngModelCtrl) {
+        var formatter;
+        scope.duration = {
+          hour: Math.floor(scope.shTimepicker / (60 * 60)),
+          minute: scope.shTimepicker % (60 * 60)
+        };
+        formatter = function(value) {
+          if (value != null) {
+            scope.duration.hour = Math.floor(value / (60 * 60));
+            scope.duration.minute = Math.floor(value / 60) % 60;
+          } else {
+            scope.duration.hour = 0;
+            scope.duration.minute = 5;
+          }
+          return value;
+        };
+        ngModelCtrl.$formatters.push(formatter);
+        scope.$watchCollection('duration', function(newVal, oldVal) {
+          if (newVal != null) {
+            ngModelCtrl.$setViewValue(scope.duration.hour * (60 * 60) + scope.duration.minute * 60.);
+          }
+        });
       }
     };
   }
@@ -586,6 +639,7 @@ shDialogModule.directive("shDialog", [
         shDialogLabelOk: '@?',
         shDialogLabelClose: '@?',
         shDialogLabelCancel: '@?',
+        shDialogParent: '=?',
         title: '@?'
       },
       link: function(scope, element, attrs) {
@@ -594,10 +648,12 @@ shDialogModule.directive("shDialog", [
         shDialogLabelClose = (ref1 = scope.shDialogLabelClose) != null ? ref1 : 'Close';
         shDialogLabelCancel = (ref2 = scope.shDialogLabelCancel) != null ? ref2 : 'Cancel';
         angular.element(element).addClass('sh-dialog').children().eq(0).on('click', function() {
-          return onHandleClick();
+          if (angular.element(this).find('> *:first-child').attr('disabled') !== 'disabled') {
+            onHandleClick();
+          }
         });
         onHandleClick = function() {
-          var buttonOkElement, compiledShDialogBody, compiledShDialogFooter, compiledShDialogHeader, modalIdSuffix, ref3, ref4, shDialogModal;
+          var buttonOkElement, compiledShDialogBody, compiledShDialogFooter, compiledShDialogHeader, modalIdSuffix, parent, ref3, ref4, ref5, shDialogModal;
           modalIdSuffix = scope.$id;
           shDialogModal = null;
           if (scope.shDialogForm != null) {
@@ -625,18 +681,19 @@ shDialogModule.directive("shDialog", [
           } else {
             shDialogModal.find('.modal-footer').append("<button type=\"button\" data-dismiss=\"modal\" class=\"btn btn-default margin-left\">\n  " + shDialogLabelClose + "\n</button>");
           }
-          $compile(shDialogModal)(scope.$parent);
+          parent = (ref5 = scope.shDialogParent) != null ? ref5 : scope.$parent;
+          $compile(shDialogModal)(parent);
           angular.element('body').append(shDialogModal);
           if (scope.shDialogEntity != null) {
-            scope.$parent.shDialogEntity = angular.copy(scope.shDialogEntity, {});
+            parent.shDialogEntity = angular.copy(scope.shDialogEntity, {});
           }
           shDialogModal.on('show.bs.modal', function() {
             var deferred;
-            scope.$parent.shDialogLoading = true;
+            parent.shDialogLoading = true;
             deferred = $q.defer();
             $q.when((scope.shDialogBeforeShow || angular.noop)()).then(function(success) {
               if ((success != null ? success.data : void 0) != null) {
-                scope.$parent.shDialogEntity = angular.copy(success.data, {});
+                parent.shDialogEntity = angular.copy(success.data, {});
               }
 
               /* */
@@ -649,19 +706,19 @@ shDialogModule.directive("shDialog", [
             })["finally"](function() {
 
               /* */
-              scope.$parent.shDialogLoading = false;
+              parent.shDialogLoading = false;
             });
             return deferred.promise;
           }).on('hidden.bs.modal', function() {
             shDialogModal.remove();
-            scope.$parent.shDialogEntity = {};
+            parent.shDialogEntity = {};
           });
           $timeout(function() {
             return shDialogModal.modal('show');
           }, 20);
-          scope.$parent.aliasShDialogDisabled = function() {
-            var ref5, ref6, ref7;
-            if (scope.$parent.shDialogLoading) {
+          parent.aliasShDialogDisabled = function() {
+            var ref6, ref7, ref8;
+            if (parent.shDialogLoading) {
               return true;
             }
             if (attrs.shDialogDisabled != null) {
@@ -670,31 +727,31 @@ shDialogModule.directive("shDialog", [
             if (scope.shDialogForm == null) {
               return false;
             }
-            return ((ref5 = scope.$parent[scope.shDialogForm]) != null ? ref5.$pristine : void 0) || ((ref6 = scope.$parent[scope.shDialogForm]) != null ? ref6.$invalid : void 0) || ((ref7 = scope.$parent[scope.shDialogForm]) != null ? ref7.$submitted : void 0);
+            return ((ref6 = parent[scope.shDialogForm]) != null ? ref6.$pristine : void 0) || ((ref7 = parent[scope.shDialogForm]) != null ? ref7.$invalid : void 0) || ((ref8 = parent[scope.shDialogForm]) != null ? ref8.$submitted : void 0);
           };
-          scope.$parent.aliasShDialogOk = function($event) {
+          parent.aliasShDialogOk = function($event) {
             var deferred;
             deferred = $q.defer();
-            scope.$parent.shDialogLoading = true;
+            parent.shDialogLoading = true;
             $q.when((scope.shDialogOk || angular.noop)({
               $event: $event
             })).then(function(success) {
               hideModal();
               return deferred.resolve();
             }, function(error) {
-              var ref5;
+              var ref6;
               if (scope.shDialogForm != null) {
-                if ((ref5 = scope.$parent[scope.shDialogForm]) != null) {
-                  ref5.$submitted = false;
+                if ((ref6 = parent[scope.shDialogForm]) != null) {
+                  ref6.$submitted = false;
                 }
               }
               return deferred.reject();
             })["finally"](function() {
-              scope.$parent.shDialogLoading = false;
+              parent.shDialogLoading = false;
             });
             return deferred.promise;
           };
-          scope.$parent.aliasShDialogForm = scope.shDialogForm;
+          parent.aliasShDialogForm = scope.shDialogForm;
         };
         hideModal = function() {
           angular.element('.modal').modal('hide');
@@ -1253,6 +1310,15 @@ angular.module('sh.view.helper', []).directive('yesNo', function() {
     },
     template: function(element, attrs) {
       return '<span ng-if="yesNo == true" class="text-success"><i class="fa fa-left fa-check"></i>{{"LABEL_YES" | translate}}</span>\n<span ng-if="yesNo == false" class="text-danger"><i class="fa fa-left fa-times"></i>{{"LABEL_NO" | translate}}</span>\n<span ng-if="yesNo == null || yesNo == undefined" class="text-muted"><i class="fa fa-left fa-dash"></i></span>';
+    },
+    link: function(scope) {
+      var ref, ref1;
+      if ((ref = scope.yesNo) === true || ref === "true" || ref === 1 || ref === "TRUE") {
+        scope.yesNo = true;
+      }
+      if ((ref1 = scope.yesNo) === false || ref1 === "false" || ref1 === 0 || ref1 === "FALSE") {
+        scope.yesNo = false;
+      }
     }
   };
 }).directive('codeName', function() {
@@ -1364,7 +1430,7 @@ shTableModule.factory('ShTableParams', [
        *
        * @param {}
        *
-       * @returns promise
+       * @returns {promise}
        *
        * @description
        * ShTableParams factory
@@ -1397,7 +1463,7 @@ shTableModule.factory('ShTableParams', [
        *
        * @param {}
        *
-       * @returns promise
+       * @returns {promise}
        *
        * @description
        * ShTableParams factory
@@ -1413,7 +1479,7 @@ shTableModule.factory('ShTableParams', [
        *
        * @param {}
        *
-       * @returns promise
+       * @returns {promise}
        *
        * @description
        * ShTableParams factory
@@ -1507,12 +1573,30 @@ shTableModule.factory('ShTableParams', [
   }
 ]);
 
-angular.module('sh.filter.collection', []).filter("shFilterCollection", [
-  function() {
-    return function(collection, callback, entity) {
-      if (collection && entity) {
+angular.module('sh.filter.collection', []).filter("shFilterCollection", function() {
+  return function(collection, callback, entity) {
+    if (collection && entity) {
+      return collection.filter(function(item) {
+        return callback(item, entity);
+      });
+    }
+  };
+}).filter('searchAnyIn', [
+  '$filter', function($filter) {
+    return function(collection, fields, query) {
+      if (!query) {
+        return collection;
+      } else {
         return collection.filter(function(item) {
-          return callback(item, entity);
+          var field, i, len, result;
+          result = false;
+          for (i = 0, len = fields.length; i < len; i++) {
+            field = fields[i];
+            if (!result) {
+              result = result || item[field].toLowerCase().indexOf(query.toLowerCase()) >= 0;
+            }
+          }
+          return result;
         });
       }
     };
@@ -1525,6 +1609,25 @@ angular.module('sh.floating.precision', []).filter("shFloatingPrecision", functi
       accuracy = 12;
     }
     return parseFloat(value.toPrecision(accuracy));
+  };
+});
+
+angular.module('sh.range', []).filter("shRange", function() {
+  return function(input, min, max, interval) {
+    var i;
+    if (interval) {
+      interval = parseInt(interval);
+    } else {
+      interval = 1;
+    }
+    min = parseInt(min);
+    max = parseInt(max);
+    i = min;
+    while (i < max) {
+      input.push(i);
+      i += interval;
+    }
+    return input;
   };
 });
 
@@ -2840,6 +2943,7 @@ shTableModule.run([
         };
         this.filterTextCont = function(shFilter) {
           this.tableParams.$params.pageNumber = 1;
+          self.filterParams['fromShFilter'] = true;
           return this.refreshGrid();
         };
         this.getLabelTextCont = function(shFilter) {
@@ -2850,6 +2954,7 @@ shTableModule.run([
           this.filterParams[shFilter + '_year'] = year;
           this.filterParams[shFilter + '_lteqdate'] = year + '-12-31';
           this.filterParams[shFilter + '_gteqdate'] = year + '-01-01';
+          self.filterParams['fromShFilter'] = true;
           return this.refreshGrid();
         };
         this.filterMonthBetween = function(shFilter, month) {
@@ -2862,6 +2967,7 @@ shTableModule.run([
             this.filterParams[shFilter + '_lteqdate'] = mDate.endOf('month').format('YYYY-MM-DD');
             this.filterParams[shFilter + '_gteqdate'] = mDate.startOf('month').format('YYYY-MM-DD');
           }
+          self.filterParams['fromShFilter'] = true;
           return this.refreshGrid();
         };
         this.filterInCollection = function(shFilter, key) {
@@ -2881,6 +2987,7 @@ shTableModule.run([
             }).join(', ');
             this.filterParams[shFilter + '_in'] = this.filterCollection[shFilter];
           }
+          self.filterParams['fromShFilter'] = true;
           return this.refreshGrid();
         };
         this.collectionNavbarFilterSelect = function(shFilter, item, key) {
@@ -2943,6 +3050,7 @@ shTableModule.run([
             v = ref[k];
             HelperService.clearRowSelection(this.filterCollection[k]);
           }
+          self.filterParams['fromShFilter'] = true;
           return this.refreshGrid();
         };
         this.isNoFilter = function() {
@@ -3648,7 +3756,7 @@ shTableModule.run([
          * @returns {Object} Grid params object
          */
         this.generateGridParams = function(opts) {
-          var directions, fields, gridParams, params, property;
+          var directions, fields, gridParams, params, property, ref;
           params = opts.params;
           fields = [];
           directions = [];
@@ -3657,7 +3765,6 @@ shTableModule.run([
             directions.push(params.sorting[property]);
           }
           gridParams = {
-            column_defs: JSON.stringify(this.getProcessedColumnDefs(opts.columnDefs)),
             page: params.pageNumber,
             per_page: params.perPage,
             sort_info: JSON.stringify({
@@ -3666,6 +3773,9 @@ shTableModule.run([
             }),
             filter_params: {}
           };
+          if (((ref = opts.columnDefs) != null ? ref.length : void 0) > 0) {
+            gridParams.column_defs = JSON.stringify(this.getProcessedColumnDefs(opts.columnDefs));
+          }
           if (opts.filterParams) {
             angular.extend(gridParams.filter_params, opts.filterParams);
           }
@@ -3726,12 +3836,16 @@ shTableModule.run([
         if (this.sorting == null) {
           this.sorting = {};
         }
+        if (this.name == null) {
+          this.name = {};
+        }
         shTableProcessor = {};
         $injector.invoke($rootScope.shTableFilter, this);
         $injector.invoke($rootScope.shTableHelper, this);
         $injector.invoke($rootScope.shTableHook, this);
         $injector.invoke($rootScope.shTableParamsHook, this);
         $injector.invoke($rootScope.shTableProcessor, shTableProcessor);
+        $injector.invoke($rootScope.filterStoragePrototype, this);
         this.tableParams = new ShTableParams({
           pageNumber: 1,
           perPage: 10,
@@ -4124,6 +4238,6 @@ shHelperModule.service("HelperService", [
   }
 ]);
 
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.api.module', 'sh.datepicker.module', 'sh.dialog.module', 'sh.form.module', 'sh.helper.module', 'sh.persistence.module', 'sh.spinning.module', 'sh.table.module', 'sh.validation.module', 'sh.notification', 'sh.page.service']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.range', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.api.module', 'sh.datepicker.module', 'sh.dialog.module', 'sh.form.module', 'sh.helper.module', 'sh.persistence.module', 'sh.spinning.module', 'sh.table.module', 'sh.validation.module', 'sh.notification', 'sh.page.service']);
 
 }());
