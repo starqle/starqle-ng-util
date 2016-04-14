@@ -337,6 +337,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
       @filterTextCont = (shFilter) ->
         @tableParams.$params.pageNumber = 1
+        self.filterParams['fromShFilter'] = true
         @refreshGrid()
 
       @getLabelTextCont = (shFilter) ->
@@ -349,6 +350,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         @filterParams[shFilter + '_year'] = year
         @filterParams[shFilter + '_lteqdate'] = year + '-12-31'
         @filterParams[shFilter + '_gteqdate'] = year + '-01-01'
+        self.filterParams['fromShFilter'] = true
         @refreshGrid()
 
       @filterMonthBetween = (shFilter, month) ->
@@ -359,6 +361,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
           mDate = moment(year + '-' + month + '-01')
           @filterParams[shFilter + '_lteqdate'] = mDate.endOf('month').format('YYYY-MM-DD')
           @filterParams[shFilter + '_gteqdate'] = mDate.startOf('month').format('YYYY-MM-DD')
+        self.filterParams['fromShFilter'] = true
         @refreshGrid()
 
 
@@ -378,6 +381,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
             (o) -> $filter('translate') o
           ).join(', ')
           @filterParams[shFilter + '_in'] = @filterCollection[shFilter]
+        self.filterParams['fromShFilter'] = true
         @refreshGrid()
 
       @collectionNavbarFilterSelect = (shFilter, item, key = null) ->
@@ -420,11 +424,14 @@ shTableModule.run ['$rootScope', ($rootScope) ->
         for k, v of @filterCollection
           HelperService.clearRowSelection(@filterCollection[k])
 
+        self.filterParams['fromShFilter'] = true
         @refreshGrid()
 
       # Return true if there's no filter
       @isNoFilter = () ->
         jQuery.isEmptyObject @filterParams
+
+
 
 
       return
