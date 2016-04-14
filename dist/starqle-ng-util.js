@@ -34,6 +34,18 @@ shApiModule = angular.module('sh.api.module', []);
 
 /**
  * @ngdoc module
+ * @name shTableModule
+ *
+ * @description
+ * shTableModule
+ */
+var shDatepickerModule;
+
+shDatepickerModule = angular.module('sh.datepicker.module', []);
+
+
+/**
+ * @ngdoc module
  * @name shDialogModule
  *
  * @description
@@ -291,207 +303,315 @@ angular.module('sh.collapsible', []).directive("shCollapsible", function() {
   };
 });
 
-angular.module('sh.datepicker', []).directive("shDatepicker", [
+shDatepickerModule.directive("shDatepicker", [
   function() {
     return {
       restrict: 'A',
       scope: {
+        shDisplayFormat: '@?',
         shFromDate: '=?',
+        shIcons: '=?',
         shThruDate: '=?',
-        shTimezone: '@',
         widgetVerticalPosition: '@?'
       },
       require: '?ngModel',
       link: function(scope, element, attrs, ngModelCtrl) {
-        var initiation;
-        initiation = true;
-        element.datetimepicker({
-          timeZone: scope.shTimezone,
-          showClear: true,
-          showTodayButton: true,
-          useCurrent: false,
-          format: 'DD-MM-YYYY',
-          widgetPositioning: {
-            vertical: scope.widgetVerticalPosition || 'auto'
-          },
-          icons: {
-            time: 'fa fa-clock-o',
-            date: 'fa fa-calendar',
-            up: 'fa fa-chevron-up',
-            down: 'fa fa-chevron-down',
-            previous: 'fa fa-chevron-left',
-            next: 'fa fa-chevron-right',
-            today: 'fa fa-crosshairs',
-            clear: 'fa fa-trash',
-            close: 'fa fa-times'
-          }
-        });
-        ngModelCtrl.$render = function() {
-          var date, ref;
-          date = ngModelCtrl.$viewValue;
-          if (date != null) {
-            if ((ref = element.data('DateTimePicker')) != null) {
-              ref.date(moment(date, 'YYYY-MM-DD'));
-            }
-          }
-          return ngModelCtrl.$viewValue;
-        };
-        ngModelCtrl.$parsers.push(function(data) {
-          if (moment(data, 'DD-MM-YYYY').isValid()) {
-            return moment(data, 'DD-MM-YYYY').format('YYYY-MM-DD');
+        var displayFormat, dpChange, formatter, parser, ref, setupDatepicker, updateDate, updateIcon, updateMaxDate, updateMinDate, valueFormat;
+        valueFormat = 'YYYY-MM-DD';
+        displayFormat = (ref = scope.shDisplayFormat) != null ? ref : 'DD-MM-YYYY';
+        formatter = function(value) {
+          if (value != null) {
+            return moment(value).format(displayFormat);
           } else {
-            data = null;
+            return null;
+          }
+        };
+        ngModelCtrl.$formatters.push(formatter);
+        parser = function(value) {
+          if (moment(value, displayFormat).isValid()) {
+            return moment(value, displayFormat).format(valueFormat);
+          } else {
+            value = null;
             return void 0;
           }
-        });
-        element.bind('dp.change', function(data) {
-          if (initiation) {
-            ngModelCtrl.$pristine = false;
+        };
+        ngModelCtrl.$parsers.push(parser);
+        setupDatepicker = function(value) {
+          var ref1;
+          element.unbind('dp.change', dpChange);
+          if ((ref1 = element.data('DateTimePicker')) != null) {
+            ref1.destroy();
           }
-          if (data.date) {
-            ngModelCtrl.$setViewValue(data.date.format('DD-MM-YYYY'));
+          element.datetimepicker({
+            format: displayFormat,
+            showClear: true,
+            showClose: true,
+            showTodayButton: false,
+            useCurrent: false,
+            useStrict: true,
+            widgetPositioning: {
+              vertical: scope.widgetVerticalPosition || 'auto'
+            }
+          });
+          updateDate(value);
+          updateIcon(scope.shIcons);
+          updateMinDate(scope.shFromDate);
+          updateMaxDate(scope.shThruDate);
+          element.bind('dp.change', dpChange);
+        };
+        updateDate = function(value) {
+          if (value != null) {
+            element.data('DateTimePicker').date(moment(value));
           } else {
-            ngModelCtrl.$setViewValue(null);
+            element.data('DateTimePicker').clear();
           }
-          if (initiation) {
-            ngModelCtrl.$pristine = true;
-          }
-          initiation = false;
-        });
-        element.bind('dp.show', function(data) {
-          if (initiation) {
-            initiation = false;
-          }
-        });
-        element.bind('dp.hide', function(data) {
-          var ref;
-          if (!moment(ngModelCtrl.$viewValue, 'DD-MM-YYYY').isValid()) {
-            ngModelCtrl.$setViewValue(null);
-            return (ref = element.data('DateTimePicker')) != null ? ref.date(null) : void 0;
-          }
-        });
-        scope.$watch('shFromDate', function(newVal, oldVal) {
-          var ref, ref1;
-          if (newVal != null) {
-            if (moment(new Date(newVal)).isValid()) {
-              return (ref = element.data('DateTimePicker')) != null ? ref.minDate(moment(new Date(newVal))) : void 0;
+        };
+        updateMinDate = function(value) {
+          var ref1, ref2;
+          if (value != null) {
+            if ((ref1 = element.data('DateTimePicker')) != null) {
+              ref1.minDate(moment(value));
             }
           } else {
-            return (ref1 = element.data('DateTimePicker')) != null ? ref1.minDate(false) : void 0;
+            if ((ref2 = element.data('DateTimePicker')) != null) {
+              ref2.minDate(false);
+            }
           }
+        };
+        updateMaxDate = function(value) {
+          var ref1, ref2;
+          if (value != null) {
+            if ((ref1 = element.data('DateTimePicker')) != null) {
+              ref1.maxDate(moment(value));
+            }
+          } else {
+            if ((ref2 = element.data('DateTimePicker')) != null) {
+              ref2.maxDate(false);
+            }
+          }
+        };
+        updateIcon = function(obj) {
+          if (obj != null) {
+            element.data('DateTimePicker').icons(obj);
+          }
+        };
+        dpChange = function(data) {
+          if (data.date) {
+            ngModelCtrl.$setViewValue(data.date.format(displayFormat));
+          } else {
+            ngModelCtrl.$setViewValue(null);
+          }
+        };
+        scope.$watch('shFromDate', function(newVal, oldVal) {
+          updateMinDate(newVal);
         });
         scope.$watch('shThruDate', function(newVal, oldVal) {
-          var ref, ref1;
+          updateMaxDate(newVal);
+        });
+        scope.$watch(function() {
+          return moment.defaultZone.name;
+        }, function(newVal, oldVal) {
           if (newVal != null) {
-            if (moment(new Date(newVal)).isValid()) {
-              return (ref = element.data('DateTimePicker')) != null ? ref.maxDate(moment(new Date(newVal))) : void 0;
-            }
-          } else {
-            return (ref1 = element.data('DateTimePicker')) != null ? ref1.maxDate(false) : void 0;
+            setupDatepicker(ngModelCtrl.$modelValue);
           }
         });
       }
     };
   }
-]).directive("shDatetimepicker", [
+]);
+
+shDatepickerModule.directive("shDatetimepicker", [
   'dateFilter', function(dateFilter) {
     return {
       restrict: 'A',
       scope: {
+        shDisplayFormat: '@?',
         shFromTime: '=?',
+        shIcons: '=?',
         shThruTime: '=?',
-        shTimezone: '@',
         widgetVerticalPosition: '@?'
       },
       require: '?ngModel',
       link: function(scope, element, attrs, ngModelCtrl) {
-        var initiation;
-        initiation = true;
-        element.datetimepicker({
-          timeZone: scope.shTimezone,
-          showClose: true,
-          showClear: true,
-          useCurrent: false,
-          showTodayButton: false,
-          format: 'DD-MM-YYYY, HH:mm (z)',
-          widgetPositioning: {
-            vertical: scope.widgetVerticalPosition || 'auto'
-          },
-          icons: {
-            time: 'fa fa-clock-o',
-            date: 'fa fa-calendar',
-            up: 'fa fa-chevron-up',
-            down: 'fa fa-chevron-down',
-            previous: 'fa fa-chevron-left',
-            next: 'fa fa-chevron-right',
-            today: 'fa fa-crosshairs',
-            clear: 'fa fa-trash',
-            close: 'fa fa-times'
-          }
-        });
-        ngModelCtrl.$render = function() {
-          var date, ref;
-          date = ngModelCtrl.$viewValue;
-          if (date != null) {
-            return (ref = element.data('DateTimePicker')) != null ? ref.date(moment.tz(moment(+date).format(), scope.shTimezone)) : void 0;
+        var displayFormat, dpChange, formatter, parser, ref, setupDatepicker, updateDate, updateIcon, updateMaxDate, updateMinDate, valueFormat;
+        valueFormat = 'x';
+        displayFormat = (ref = scope.shDisplayFormat) != null ? ref : 'DD-MM-YYYY, HH:mm (z)';
+        formatter = function(value) {
+          if (value != null) {
+            if (!(isNaN(value) && moment(value, moment.ISO_8601).isValid())) {
+              value *= 1;
+            }
+            return moment(value).tz(moment.defaultZone.name).format(displayFormat);
+          } else {
+            return null;
           }
         };
-        ngModelCtrl.$parsers.push(function(data) {
-          if (moment.tz(data, 'DD-MM-YYYY, HH:mm', scope.shTimezone).isValid()) {
-            return moment.tz(data, 'DD-MM-YYYY, HH:mm', scope.shTimezone).format('x');
+        ngModelCtrl.$formatters.push(formatter);
+        parser = function(value) {
+          if (moment.tz(value, displayFormat, moment.defaultZone.name).isValid()) {
+            return moment.tz(value, displayFormat, moment.defaultZone.name).format(valueFormat);
           } else {
+            value = null;
             return void 0;
           }
-        });
-        element.bind('dp.change', function(data) {
-          if (initiation) {
-            ngModelCtrl.$pristine = false;
+        };
+        ngModelCtrl.$parsers.push(parser);
+        setupDatepicker = function(value) {
+          var ref1;
+          element.unbind('dp.change', dpChange);
+          if ((ref1 = element.data('DateTimePicker')) != null) {
+            ref1.destroy();
           }
+          element.datetimepicker({
+            format: displayFormat,
+            showClear: true,
+            showClose: true,
+            showTodayButton: false,
+            timeZone: moment.defaultZone.name,
+            useCurrent: false,
+            useStrict: true,
+            widgetPositioning: {
+              vertical: scope.widgetVerticalPosition || 'auto'
+            }
+          });
+          updateDate(value);
+          updateIcon(scope.shIcons);
+          updateMinDate(scope.shFromTime);
+          updateMaxDate(scope.shThruTime);
+          element.bind('dp.change', dpChange);
+        };
+        updateDate = function(value) {
+          if (value != null) {
+            if (!(isNaN(value) && moment(value, moment.ISO_8601).isValid())) {
+              value *= 1;
+            }
+            element.data('DateTimePicker').date(moment(value).tz(moment.defaultZone.name));
+          } else {
+            element.data('DateTimePicker').clear();
+          }
+        };
+        updateMinDate = function(value) {
+          var ref1, ref2;
+          if (value != null) {
+            if (!(isNaN(value) && moment(value, moment.ISO_8601).isValid())) {
+              value *= 1;
+            }
+            if ((ref1 = element.data('DateTimePicker')) != null) {
+              ref1.minDate(moment(value).tz(moment.defaultZone.name));
+            }
+          } else {
+            if ((ref2 = element.data('DateTimePicker')) != null) {
+              ref2.minDate(false);
+            }
+          }
+        };
+        updateMaxDate = function(value) {
+          var ref1, ref2;
+          if (value != null) {
+            if (!(isNaN(value) && moment(value, moment.ISO_8601).isValid())) {
+              value *= 1;
+            }
+            if ((ref1 = element.data('DateTimePicker')) != null) {
+              ref1.maxDate(moment(value).tz(moment.defaultZone.name));
+            }
+          } else {
+            if ((ref2 = element.data('DateTimePicker')) != null) {
+              ref2.maxDate(false);
+            }
+          }
+        };
+        updateIcon = function(obj) {
+          if (obj != null) {
+            element.data('DateTimePicker').icons(obj);
+          }
+        };
+        dpChange = function(data) {
           if (data.date) {
-            ngModelCtrl.$setViewValue(data.date.tz(scope.shTimezone).format('DD-MM-YYYY, HH:mm (z)'));
+            ngModelCtrl.$setViewValue(data.date.tz(moment.defaultZone.name).format(displayFormat));
           } else {
             ngModelCtrl.$setViewValue(null);
           }
-          if (initiation) {
-            ngModelCtrl.$pristine = true;
-          }
-          initiation = false;
-        });
-        element.bind('dp.show', function(data) {
-          if (initiation) {
-            initiation = false;
-          }
-        });
-        element.bind('dp.hide', function(data) {
-          var ref;
-          if (!moment(ngModelCtrl.$viewValue, 'DD-MM-YYYY, HH:mm (z)').isValid()) {
-            ngModelCtrl.$setViewValue(null);
-            return (ref = element.data('DateTimePicker')) != null ? ref.date(null) : void 0;
-          }
-        });
+        };
         scope.$watch('shFromTime', function(newVal, oldVal) {
-          var ref, ref1;
-          if (newVal != null) {
-            return (ref = element.data('DateTimePicker')) != null ? ref.minDate(moment.tz(newVal * 1, scope.shTimezone)) : void 0;
-          } else {
-            return (ref1 = element.data('DateTimePicker')) != null ? ref1.minDate(false) : void 0;
-          }
+          updateMinDate(newVal);
         });
         scope.$watch('shThruTime', function(newVal, oldVal) {
-          var ref, ref1;
+          updateMaxDate(newVal);
+        });
+        scope.$watch(function() {
+          return moment.defaultZone.name;
+        }, function(newVal, oldVal) {
           if (newVal != null) {
-            return (ref = element.data('DateTimePicker')) != null ? ref.maxDate(moment.tz(newVal * 1, scope.shTimezone)) : void 0;
-          } else {
-            return (ref1 = element.data('DateTimePicker')) != null ? ref1.maxDate(false) : void 0;
+            setupDatepicker(ngModelCtrl.$modelValue);
           }
         });
-        scope.$watch('shTimezone', function(newVal, oldVal) {
-          var date, ref;
-          if (newVal != null) {
-            date = ngModelCtrl.$modelValue;
-            if (date != null) {
-              return (ref = element.data('DateTimePicker')) != null ? ref.date(moment.tz(moment(+date).format(), scope.shTimezone)) : void 0;
+      }
+    };
+  }
+]);
+
+shDatepickerModule.directive("shDatetime", [
+  function() {
+    return {
+      restrict: 'A',
+      scope: {
+        shDatetime: '=',
+        shDatetimeFormat: '@?',
+        shDateFormat: '@?'
+      },
+      template: '<span title="{{getFormattedShDatetime()}}">{{getFormattedShDatetime()}}</span>',
+      link: function(scope, element, attrs) {
+        scope.getFormattedShDatetime = function() {
+          var ref, ref1, shDateFormat, shDatetimeFormat;
+          if (scope.shDatetime != null) {
+            if (moment(scope.shDatetime, 'YYYY-MM-DD').isValid()) {
+              shDateFormat = (ref = scope.shDateFormat) != null ? ref : 'DD-MM-YYYY';
+              return moment(scope.shDatetime).format(shDateFormat);
+            } else {
+              if (!(isNaN(scope.shDatetime) && moment(scope.shDatetime, moment.ISO_8601).isValid())) {
+                scope.shDatetime *= 1;
+              }
+              shDatetimeFormat = (ref1 = scope.shDatetimeFormat) != null ? ref1 : 'DD MMM YYYY, HH:mm (z)';
+              return moment(scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat);
             }
+          } else {
+            return '-';
+          }
+        };
+      }
+    };
+  }
+]);
+
+shDatepickerModule.directive("shTimepicker", [
+  function() {
+    return {
+      restrict: 'A',
+      scope: {
+        shTimepicker: '='
+      },
+      template: '<select name="duration-hour" ng-model="duration.hour" ng-options="n as n for n in ([] | shRange:0:24)" class="form-control">\n  <option value="0">0</option>\n</select>&colon;\n<select name="duration-minute" ng-model="duration.minute" ng-options="n as n for n in ([] | shRange:0:60:5)" class="form-control">\n  <option value="0">0</option>\n</select>',
+      require: '?ngModel',
+      link: function(scope, element, attrs, ngModelCtrl) {
+        var formatter;
+        scope.duration = {
+          hour: Math.floor(scope.shTimepicker / (60 * 60)),
+          minute: scope.shTimepicker % (60 * 60)
+        };
+        formatter = function(value) {
+          if (value != null) {
+            scope.duration.hour = Math.floor(value / (60 * 60));
+            scope.duration.minute = Math.floor(value / 60) % 60;
+          } else {
+            scope.duration.hour = 0;
+            scope.duration.minute = 5;
+          }
+          return value;
+        };
+        ngModelCtrl.$formatters.push(formatter);
+        scope.$watchCollection('duration', function(newVal, oldVal) {
+          if (newVal != null) {
+            ngModelCtrl.$setViewValue(scope.duration.hour * (60 * 60) + scope.duration.minute * 60.);
           }
         });
       }
@@ -516,21 +636,30 @@ shDialogModule.directive("shDialog", [
         shDialogEntity: '=?',
         shDialogLoading: '=?',
         shDialogDisabled: '&?',
+        shDialogLabelOk: '@?',
+        shDialogLabelClose: '@?',
+        shDialogLabelCancel: '@?',
+        shDialogParent: '=?',
         title: '@?'
       },
       link: function(scope, element, attrs) {
-        var hideModal, onHandleClick;
+        var hideModal, onHandleClick, ref, ref1, ref2, shDialogLabelCancel, shDialogLabelClose, shDialogLabelOk;
+        shDialogLabelOk = (ref = scope.shDialogLabelOk) != null ? ref : 'Submit';
+        shDialogLabelClose = (ref1 = scope.shDialogLabelClose) != null ? ref1 : 'Close';
+        shDialogLabelCancel = (ref2 = scope.shDialogLabelCancel) != null ? ref2 : 'Cancel';
         angular.element(element).addClass('sh-dialog').children().eq(0).on('click', function() {
-          return onHandleClick();
+          if (angular.element(this).find('> *:first-child').attr('disabled') !== 'disabled') {
+            onHandleClick();
+          }
         });
         onHandleClick = function() {
-          var buttonOkElement, compiledShDialogBody, compiledShDialogFooter, compiledShDialogHeader, modalIdSuffix, ref, ref1, shDialogModal;
+          var buttonOkElement, compiledShDialogBody, compiledShDialogFooter, compiledShDialogHeader, modalIdSuffix, parent, ref3, ref4, ref5, shDialogModal;
           modalIdSuffix = scope.$id;
           shDialogModal = null;
           if (scope.shDialogForm != null) {
-            shDialogModal = angular.element('<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' + '<div class="modal-dialog ' + ((ref = scope.shDialogClass) != null ? ref : 'modal-sm') + '">' + '<form class="modal-content" novalidate="" name="' + scope.shDialogForm + '">' + '      <div class="modal-header">\n        <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>\n        <h4 class="modal-title"></h4>\n      </div>\n      <div class="modal-body"></div>\n      <div class="modal-footer"></div>\n    </form>\n  </div>\n</div>');
+            shDialogModal = angular.element('<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' + '<div class="modal-dialog ' + ((ref3 = scope.shDialogClass) != null ? ref3 : 'modal-sm') + '">' + '<form class="modal-content" novalidate="" name="' + scope.shDialogForm + '">' + "      <div class=\"modal-header\">\n        <button type=\"button\" data-dismiss=\"modal\" aria-hidden=\"true\" class=\"close\">&times;</button>\n        <h4 class=\"modal-title\"></h4>\n      </div>\n      <div class=\"modal-body\"></div>\n      <div class=\"modal-footer\"></div>\n    </form>\n  </div>\n</div>");
           } else {
-            shDialogModal = angular.element('<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' + '<div class="modal-dialog ' + ((ref1 = scope.shDialogClass) != null ? ref1 : 'modal-sm') + '">' + '    <div class="modal-content">\n      <div class="modal-header">\n        <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>\n        <h4 class="modal-title"></h4>\n      </div>\n      <div class="modal-body"></div>\n      <div class="modal-footer"></div>\n    </div>\n  </div>\n</div>');
+            shDialogModal = angular.element('<div id="modal-sh-dialog-' + modalIdSuffix + '" tabindex="-1" role="dialog" aria-labelledby="modalShDialogLabel" aria-hidden="true" class="modal">' + '<div class="modal-dialog ' + ((ref4 = scope.shDialogClass) != null ? ref4 : 'modal-sm') + '">' + "    <div class=\"modal-content\">\n      <div class=\"modal-header\">\n        <button type=\"button\" data-dismiss=\"modal\" aria-hidden=\"true\" class=\"close\">&times;</button>\n        <h4 class=\"modal-title\"></h4>\n      </div>\n      <div class=\"modal-body\"></div>\n      <div class=\"modal-footer\"></div>\n    </div>\n  </div>\n</div>");
           }
           if (scope.shDialogHeader != null) {
             compiledShDialogHeader = angular.element($templateCache.get(scope.shDialogHeader));
@@ -546,24 +675,25 @@ shDialogModule.directive("shDialog", [
             compiledShDialogFooter = angular.element($templateCache.get(scope.shDialogFooter));
             shDialogModal.find('.modal-footer').append(compiledShDialogFooter);
           } else if (attrs.shDialogOk != null) {
-            buttonOkElement = '<button\n  class="btn btn-primary margin-left"\n\n  ng-disabled="' + 'aliasShDialogDisabled()' + '"\n\nng-click="' + 'aliasShDialogOk($event)' + '"\n\nsh-submit="' + '{{aliasShDialogForm}}' + '  "\n\n  ng-attr-title="{{\'ACTION_SUBMIT\' | translate}}"\n  translate="ACTION_SUBMIT"\n  type="submit"\n>\n</button>';
+            buttonOkElement = "<button\n  class=\"btn btn-primary margin-left\"\n\n  ng-disabled=\"" + 'aliasShDialogDisabled()' + "\"\n\nng-click=\"" + 'aliasShDialogOk($event)' + "\"\n\nsh-submit=\"" + '{{aliasShDialogForm}}' + ("  \"\n\n  ng-attr-title=\"" + shDialogLabelOk + "\"\n  type=\"submit\"\n>\n" + shDialogLabelOk + "\n</button>");
             shDialogModal.find('.modal-footer').append(buttonOkElement);
-            shDialogModal.find('.modal-footer').append('<button type="button" data-dismiss="modal" translate="ACTION_CANCEL" class="btn btn-default margin-left">\n</button>');
+            shDialogModal.find('.modal-footer').append("<button type=\"button\" data-dismiss=\"modal\" class=\"btn btn-default margin-left\">\n  " + shDialogLabelCancel + "\n</button>");
           } else {
-            shDialogModal.find('.modal-footer').append('<button type="button" data-dismiss="modal" translate="ACTION_CLOSE" class="btn btn-default margin-left">\n</button>');
+            shDialogModal.find('.modal-footer').append("<button type=\"button\" data-dismiss=\"modal\" class=\"btn btn-default margin-left\">\n  " + shDialogLabelClose + "\n</button>");
           }
-          $compile(shDialogModal)(scope.$parent);
+          parent = (ref5 = scope.shDialogParent) != null ? ref5 : scope.$parent;
+          $compile(shDialogModal)(parent);
           angular.element('body').append(shDialogModal);
           if (scope.shDialogEntity != null) {
-            scope.$parent.shDialogEntity = angular.copy(scope.shDialogEntity, {});
+            parent.shDialogEntity = angular.copy(scope.shDialogEntity, {});
           }
           shDialogModal.on('show.bs.modal', function() {
             var deferred;
-            scope.$parent.shDialogLoading = true;
+            parent.shDialogLoading = true;
             deferred = $q.defer();
             $q.when((scope.shDialogBeforeShow || angular.noop)()).then(function(success) {
               if ((success != null ? success.data : void 0) != null) {
-                scope.$parent.shDialogEntity = angular.copy(success.data, {});
+                parent.shDialogEntity = angular.copy(success.data, {});
               }
 
               /* */
@@ -576,19 +706,19 @@ shDialogModule.directive("shDialog", [
             })["finally"](function() {
 
               /* */
-              scope.$parent.shDialogLoading = false;
+              parent.shDialogLoading = false;
             });
             return deferred.promise;
           }).on('hidden.bs.modal', function() {
             shDialogModal.remove();
-            scope.$parent.shDialogEntity = {};
+            parent.shDialogEntity = {};
           });
           $timeout(function() {
             return shDialogModal.modal('show');
           }, 20);
-          scope.$parent.aliasShDialogDisabled = function() {
-            var ref2, ref3, ref4;
-            if (scope.$parent.shDialogLoading) {
+          parent.aliasShDialogDisabled = function() {
+            var ref6, ref7, ref8;
+            if (parent.shDialogLoading) {
               return true;
             }
             if (attrs.shDialogDisabled != null) {
@@ -597,31 +727,31 @@ shDialogModule.directive("shDialog", [
             if (scope.shDialogForm == null) {
               return false;
             }
-            return ((ref2 = scope.$parent[scope.shDialogForm]) != null ? ref2.$pristine : void 0) || ((ref3 = scope.$parent[scope.shDialogForm]) != null ? ref3.$invalid : void 0) || ((ref4 = scope.$parent[scope.shDialogForm]) != null ? ref4.$submitted : void 0);
+            return ((ref6 = parent[scope.shDialogForm]) != null ? ref6.$pristine : void 0) || ((ref7 = parent[scope.shDialogForm]) != null ? ref7.$invalid : void 0) || ((ref8 = parent[scope.shDialogForm]) != null ? ref8.$submitted : void 0);
           };
-          scope.$parent.aliasShDialogOk = function($event) {
+          parent.aliasShDialogOk = function($event) {
             var deferred;
             deferred = $q.defer();
-            scope.$parent.shDialogLoading = true;
+            parent.shDialogLoading = true;
             $q.when((scope.shDialogOk || angular.noop)({
               $event: $event
             })).then(function(success) {
               hideModal();
               return deferred.resolve();
             }, function(error) {
-              var ref2;
+              var ref6;
               if (scope.shDialogForm != null) {
-                if ((ref2 = scope.$parent[scope.shDialogForm]) != null) {
-                  ref2.$submitted = false;
+                if ((ref6 = parent[scope.shDialogForm]) != null) {
+                  ref6.$submitted = false;
                 }
               }
               return deferred.reject();
             })["finally"](function() {
-              scope.$parent.shDialogLoading = false;
+              parent.shDialogLoading = false;
             });
             return deferred.promise;
           };
-          scope.$parent.aliasShDialogForm = scope.shDialogForm;
+          parent.aliasShDialogForm = scope.shDialogForm;
         };
         hideModal = function() {
           angular.element('.modal').modal('hide');
@@ -642,7 +772,7 @@ shDialogModule.directive('shDialogDismissButton', function() {
   return {
     restrict: 'EA',
     template: function(element, attrs) {
-      return '<button type="button" data-dismiss="modal" translate="ACTION_CANCEL" class="btn btn-default margin-left">\n</button>';
+      return "<button type=\"button\" data-dismiss=\"modal\" class=\"btn btn-default margin-left\">\n  " + shDialogLabelCancel + "\n</button>";
     }
   };
 });
@@ -1180,6 +1310,15 @@ angular.module('sh.view.helper', []).directive('yesNo', function() {
     },
     template: function(element, attrs) {
       return '<span ng-if="yesNo == true" class="text-success"><i class="fa fa-left fa-check"></i>{{"LABEL_YES" | translate}}</span>\n<span ng-if="yesNo == false" class="text-danger"><i class="fa fa-left fa-times"></i>{{"LABEL_NO" | translate}}</span>\n<span ng-if="yesNo == null || yesNo == undefined" class="text-muted"><i class="fa fa-left fa-dash"></i></span>';
+    },
+    link: function(scope) {
+      var ref, ref1;
+      if ((ref = scope.yesNo) === true || ref === "true" || ref === 1 || ref === "TRUE") {
+        scope.yesNo = true;
+      }
+      if ((ref1 = scope.yesNo) === false || ref1 === "false" || ref1 === 0 || ref1 === "FALSE") {
+        scope.yesNo = false;
+      }
     }
   };
 }).directive('codeName', function() {
@@ -1291,7 +1430,7 @@ shTableModule.factory('ShTableParams', [
        *
        * @param {}
        *
-       * @returns promise
+       * @returns {promise}
        *
        * @description
        * ShTableParams factory
@@ -1324,7 +1463,7 @@ shTableModule.factory('ShTableParams', [
        *
        * @param {}
        *
-       * @returns promise
+       * @returns {promise}
        *
        * @description
        * ShTableParams factory
@@ -1340,7 +1479,7 @@ shTableModule.factory('ShTableParams', [
        *
        * @param {}
        *
-       * @returns promise
+       * @returns {promise}
        *
        * @description
        * ShTableParams factory
@@ -1434,12 +1573,30 @@ shTableModule.factory('ShTableParams', [
   }
 ]);
 
-angular.module('sh.filter.collection', []).filter("shFilterCollection", [
-  function() {
-    return function(collection, callback, entity) {
-      if (collection && entity) {
+angular.module('sh.filter.collection', []).filter("shFilterCollection", function() {
+  return function(collection, callback, entity) {
+    if (collection && entity) {
+      return collection.filter(function(item) {
+        return callback(item, entity);
+      });
+    }
+  };
+}).filter('searchAnyIn', [
+  '$filter', function($filter) {
+    return function(collection, fields, query) {
+      if (!query) {
+        return collection;
+      } else {
         return collection.filter(function(item) {
-          return callback(item, entity);
+          var field, i, len, result;
+          result = false;
+          for (i = 0, len = fields.length; i < len; i++) {
+            field = fields[i];
+            if (!result) {
+              result = result || item[field].toLowerCase().indexOf(query.toLowerCase()) >= 0;
+            }
+          }
+          return result;
         });
       }
     };
@@ -1452,6 +1609,25 @@ angular.module('sh.floating.precision', []).filter("shFloatingPrecision", functi
       accuracy = 12;
     }
     return parseFloat(value.toPrecision(accuracy));
+  };
+});
+
+angular.module('sh.range', []).filter("shRange", function() {
+  return function(input, min, max, interval) {
+    var i;
+    if (interval) {
+      interval = parseInt(interval);
+    } else {
+      interval = 1;
+    }
+    min = parseInt(min);
+    max = parseInt(max);
+    i = min;
+    while (i < max) {
+      input.push(i);
+      i += interval;
+    }
+    return input;
   };
 });
 
@@ -1525,640 +1701,6 @@ angular.module('sh.truncate', []).filter("shTruncate", [
       }
       return text + (tail || ' ...');
     };
-  }
-]);
-
-angular.module('sh.init.ng.table', []).run([
-  '$rootScope', '$templateCache', 'ngTableParams', function($rootScope, $templateCache, ngTableParams) {
-    $rootScope.initNgTable = [
-      '$scope', '$timeout', '$filter', function($scope, $timeout, $filter) {
-        $scope.recentlyCreatedIds = [];
-        $scope.recentlyUpdatedIds = [];
-        $scope.recentlyDeletedIds = [];
-        if ($scope.asyncBlock == null) {
-          $scope.asyncBlock = false;
-        }
-        $scope.gridRefreshing = true;
-        $scope.pagingOptions = {
-          currentPage: 1,
-          pageSize: 10,
-          pageSizes: [10, 25, 50, 100]
-        };
-        if ($scope.sorting == null) {
-          $scope.sorting = {
-            id: "desc"
-          };
-        }
-        $scope.tableParams = new ngTableParams({
-          page: $scope.pagingOptions.currentPage,
-          count: $scope.pagingOptions.pageSize,
-          sorting: $scope.sorting
-        }, {
-          total: 0,
-          getData: function($defer, params) {
-            $scope.tableParamsGetData = {
-              defer: $defer,
-              params: params
-            };
-            return $scope.refreshGrid();
-          }
-        });
-        $scope.beforeGetPagedData = function() {
-
-          /* Befor Get PAge Data Callback */
-        };
-        $scope.refreshGrid = function(currentPage) {
-          if (currentPage == null) {
-            currentPage = null;
-          }
-          if (currentPage) {
-            $scope.tableParams.page(currentPage);
-          }
-          return $scope.getPagedDataAsync();
-        };
-        $scope.generateGridParams = function() {
-          var $defer, directions, fields, gridParams, params, property;
-          $defer = $scope.tableParamsGetData.defer;
-          params = $scope.tableParamsGetData.params;
-          fields = [];
-          directions = [];
-          for (property in params.$params.sorting) {
-            fields.push(property);
-            directions.push(params.$params.sorting[property]);
-          }
-          gridParams = {
-            column_defs: JSON.stringify($scope.getProcessedColumnDefs($scope.columnDefs)),
-            page: params.$params.page,
-            per_page: params.$params.count,
-            sort_info: JSON.stringify({
-              fields: fields,
-              directions: directions
-            }),
-            filter_params: {}
-          };
-          if ($scope.filterParams) {
-            angular.extend(gridParams.filter_params, $scope.filterParams);
-          }
-          return gridParams;
-        };
-        $scope.getPagedDataAsync = function() {
-          if ($scope.asyncBlock === false) {
-            $scope.asyncBlock = true;
-            $timeout((function() {
-              var $defer, gridParams, params;
-              $scope.beforeGetPagedData();
-              $defer = $scope.tableParamsGetData.defer;
-              params = $scope.tableParamsGetData.params;
-              gridParams = $scope.generateGridParams();
-              $scope.gridRefreshing = true;
-              return $scope.resource.get(angular.extend(gridParams, $scope.optParams)).$promise.then(function(success) {
-                params.total(success.data.total_server_items);
-                $defer.resolve(success.data.items);
-                $scope.tableParams.reload();
-                if (($scope.getPagedDataAsyncSuccess != null) && typeof $scope.getPagedDataAsyncSuccess === 'function') {
-                  $scope.getPagedDataAsyncSuccess(success);
-                }
-                $scope.gridRefreshing = false;
-                $scope.asyncBlock = false;
-              }, function(error) {
-                $scope.gridRefreshing = false;
-                $scope.asyncBlock = false;
-              });
-            }), 100);
-          }
-        };
-        $scope.getProcessedColumnDefs = function(columnDefs) {
-          var columnDef, i, len, processedColumnDefs;
-          processedColumnDefs = [];
-          for (i = 0, len = columnDefs.length; i < len; i++) {
-            columnDef = columnDefs[i];
-            if (columnDef.field !== '') {
-              processedColumnDefs.push({
-                field: columnDef.field
-              });
-            }
-          }
-          return processedColumnDefs;
-        };
-        $scope.getPagedDataAsyncSuccess = function(response) {};
-        $scope.sortableClass = function(fieldName) {
-          if ($scope.tableParams.isSortBy(fieldName, 'asc')) {
-            return 'sortable sort-asc';
-          } else if ($scope.tableParams.isSortBy(fieldName, 'desc')) {
-            return 'sortable sort-desc';
-          } else {
-            return 'sortable';
-          }
-        };
-        $scope.sortableClick = function(fieldName) {
-          var newDirection;
-          newDirection = 'asc';
-          if ($scope.tableParams.isSortBy(fieldName, 'asc')) {
-            newDirection = 'desc';
-          }
-          return $scope.tableParams.sorting(fieldName, newDirection);
-        };
-        $scope.getGeneratedPagesArray = function() {
-          return $scope.tableParams.generatePagesArray($scope.tableParams.page(), $scope.tableParams.total(), $scope.tableParams.count());
-        };
-        $scope.pages = $scope.getGeneratedPagesArray();
-        $scope.$on('ngTableAfterReloadData', function() {
-          $scope.pages = $scope.getGeneratedPagesArray();
-        }, true);
-      }
-    ];
-  }
-]);
-
-angular.module('sh.modal.persistence', []).run([
-  '$rootScope', function($rootScope) {
-    $rootScope.modalPersistence = [
-      '$scope', '$q', '$timeout', 'ShNotification', 'ShButtonState', function($scope, $q, $timeout, ShNotification, ShButtonState) {
-        $scope.entity = {};
-        $scope.errors = [];
-        $scope.localLookup = {};
-        $scope.modalProperties = {};
-        $scope.beforeNewEntity = function() {};
-        $scope.newEntitySuccess = function(response) {};
-        $scope.newEntitySuccessNotification = function(response) {};
-        $scope.newEntityFailure = function(response) {};
-        $scope.newEntityFailureNotification = function(response) {};
-        $scope.beforeCreateEntity = function($event) {};
-        $scope.createEntitySuccess = function(response, $event) {};
-        $scope.createEntitySuccessNotification = function(response, $event) {
-          return ShNotification.toastByResponse(response, {
-            type: 'success',
-            message: 'Successfully Created'
-          });
-        };
-        $scope.createEntityFailure = function(response, $event) {};
-        $scope.createEntityFailureNotification = function(response, $event) {
-          if (response && response.data && response.data.error) {
-            return ShNotification.toastByResponse(response, {
-              type: 'danger',
-              message: response.data.error.message
-            });
-          } else {
-            return ShNotification.toastByResponse(response, {
-              type: 'danger',
-              message: 'Failed to Create'
-            });
-          }
-        };
-        $scope.beforeEditEntity = function(id) {};
-        $scope.editEntitySuccess = function(response, id) {};
-        $scope.editEntitySuccessNotification = function(response, id) {};
-        $scope.editEntityFailure = function(response, id) {};
-        $scope.editEntityFailureNotification = function(response, id) {};
-        $scope.beforeUpdateEntity = function($event) {};
-        $scope.updateEntitySuccess = function(response, $event) {};
-        $scope.updateEntitySuccessNotification = function(response, $event) {
-          return ShNotification.toastByResponse(response, {
-            type: 'success',
-            message: 'Successfully Updated'
-          });
-        };
-        $scope.updateEntityFailure = function(response, $event) {};
-        $scope.updateEntityFailureNotification = function(response, $event) {
-          if (response && response.data && response.data.error) {
-            return ShNotification.toastByResponse(response, {
-              type: 'danger',
-              message: response.data.error.message
-            });
-          } else {
-            return ShNotification.toastByResponse(response, {
-              type: 'danger',
-              message: 'Failed to Update'
-            });
-          }
-        };
-        $scope.beforeDestroyEntity = function($event) {};
-        $scope.destroyEntitySuccess = function(response, $event) {};
-        $scope.destroyEntitySuccessNotification = function(response, $event) {
-          return ShNotification.toastByResponse(response, {
-            type: 'success',
-            message: 'Successfully Deleted'
-          });
-        };
-        $scope.destroyEntityFailure = function(response, $event) {};
-        $scope.destroyEntityFailureNotification = function(response, $event) {
-          var ref;
-          if (((ref = response.data.error) != null ? ref.message : void 0) != null) {
-            return ShNotification.toastByResponse(response, {
-              type: 'danger',
-              message: response.data.error.message
-            });
-          } else {
-            return ShNotification.toastByResponse(response, {
-              type: 'danger',
-              message: 'Failed to Delete'
-            });
-          }
-        };
-        $scope.beforeMultipleDestroyEntity = function() {};
-        $scope.multipleDestroyEntitySuccess = function(response) {};
-        $scope.multipleDestroyEntitySuccessNotification = function(response) {
-          return ShNotification.toastByResponse(response, {
-            type: 'success',
-            message: 'Successfully Deleted'
-          });
-        };
-        $scope.multipleDestroyEntityFailure = function(response) {};
-        $scope.multipleDestroyEntityFailureNotification = function(response) {
-          var ref;
-          if (((ref = response.data.error) != null ? ref.message : void 0) != null) {
-            return ShNotification.toastByResponse(response, {
-              type: 'danger',
-              message: response.data.error.message
-            });
-          } else {
-            return ShNotification.toastByResponse(response, {
-              type: 'danger',
-              message: 'Failed to Delete'
-            });
-          }
-        };
-        $scope.beforeShowEntityModal = function(elementStr, id) {
-          if (id == null) {
-            id = null;
-          }
-        };
-        $scope.afterCloseEntityModal = function(elementStr, id) {
-          if (id == null) {
-            id = null;
-          }
-        };
-        $scope.beforeSaveEntity = function(elementStr, $event) {};
-        $scope.showEntityModal = function(elementStr, id) {
-          if (id == null) {
-            id = null;
-          }
-          $scope.beforeShowEntityModal(elementStr, id);
-          if (id === null) {
-            return $scope.showNewEntityModal(elementStr);
-          } else {
-            return $scope.showEditEntityModal(id, elementStr);
-          }
-        };
-        $scope.resetEntityModal = function(elementStr) {
-          var entityForm, entityFormName, ref;
-          if (elementStr == null) {
-            elementStr = null;
-          }
-          $scope.entity = {};
-          $scope.errors = [];
-          $scope.localLookup = {};
-          if (elementStr) {
-            entityForm = angular.element("#" + elementStr).find('form').eq(0);
-            entityForm.removeClass('sh-highlight-required');
-            entityFormName = entityForm.attr('name');
-            if ((entityFormName != null) && $scope[entityFormName] !== null) {
-              return (ref = $scope[entityFormName]) != null ? ref.$setPristine() : void 0;
-            }
-          }
-        };
-        $scope.closeEntityModal = function(elementStr) {
-          angular.element("#" + elementStr).modal('hide');
-          $scope.resetEntityModal(elementStr);
-          return $scope.afterCloseEntityModal(elementStr);
-        };
-        $scope.saveEntity = function(elementStr, $event) {
-          $scope.beforeSaveEntity(elementStr, $event);
-          if ($scope.entity.id != null) {
-            return $scope.updateEntity(elementStr, $event);
-          } else {
-            return $scope.createEntity(elementStr, $event);
-          }
-        };
-        $scope.showNewEntityModal = function(elementStr) {
-          angular.element("#" + elementStr).modal('show');
-          angular.element("#" + elementStr).on('hidden.bs.modal', function() {
-            $scope.closeNewEntityModal(elementStr);
-            $scope.modalProperties.visible = false;
-          });
-          return $scope.fetchNewEntity();
-        };
-        $scope.fetchNewEntity = function() {
-          var deferred;
-          deferred = $q.defer();
-          $rootScope.spinningService.spin('modal');
-          $scope.beforeNewEntity();
-          $scope.resource["new"](angular.extend({}, $scope.optParams)).$promise.then(function(success) {
-            $rootScope.spinningService.stop('modal');
-            $scope.entity = success.data;
-            $scope.localLookup = success.lookup;
-            $scope.modalProperties.visible = true;
-            $scope.newEntitySuccess(success);
-            $scope.newEntitySuccessNotification(success);
-            return deferred.resolve(success);
-          }, function(error) {
-            $rootScope.spinningService.stop('modal');
-            $scope.newEntityFailure(error);
-            $scope.newEntityFailureNotification(error);
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-        $scope.closeNewEntityModal = function(elementStr) {
-          angular.element("#" + elementStr).modal('hide');
-          $scope.resetEntityModal(elementStr);
-          return $scope.afterCloseEntityModal(elementStr);
-        };
-        $scope.createEntity = function(elementStr, $event) {
-          $scope.beforeCreateEntity($event);
-          $event = ShButtonState.initializeEvent($event);
-          ShButtonState.loading($event);
-          return $scope.resource.save(angular.extend({}, $scope.optParams), {
-            data: $scope.entity
-          }).$promise.then(function(success) {
-            $scope.closeNewEntityModal(elementStr);
-            if ($scope.recentlyCreatedIds != null) {
-              $scope.recentlyCreatedIds.push(success.data.id);
-            }
-            if (typeof $scope.getPagedDataAsync === 'function') {
-              $scope.refreshGrid();
-            }
-            ShButtonState.enable($event);
-            $scope.createEntitySuccess(success, $event);
-            return $scope.createEntitySuccessNotification(success, $event);
-          }, function(error) {
-            $scope.errors = error.data.error.errors;
-            ShButtonState.enable($event);
-            $scope.createEntityFailure(error, $event);
-            return $scope.createEntityFailureNotification(error, $event);
-          });
-        };
-        $scope.showEditEntityModal = function(id, elementStr) {
-          angular.element("#" + elementStr).modal('show');
-          angular.element("#" + elementStr).on('hidden.bs.modal', function() {
-            $scope.closeEditEntityModal(elementStr, id);
-            $scope.modalProperties.visible = false;
-          });
-          return $scope.fetchEditEntity(id);
-        };
-        $scope.fetchEditEntity = function(id) {
-          var deferred;
-          deferred = $q.defer();
-          $rootScope.spinningService.spin('modal');
-          $scope.beforeEditEntity(id);
-          $scope.resource.edit(angular.extend({
-            id: id
-          }, $scope.optParams)).$promise.then(function(success) {
-            $rootScope.spinningService.stop('modal');
-            $scope.entity = success.data;
-            $scope.localLookup = success.lookup;
-            $scope.modalProperties.visible = true;
-            $scope.editEntitySuccess(success, id);
-            $scope.editEntitySuccessNotification(success, id);
-            return deferred.resolve(success);
-          }, function(error) {
-            $rootScope.spinningService.stop('modal');
-            $scope.editEntityFailure(error, id);
-            $scope.editEntityFailureNotification(error, id);
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-        $scope.closeEditEntityModal = function(elementStr, id) {
-          angular.element("#" + elementStr).modal('hide');
-          $scope.resetEntityModal(elementStr);
-          return $scope.afterCloseEntityModal(elementStr, id);
-        };
-        $scope.updateEntity = function(elementStr, $event) {
-          $scope.beforeUpdateEntity($event);
-          $event = ShButtonState.initializeEvent($event);
-          ShButtonState.loading($event);
-          return $scope.resource.update(angular.extend({
-            id: $scope.entity.id
-          }, $scope.optParams), {
-            data: $scope.entity
-          }).$promise.then(function(success) {
-            $scope.closeEditEntityModal(elementStr, $scope.entity.id);
-            if ($scope.recentlyUpdatedIds != null) {
-              $scope.recentlyUpdatedIds.push(success.data.id);
-            }
-            if (typeof $scope.getPagedDataAsync === 'function') {
-              $scope.refreshGrid();
-            }
-            ShButtonState.enable($event);
-            $scope.updateEntitySuccess(success, $event);
-            return $scope.updateEntitySuccessNotification(success, $event);
-          }, function(error) {
-            $scope.errors = error.data.error.errors;
-            ShButtonState.enable($event);
-            $scope.updateEntityFailure(error, $event);
-            return $scope.updateEntityFailureNotification(error, $event);
-          });
-        };
-        $scope.destroyEntity = function(id, $event) {
-          var deferred;
-          deferred = $q.defer();
-          $event = ShButtonState.initializeEvent($event);
-          ShButtonState.loading($event);
-          $scope.beforeDestroyEntity($event);
-          $scope.resource["delete"](angular.extend({
-            id: id
-          }, $scope.optParams)).$promise.then(function(success) {
-            if ($scope.recentlyDeletedIds != null) {
-              $scope.recentlyDeletedIds.push(success.data.id);
-            }
-            if (typeof $scope.getPagedDataAsync === 'function') {
-              $scope.refreshGrid();
-            }
-            $scope.destroyEntitySuccess(success, $event);
-            $scope.destroyEntitySuccessNotification(success, $event);
-            angular.element('.modal').modal('hide');
-            return deferred.resolve(success);
-          }, function(error) {
-            $scope.destroyEntityFailure(error, $event);
-            $scope.destroyEntityFailureNotification(error, $event);
-            ShButtonState.enable($event);
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-        $scope.deleteEntity = function(id, $event) {
-          return $scope.destroyEntity(id, $event);
-        };
-        $scope.multipleDestroyEntity = function(ids) {
-          $scope.beforeMultipleDestroyEntity();
-          return $scope.resource.multiple_delete(angular.extend({
-            'ids[]': ids
-          }, $scope.optParams)).$promise.then(function(success) {
-            if ($scope.recentlyDeletedIds != null) {
-              $scope.recentlyDeletedIds = ids;
-            }
-            $scope.selectedEntities = [];
-            $scope.multipleDestroyEntitySuccess(success);
-            return $scope.multipleDestroyEntitySuccessNotification(success);
-          }, function(error) {
-            $scope.multipleDestroyEntityFailure(error);
-            return $scope.multipleDestroyEntityFailureNotification(error);
-          });
-        };
-        $scope.multipleDeleteEntity = function(ids) {
-          return $scope.multipleDestroyEntity(ids);
-        };
-        $scope.rowEvent = function(entity) {
-          if ($scope.recentlyDeletedIds.indexOf(entity.id) >= 0) {
-            return 'recently-deleted';
-          } else if ($scope.recentlyUpdatedIds.indexOf(entity.id) >= 0) {
-            return 'recently-updated';
-          } else if ($scope.recentlyCreatedIds.indexOf(entity.id) >= 0) {
-            return 'recently-created';
-          } else {
-            return 'else';
-          }
-        };
-      }
-    ];
-  }
-]);
-
-angular.module('sh.persistence', []).run([
-  '$rootScope', function($rootScope) {
-    $rootScope.persistence = [
-      '$scope', '$timeout', '$state', 'ShNotification', 'ShButtonState', function($scope, $timeout, $state, ShNotification, ShButtonState) {
-        $scope.entity = {};
-        $scope.localLookup = {};
-        $scope.privileges = {};
-        $scope.saved = false;
-        $scope.addNestedAttributes = function(objName) {
-          return $scope.entity[objName].push({});
-        };
-        $scope.removeNestedAttributes = function(objName, obj) {
-          var index;
-          if (obj.id) {
-            obj._destroy = true;
-          } else {
-            index = $scope.entity[objName].indexOf(obj);
-            $scope.entity[objName].splice(index, 1);
-          }
-        };
-        $scope.beforeNewEntity = function() {};
-        $scope.newEntitySuccess = function(response) {};
-        $scope.newEntitySuccessNotification = function(response) {};
-        $scope.newEntityFailure = function(response) {};
-        $scope.newEntityFailureNotification = function(response) {};
-        $scope.beforeCreateEntity = function($event) {};
-        $scope.createEntitySuccess = function(response, $event) {};
-        $scope.createEntitySuccessNotification = function(response, $event) {
-          return ShNotification.toastByResponse(response, {
-            type: 'success',
-            message: 'Successfully Created'
-          });
-        };
-        $scope.createEntityFailure = function(response, $event) {};
-        $scope.createEntityFailureNotification = function(response, $event) {
-          return ShNotification.toastByResponse(response, {
-            type: 'danger',
-            message: 'Failed to Create'
-          });
-        };
-        $scope.beforeEditEntity = function() {};
-        $scope.editEntitySuccess = function(response) {};
-        $scope.editEntitySuccessNotification = function(response) {};
-        $scope.editEntityFailure = function(response) {};
-        $scope.editEntityFailureNotification = function(response) {};
-        $scope.beforeUpdateEntity = function($event) {};
-        $scope.updateEntitySuccess = function(response, $event) {};
-        $scope.updateEntitySuccessNotification = function(response, $event) {
-          return ShNotification.toastByResponse(response, {
-            type: 'success',
-            message: 'Successfully Updated'
-          });
-        };
-        $scope.updateEntityFailure = function(response, $event) {};
-        $scope.updateEntityFailureNotification = function(response, $event) {
-          return ShNotification.toastByResponse(response, {
-            type: 'danger',
-            message: 'Failed to Update'
-          });
-        };
-        $scope.saveEntity = function($event) {
-          if ($scope.entity.id != null) {
-            return $scope.updateEntity($event);
-          } else {
-            return $scope.createEntity($event);
-          }
-        };
-        $scope.createEntity = function($event) {
-          $scope.beforeCreateEntity($event);
-          $event = ShButtonState.initializeEvent($event);
-          ShButtonState.loading($event);
-          return $scope.resource.save(angular.extend({}, $scope.optParams), {
-            data: $scope.entity
-          }).$promise.then(function(success) {
-            var params;
-            params = {};
-            params.id = success.data.id;
-            $state.transitionTo($scope.showPath, params);
-            $scope.createEntitySuccess(success, $event);
-            $scope.createEntitySuccessNotification(success, $event);
-            return ShButtonState.enable($event);
-          }, function(error) {
-            $scope.createEntityFailure(error, $event);
-            $scope.createEntityFailureNotification(error, $event);
-            return ShButtonState.enable($event);
-          });
-        };
-        $scope.updateEntity = function($event) {
-          $scope.beforeUpdateEntity($event);
-          $event = ShButtonState.initializeEvent($event);
-          ShButtonState.loading($event);
-          $scope.saved = false;
-          return $scope.resource.update(angular.extend({
-            id: $scope.entity.id
-          }, $scope.optParams), {
-            data: $scope.entity
-          }).$promise.then(function(success) {
-            $scope.saved = true;
-            $timeout((function() {
-              $scope.saved = false;
-            }), 5000);
-            $scope.updateEntitySuccess(success, $event);
-            $scope.updateEntitySuccessNotification(success, $event);
-            return ShButtonState.enable($event);
-          }, function(error) {
-            $scope.updateEntityFailure(error, $event);
-            $scope.updateEntityFailureNotification(error, $event);
-            return ShButtonState.enable($event);
-          });
-        };
-        $scope.init = function() {
-          if ($scope.id === void 0) {
-            $scope.beforeNewEntity();
-            return $scope.resource["new"]($scope.optParams).$promise.then(function(success) {
-              $scope.entity = success.data;
-              $scope.localLookup = success.lookup;
-              $scope.privileges = success.privileges;
-              $scope.newEntitySuccess(success);
-              return $scope.newEntitySuccessNotification(success);
-            }, function(error) {
-              $scope.newEntityFailure(error);
-              return $scope.newEntityFailureNotification(error);
-            });
-          } else {
-            $scope.beforeEditEntity();
-            return $scope.resource.edit(angular.extend({
-              id: $scope.id
-            }, $scope.optParams)).$promise.then(function(success) {
-              $scope.entity = success.data;
-              $scope.localLookup = success.lookup;
-              $scope.privileges = success.privileges;
-              $scope.editEntitySuccess(success);
-              return $scope.editEntitySuccessNotification(success);
-            }, function(error) {
-              $scope.editEntityFailure(error);
-              return $scope.editEntityFailureNotification(error);
-            });
-          }
-        };
-        if (!$scope.skipInit) {
-          $scope.init();
-        }
-      }
-    ];
   }
 ]);
 
@@ -3401,6 +2943,7 @@ shTableModule.run([
         };
         this.filterTextCont = function(shFilter) {
           this.tableParams.$params.pageNumber = 1;
+          self.filterParams['fromShFilter'] = true;
           return this.refreshGrid();
         };
         this.getLabelTextCont = function(shFilter) {
@@ -3411,6 +2954,7 @@ shTableModule.run([
           this.filterParams[shFilter + '_year'] = year;
           this.filterParams[shFilter + '_lteqdate'] = year + '-12-31';
           this.filterParams[shFilter + '_gteqdate'] = year + '-01-01';
+          self.filterParams['fromShFilter'] = true;
           return this.refreshGrid();
         };
         this.filterMonthBetween = function(shFilter, month) {
@@ -3423,6 +2967,7 @@ shTableModule.run([
             this.filterParams[shFilter + '_lteqdate'] = mDate.endOf('month').format('YYYY-MM-DD');
             this.filterParams[shFilter + '_gteqdate'] = mDate.startOf('month').format('YYYY-MM-DD');
           }
+          self.filterParams['fromShFilter'] = true;
           return this.refreshGrid();
         };
         this.filterInCollection = function(shFilter, key) {
@@ -3442,6 +2987,7 @@ shTableModule.run([
             }).join(', ');
             this.filterParams[shFilter + '_in'] = this.filterCollection[shFilter];
           }
+          self.filterParams['fromShFilter'] = true;
           return this.refreshGrid();
         };
         this.collectionNavbarFilterSelect = function(shFilter, item, key) {
@@ -3504,6 +3050,7 @@ shTableModule.run([
             v = ref[k];
             HelperService.clearRowSelection(this.filterCollection[k]);
           }
+          self.filterParams['fromShFilter'] = true;
           return this.refreshGrid();
         };
         this.isNoFilter = function() {
@@ -4209,7 +3756,7 @@ shTableModule.run([
          * @returns {Object} Grid params object
          */
         this.generateGridParams = function(opts) {
-          var directions, fields, gridParams, params, property;
+          var directions, fields, gridParams, params, property, ref;
           params = opts.params;
           fields = [];
           directions = [];
@@ -4218,7 +3765,6 @@ shTableModule.run([
             directions.push(params.sorting[property]);
           }
           gridParams = {
-            column_defs: JSON.stringify(this.getProcessedColumnDefs(opts.columnDefs)),
             page: params.pageNumber,
             per_page: params.perPage,
             sort_info: JSON.stringify({
@@ -4227,6 +3773,9 @@ shTableModule.run([
             }),
             filter_params: {}
           };
+          if (((ref = opts.columnDefs) != null ? ref.length : void 0) > 0) {
+            gridParams.column_defs = JSON.stringify(this.getProcessedColumnDefs(opts.columnDefs));
+          }
           if (opts.filterParams) {
             angular.extend(gridParams.filter_params, opts.filterParams);
           }
@@ -4287,12 +3836,16 @@ shTableModule.run([
         if (this.sorting == null) {
           this.sorting = {};
         }
+        if (this.name == null) {
+          this.name = {};
+        }
         shTableProcessor = {};
         $injector.invoke($rootScope.shTableFilter, this);
         $injector.invoke($rootScope.shTableHelper, this);
         $injector.invoke($rootScope.shTableHook, this);
         $injector.invoke($rootScope.shTableParamsHook, this);
         $injector.invoke($rootScope.shTableProcessor, shTableProcessor);
+        $injector.invoke($rootScope.filterStoragePrototype, this);
         this.tableParams = new ShTableParams({
           pageNumber: 1,
           perPage: 10,
@@ -4311,49 +3864,6 @@ shTableModule.run([
         });
       }
     ];
-  }
-]);
-
-angular.module('sh.button.state', []).service("ShButtonState", [
-  '$timeout', function($timeout) {
-    this.initializeEvent = function($event, defaultValue) {
-      defaultValue = (typeof defaultValue === "undefined" ? null : defaultValue);
-      return (typeof $event === "undefined" ? defaultValue : $event);
-    };
-    this.setEnable = function($event, enabled) {
-      var btn, target;
-      if ($event != null) {
-        target = jQuery($event.target);
-        target.prop('disabled', !enabled);
-        if (target.is('form')) {
-          btn = target.find('button[type="submit"]');
-          btn.prop('disabled', !enabled);
-        } else if (target.is('a')) {
-          if (enabled) {
-            target.removeClass('disabled');
-          } else {
-            target.addClass('disabled');
-          }
-        } else if (target.is('span')) {
-          target = target.parent();
-          if (enabled) {
-            target.removeClass('disabled');
-          } else {
-            target.addClass('disabled');
-          }
-        }
-      }
-    };
-    this.disable = function($event) {
-      return this.setEnable($event, false);
-    };
-    this.loading = function($event) {
-      return this.disable($event);
-    };
-    this.enable = function($event) {
-      return this.setEnable($event, true);
-    };
-    return this;
   }
 ]);
 
@@ -4542,7 +4052,6 @@ angular.module('sh.notification', []).service("ShNotification", [
       }
     };
     this.runInterval(this);
-    return this;
   }
 ]);
 
@@ -4567,16 +4076,8 @@ angular.module("sh.page.service", []).service("ShPageService", [
     this.getAppName = function() {
       return _appName;
     };
-    return this;
   }
 ]);
-
-angular.module("sh.priv", []).service("ShPriv", function() {
-  this.can = function(privileges, ability) {
-    return privileges.indexOf(ability) !== -1;
-  };
-  return this;
-});
 
 shSpinningModule.service("ShSpinningService", function() {
   var spinningStates;
@@ -4635,32 +4136,6 @@ shSpinningModule.service("ShSpinningService", function() {
   this.isSpinning = function(key) {
     return spinningStates[key] === true;
   };
-  return this;
-});
-
-shHelperModule.service("shElementFinder", function() {
-  this.findById = function(source, id) {
-    return source.filter(function(obj) {
-      return +obj.id === +id;
-    });
-  };
-  this.findFirstById = function(source, id) {
-    var ref;
-    return (ref = source.filter(function(obj) {
-      return +obj.id === +id;
-    })[0]) != null ? ref : {};
-  };
-  this.findByField = function(source, value) {
-    return source.filter(function(obj) {
-      return obj.field === value;
-    });
-  };
-  this.findByElmt = function(source, elmt) {
-    return source.filter(function(obj) {
-      return +obj === +elmt;
-    });
-  };
-  return this;
 });
 
 shHelperModule.service("HelperService", [
@@ -4739,10 +4214,30 @@ shHelperModule.service("HelperService", [
         return object;
       }
     };
-    return this;
+    this.findById = function(source, id) {
+      return source.filter(function(obj) {
+        return +obj.id === +id;
+      });
+    };
+    this.findFirstById = function(source, id) {
+      var ref;
+      return (ref = source.filter(function(obj) {
+        return +obj.id === +id;
+      })[0]) != null ? ref : {};
+    };
+    this.findByField = function(source, value) {
+      return source.filter(function(obj) {
+        return obj.field === value;
+      });
+    };
+    this.findByElmt = function(source, elmt) {
+      return source.filter(function(obj) {
+        return +obj === +elmt;
+      });
+    };
   }
 ]);
 
-angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.datepicker', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.init.ng.table', 'sh.modal.persistence', 'sh.persistence', 'sh.api.module', 'sh.dialog.module', 'sh.form.module', 'sh.helper.module', 'sh.persistence.module', 'sh.spinning.module', 'sh.table.module', 'sh.validation.module', 'sh.button.state', 'sh.notification', 'sh.page.service', 'sh.priv']);
+angular.module('starqle.ng.util', ['on.root.scope', 'sh.bootstrap', 'sh.collapsible', 'sh.focus', 'sh.number.format', 'sh.segment', 'sh.submit', 'sh.view.helper', 'auth.token.handler', 'sh.filter.collection', 'sh.floating.precision', 'sh.range', 'sh.remove.duplicates', 'sh.strip.html', 'sh.strip.to.newline', 'sh.truncate', 'sh.api.module', 'sh.datepicker.module', 'sh.dialog.module', 'sh.form.module', 'sh.helper.module', 'sh.persistence.module', 'sh.spinning.module', 'sh.table.module', 'sh.validation.module', 'sh.notification', 'sh.page.service']);
 
 }());

@@ -53,5 +53,5 @@ angular.module("sh.page.service", []).service "ShPageService", ['$window', ($win
   # Private Methods
   # ===========================================================================
 
-  return this
+  return
 ]

@@ -75,4 +75,4 @@ shSpinningModule.service "ShSpinningService", ->
   @isSpinning = (key) ->
     spinningStates[key] == true
 
-  return this
+  return

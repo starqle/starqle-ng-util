@@ -1,6 +1,6 @@
 {
   "name": "starqle-ng-util",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "description": "Collection of Starqle Angular utilities.",
   "main": "''",
   "scripts": {
@@ -14,11 +14,19 @@
   "author": "Starqle Indonesia",
   "license": "Starqle Permissive License",
   "devDependencies": {
+    "connect-modrewrite": "^0.7.6",
+    "del": "^0.1.3",
     "gulp": "^3.8.6",
+    "gulp-cached": "^1.0.1",
     "gulp-coffee": "^2.1.1",
     "gulp-concat": "^2.3.3",
+    "gulp-connect": "^2.2.0",
     "gulp-if": "^1.2.5",
+    "gulp-jade": "^1.0.0",
+    "gulp-plumber": "^1.0.0",
+    "gulp-sass": "2.0.4",
     "gulp-util": "^2.2.20",
+    "gulp-watch": "^4.2.4",
     "rimraf": "^2.2.8"
   }
 }

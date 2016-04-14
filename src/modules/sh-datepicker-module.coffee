@@ -1,5 +1,5 @@
 # =============================================================================
-# Copyright (c) 2013 All Right Reserved, http://starqle.com/
+# Copyright (c) 2015 All Right Reserved, http://starqle.com/
 #
 # This source is subject to the Starqle Permissive License.
 # Please see the License.txt file for more information.
@@ -10,16 +10,20 @@
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
 # PARTICULAR PURPOSE.
 #
-# @file_name src/services/sh-priv.coffee
-# @author Giovanni Sakti
-# @email giosakti@starqle.com
+# @file_name src/modules/sh-datepicker-module.coffee
+# @author Raymond Ralibi
+# @email ralibi@starqle.com
 # @company PT. Starqle Indonesia
-# @note This file contains ShPriv service
+# @note This file contains module variable that will be used as a root for others shDatepicker derivatives
 # =============================================================================
 
 
-angular.module("sh.priv", []).service "ShPriv", ->
-  @can = (privileges, ability) ->
-    privileges.indexOf(ability) isnt -1
+###*
+# @ngdoc module
+# @name shTableModule
+#
+# @description
+# shTableModule
+###
 
-  return this
+shDatepickerModule = angular.module 'sh.datepicker.module', []

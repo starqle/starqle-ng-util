@@ -1,0 +1,139 @@
+link(
+  rel='stylesheet prefetch'
+  property='stylesheet'
+  href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'
+)
+link(
+  rel='stylesheet prefetch'
+  property='stylesheet'
+  href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css'
+)
+
+//- Intentionally exclude html, head and body tags to make syncing with codepen become a lot easier.
+
+.container-fluid(ng-app='exampleApp')
+  .row
+    .col-md-12
+      .alert.alert-info
+        | Moment default timezone must be specified.
+        | eg: `moment.tz.setDefault('America/New_York')`
+
+  .row
+    .col-md-4(ng-controller='ShDatepickerExampleController as exampleCtrl1')
+      .form-group
+        label.control-label Timezone
+        select.form-control(
+          ng-model='currentTimezone'
+          ng-options='timezone as timezone for timezone in exampleCtrl1.getLoadedNames()'
+        )
+
+    .col-md-8
+      .row
+        .col-md-12(ng-controller='ShDatepickerExampleController as exampleCtrl1')
+          .panel.panel-default
+            .panel-heading
+              | Basic Datepicker
+            .panel-body
+              .row
+                .col-md-6
+                  .form-group
+                    label.control-label Date
+                    input.form-control(
+                      sh-datepicker
+                      ng-model='exampleCtrl1.entity.basic_date'
+                      placeholder='Insert Date'
+                    )
+                .col-md-6
+                  pre {{exampleCtrl1.entity.basic_date}}
+                  .panel.panel-default
+                    .panel-heading Display using shDatetime
+                    .panel-body
+                      span(sh-datetime='exampleCtrl1.entity.basic_date')
+
+
+
+        .col-md-12(ng-controller='ShDatepickerExampleController as exampleCtrl1')
+          .panel.panel-default
+            .panel-heading
+              | Datepicker with min & max date
+            .panel-body
+              .row
+                .col-md-6
+                  .form-group
+                    label.control-label From Date
+                    input.form-control(
+                      sh-datepicker
+                      ng-model='exampleCtrl1.entity.from_date'
+                      placeholder='Insert Date'
+                      sh-thru-date='exampleCtrl1.entity.thru_date'
+                    )
+                  .form-group
+                    label.control-label Thru Date
+                    input.form-control(
+                      sh-datepicker
+                      ng-model='exampleCtrl1.entity.thru_date'
+                      placeholder='Insert Date'
+                      sh-from-date='exampleCtrl1.entity.from_date'
+                    )
+                .col-md-6
+                  pre {{exampleCtrl1.entity.from_date}}
+                  pre {{exampleCtrl1.entity.thru_date}}
+
+
+        .col-md-12(ng-controller='ShDatepickerExampleController as exampleCtrl1')
+          .panel.panel-default
+            .panel-heading
+              | Basic Datetimepicker
+            .panel-body
+              .row
+                .col-md-6
+                  .form-group
+                    label.control-label Time
+                    input.form-control(
+                      sh-datetimepicker
+                      ng-model='exampleCtrl1.entity.basic_datetime'
+                      placeholder='Insert Time'
+                    )
+                .col-md-6
+                  pre {{exampleCtrl1.entity.basic_datetime}}
+                  .panel.panel-default
+                    .panel-heading Display using shDatetime
+                    .panel-body
+                      span(sh-datetime='exampleCtrl1.entity.basic_datetime')
+
+        .col-md-12(ng-controller='ShDatepickerExampleController as exampleCtrl1')
+          .panel.panel-default
+            .panel-heading
+              | Datetimepicker with min & max time
+            .panel-body
+              .row
+                .col-md-6
+                  .form-group
+                    label.control-label From Time
+                    input.form-control(
+                      sh-datetimepicker
+                      ng-model='exampleCtrl1.entity.from_time'
+                      placeholder='Insert Time'
+                      sh-thru-time='exampleCtrl1.entity.thru_time'
+                    )
+                  .form-group
+                    label.control-label Thru Time
+                    input.form-control(
+                      sh-datetimepicker
+                      ng-model='exampleCtrl1.entity.thru_time'
+                      placeholder='Insert Time'
+                      sh-from-time='exampleCtrl1.entity.from_time'
+                    )
+                .col-md-6
+                  pre {{exampleCtrl1.entity.from_time}}
+                  pre {{exampleCtrl1.entity.thru_time}}
+
+
+script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js')
+script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js')
+script(src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js')
+script(src='https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.0/moment-timezone-with-data-2010-2020.min.js')
+script(src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js')
+script(src='https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js')
+script(src='http://ralibi.com/cdn/starqle/starqle-ng-util/v0.3.0-rc1/dist/starqle-ng-util.js')
+script(src='/examples/sh-datepicker/script.js')

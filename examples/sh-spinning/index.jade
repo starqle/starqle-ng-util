@@ -1,0 +1,97 @@
+link(
+  rel='stylesheet prefetch'
+  property='stylesheet'
+  href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'
+)
+link(
+  rel='stylesheet prefetch'
+  property='stylesheet'
+  href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css'
+)
+link(
+  rel='stylesheet prefetch'
+  property='stylesheet'
+  href='http://ralibi.com/cdn/starqle/starqle-ng-util/v0.3.0-rc1/dist/starqle-ng-util.css'
+)
+
+
+//- Intentionally exclude html, head and body tags to make syncing with codepen become a lot easier.
+
+
+.container-fluid(ng-app='exampleApp')
+  .row(ng-controller='ExampleController as exampleCtrl')
+    .col-md-4
+      .panel.panel-success
+        .panel-heading
+          | Panel One
+        .panel-body
+          div(
+            sh-spinning='panel-one'
+            sh-spinning-size='sm'
+          )
+            p
+              | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque quis dui vel augue vulputate sagittis. Phasellus convallis urna porta nisi eleifend elementum. Fusce posuere nec elit ullamcorper viverra. Duis dignissim posuere facilisis. Donec auctor neque at mi dapibus volutpat. Integer et velit purus. Pellentesque sit amet magna sollicitudin, scelerisque felis quis, vestibulum magna. Fusce nec metus a mi vestibulum ullamcorper.
+
+          a.btn.btn-primary(
+            ng-click='exampleCtrl.spinPanel("panel01")'
+            ng-disabled='exampleCtrl.loading.panel01'
+          ) Spin
+
+          a.btn.btn-default(
+            ng-click='exampleCtrl.stopPanel("panel01")'
+            ng-disabled='!exampleCtrl.loading.panel01'
+          ) Stop
+
+
+    .col-md-4
+      .panel.panel-info
+        .panel-heading
+          | Panel Two
+        .panel-body
+          div(
+            sh-spinning='panel-two'
+            sh-spinning-size='sm'
+          )
+            p
+              | Fusce tempor condimentum ante, ut sollicitudin sapien. Nulla a laoreet lacus, vehicula ullamcorper urna. Ut sed ipsum eros. Cras aliquam molestie posuere. Proin risus velit, interdum a varius sed, sagittis eu nunc. Pellentesque porta ex quis dolor mollis, sit amet tempor mauris interdum. Fusce sem lectus, rutrum eget maximus eu, ullamcorper volutpat nisl. Phasellus tempus condimentum lorem, hendrerit eleifend velit lacinia et. Fusce ac egestas leo. Sed sodales ex mi, eget blandit ante bibendum et. Donec rutrum tellus rutrum maximus pretium. Maecenas vitae lacus non erat pulvinar auctor. Suspendisse eu sem urna. Mauris euismod massa porttitor nisl imperdiet fringilla.
+
+          a.btn.btn-primary(
+            ng-click='exampleCtrl.spinPanel("panel02")'
+            ng-disabled='exampleCtrl.loading.panel02'
+          ) Spin
+
+          a.btn.btn-default(
+            ng-click='exampleCtrl.stopPanel("panel02")'
+            ng-disabled='!exampleCtrl.loading.panel02'
+          ) Stop
+
+    .col-md-4
+      .panel.panel-warning
+        .panel-heading
+          | Panel Three
+        .panel-body
+          div(
+            style='position: relative'
+            sh-spinning='panel-three'
+            sh-spinning-size='sm'
+          )
+            p
+              | Donec diam felis, bibendum at tempor non, viverra in tortor. In ac elementum ipsum. Ut nec ligula vitae nunc varius ultrices. Phasellus ut purus a ante scelerisque auctor sed eget ante. Donec laoreet accumsan cursus. Quisque sit amet dolor eget justo lobortis ornare. Pellentesque dapibus, lectus et efficitur elementum, augue mauris malesuada est, in malesuada sem arcu in dui. Vestibulum at metus pulvinar, posuere sem in, imperdiet dui. Aliquam facilisis in neque rhoncus tristique. Morbi et diam iaculis, dignissim erat ut, efficitur tortor.
+
+          a.btn.btn-primary(
+            ng-click='exampleCtrl.spinPanel("panel03")'
+            ng-disabled='exampleCtrl.loading.panel03'
+          ) Spin
+
+          a.btn.btn-default(
+            ng-click='exampleCtrl.stopPanel("panel03")'
+            ng-disabled='!exampleCtrl.loading.panel03'
+          ) Stop
+
+
+script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js')
+script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js')
+script(src='https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js')
+script(src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.min.js')
+script(src='http://ralibi.com/cdn/starqle/starqle-ng-util/v0.3.0-rc1/dist/starqle-ng-util.js')
+script(src='/examples/sh-spinning/script.js')

@@ -49,6 +49,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @columnDefs = [] unless @columnDefs?
       @localLookup = {}
       @sorting = {} unless @sorting?
+      @name = {} unless @name?
 
       shTableProcessor = {}
 
@@ -61,6 +62,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
 
       $injector.invoke $rootScope.shTableProcessor, shTableProcessor
 
+      $injector.invoke $rootScope.filterStoragePrototype, this
       #
       @tableParams = new ShTableParams(
         pageNumber: 1

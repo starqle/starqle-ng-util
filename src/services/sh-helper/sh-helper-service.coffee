@@ -86,5 +86,35 @@ shHelperModule.service "HelperService", [ ->
     else
       object
 
-  return this
+
+  #
+  # From sh element finder
+  #
+  # find within array of hash (object)
+  # by id
+  @findById = (source, id) ->
+    source.filter((obj) ->
+      +obj.id is +id
+    )
+
+  @findFirstById = (source, id) ->
+    source.filter((obj) ->
+      +obj.id is +id
+    )[0] ? {}
+
+  # find within array of hash (object)
+  # by field
+  @findByField = (source, value) ->
+    source.filter((obj) ->
+      obj.field is value
+    )
+
+  # find within array of element
+  # by element
+  @findByElmt = (source, elmt) ->
+    source.filter((obj) ->
+      +obj is +elmt
+    )
+
+  return
 ]

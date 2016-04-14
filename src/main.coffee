@@ -24,7 +24,6 @@ angular.module 'starqle.ng.util', [
   # directives
   'sh.bootstrap',
   'sh.collapsible',
-  'sh.datepicker',
   'sh.focus',
   'sh.number.format',
   'sh.segment',
@@ -37,18 +36,15 @@ angular.module 'starqle.ng.util', [
   # filters
   'sh.filter.collection',
   'sh.floating.precision',
+  'sh.range',
   'sh.remove.duplicates',
   'sh.strip.html',
   'sh.strip.to.newline',
   'sh.truncate',
 
-  # prototypes
-  'sh.init.ng.table',
-  'sh.modal.persistence',
-  'sh.persistence',
-
   # modules
   'sh.api.module',
+  'sh.datepicker.module',
   'sh.dialog.module',
   'sh.form.module',
   'sh.helper.module',
@@ -58,8 +54,6 @@ angular.module 'starqle.ng.util', [
   'sh.validation.module',
 
   # services
-  'sh.button.state',
   'sh.notification',
-  'sh.page.service',
-  'sh.priv'
+  'sh.page.service'
 ]

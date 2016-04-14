@@ -232,5 +232,5 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
   #
   @runInterval(this)
 
-  return this
+  return
 ]

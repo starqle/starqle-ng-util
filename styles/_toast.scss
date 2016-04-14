@@ -1,0 +1,57 @@
+.toast-group {
+  position: absolute;
+  top: 60px;
+  z-index: 9999;
+
+  // As large as modal dialog
+  // https://github.com/thomas-mcdonald/bootstrap-sass/blob/master/vendor/assets/stylesheets/bootstrap/_modals.scss#L127
+  // plus, makes placement easier
+  width: 600px;
+  position: absolute;
+  left: 50%;
+  margin-left: -300px;
+  text-align: center;
+
+  .toast-group-item {
+    .panel {
+      display: inline-block;
+      text-align: left;
+      margin-bottom: 10px;
+
+      .panel-heading {
+        padding: 5px 25px 5px 20px;
+        position: relative;
+
+        .toast-group-item-icon {
+          float: left;
+          margin-top: -3px;
+          margin-left: -5px;
+          font-size: large;
+        }
+
+        .toast-group-item-body {
+          margin-right: 20px;
+          margin-left: 20px;
+        }
+
+        .toast-group-item-dismiss {
+          position: absolute;
+          padding: 4px 6px;
+          top: 1px;
+          right: 5px;
+          font-size: large;
+          line-height: 16px;
+          cursor: pointer;
+          opacity: 0.2;
+          i {
+            width: 16px;
+            height: 16px;
+          }
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
+    }
+  }
+}
