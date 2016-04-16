@@ -323,7 +323,7 @@ shDatepickerModule.directive("shDatetime", [ ->
   link: (scope, element, attrs) ->
     scope.getFormattedShDatetime = ->
       if scope.shDatetime?
-        if moment(scope.shDatetime, 'YYYY-MM-DD').isValid()
+        if moment(scope.shDatetime, 'YYYY-MM-DD', true).isValid()
           # Date
           shDateFormat = scope.shDateFormat ? 'DD-MM-YYYY'
           moment(scope.shDatetime).format(shDateFormat)
@@ -383,7 +383,7 @@ shDatepickerModule.directive("shTimepicker", [ ->
       'duration'
       (newVal, oldVal) ->
         if newVal?
-          ngModelCtrl.$setViewValue(scope.duration.hour * (60 * 60) + scope.duration.minute * (60))
+          ngModelCtrl.$setViewValue((scope.duration.hour * 60 * 60) + (scope.duration.minute * 60))
         return
     )
 
