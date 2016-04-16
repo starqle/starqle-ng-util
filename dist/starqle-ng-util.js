@@ -611,7 +611,7 @@ shDatepickerModule.directive("shTimepicker", [
         ngModelCtrl.$formatters.push(formatter);
         scope.$watchCollection('duration', function(newVal, oldVal) {
           if (newVal != null) {
-            ngModelCtrl.$setViewValue(scope.duration.hour * (60 * 60) + scope.duration.minute * 60.);
+            ngModelCtrl.$setViewValue((scope.duration.hour * 60 * 60) + (scope.duration.minute * 60));
           }
         });
       }

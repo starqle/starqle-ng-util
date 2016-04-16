@@ -383,7 +383,7 @@ shDatepickerModule.directive("shTimepicker", [ ->
       'duration'
       (newVal, oldVal) ->
         if newVal?
-          ngModelCtrl.$setViewValue(scope.duration.hour * (60 * 60) + scope.duration.minute * (60))
+          ngModelCtrl.$setViewValue((scope.duration.hour * 60 * 60) + (scope.duration.minute * 60))
         return
     )
 
