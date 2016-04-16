@@ -61,8 +61,8 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       $injector.invoke $rootScope.shTableParamsHook, this
 
       $injector.invoke $rootScope.shTableProcessor, shTableProcessor
+      $injector.invoke $rootScope.shTableFilterStorage, this
 
-      $injector.invoke $rootScope.filterStoragePrototype, this
       #
       @tableParams = new ShTableParams(
         pageNumber: 1
