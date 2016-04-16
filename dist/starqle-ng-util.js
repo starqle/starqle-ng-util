@@ -2688,6 +2688,83 @@ shTableModule.run([
      * @description
      * shTableHelper
      */
+    $rootScope.shTableFilterStorage = [
+      '$location', 'localStorageService', function($location, localStorageService) {
+        var filterLabelStorageKey, getCurrentFilterParams, getCurrentLocalStorage, self, setFilterCollection, setFilterLabel, setFilterParams, setLocalStorage, storageKey;
+        self = this;
+        storageKey = self.name ? self.name : $location.path();
+        filterLabelStorageKey = storageKey + "/filterLabel";
+        this.beforeRefreshGridHooks.push(function() {
+          var collectionKey, currentFilterParams, currentLocalStorage, i, j, key, keysCollections, lastUnderscore, len, len1, new_key, obj, ref, ref1, resultFilterCollection, resultFilterLabel, resultFilterParams;
+          currentFilterParams = (ref = getCurrentFilterParams()) != null ? ref : {};
+          currentLocalStorage = getCurrentLocalStorage() === 'undefined' ? self.filterParams : getCurrentLocalStorage();
+          resultFilterParams = self.filterParams.fromShFilter != null ? currentFilterParams : currentLocalStorage;
+          resultFilterLabel = {};
+          resultFilterCollection = {};
+          if (resultFilterParams != null) {
+            keysCollections = Object.keys(resultFilterParams);
+            for (i = 0, len = keysCollections.length; i < len; i++) {
+              key = keysCollections[i];
+              lastUnderscore = key.lastIndexOf("_");
+              new_key = key.substring(0, lastUnderscore);
+              collectionKey = key.substring(lastUnderscore);
+              if (new_key) {
+                if (collectionKey === "_in") {
+                  resultFilterCollection[new_key] = [];
+                  ref1 = resultFilterParams[key];
+                  for (j = 0, len1 = ref1.length; j < len1; j++) {
+                    obj = ref1[j];
+                    resultFilterCollection[new_key].push({
+                      value: obj
+                    });
+                  }
+                  resultFilterLabel[new_key] = resultFilterParams[key].join(", ");
+                } else {
+                  resultFilterLabel[new_key] = resultFilterParams[key];
+                }
+              } else {
+                resultFilterLabel[key] = resultFilterParams[key];
+              }
+            }
+            setFilterParams(resultFilterParams);
+            setLocalStorage(resultFilterParams);
+            setFilterLabel(resultFilterLabel);
+            setFilterCollection(resultFilterCollection);
+          }
+        });
+        getCurrentFilterParams = function() {
+          return self.filterParams;
+        };
+        getCurrentLocalStorage = function() {
+          return localStorageService.get(storageKey);
+        };
+        setFilterParams = function(currentLocalStorage) {
+          self.filterParams = currentLocalStorage;
+        };
+        setLocalStorage = function(currentLocalStorage) {
+          return localStorageService.set(storageKey, currentLocalStorage);
+        };
+        setFilterLabel = function(resultFilterLabel) {
+          self.filterLabel = resultFilterLabel;
+        };
+        setFilterCollection = function(resultFilterCollection) {
+          self.filterCollection = resultFilterCollection;
+        };
+      }
+    ];
+  }
+]);
+
+shTableModule.run([
+  '$rootScope', function($rootScope) {
+
+    /**
+     * @ngdoc factory
+     * @name shTableHelper
+     *
+     * @description
+     * shTableHelper
+     */
     $rootScope.shTableFilter = [
       '$filter', '$injector', '$rootScope', 'HelperService', function($filter, $injector, $rootScope, HelperService) {
         var dateParams, numberParams, self;
@@ -3845,7 +3922,7 @@ shTableModule.run([
         $injector.invoke($rootScope.shTableHook, this);
         $injector.invoke($rootScope.shTableParamsHook, this);
         $injector.invoke($rootScope.shTableProcessor, shTableProcessor);
-        $injector.invoke($rootScope.filterStoragePrototype, this);
+        $injector.invoke($rootScope.shTableFilterStorage, this);
         this.tableParams = new ShTableParams({
           pageNumber: 1,
           perPage: 10,
