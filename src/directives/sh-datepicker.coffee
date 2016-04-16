@@ -323,7 +323,7 @@ shDatepickerModule.directive("shDatetime", [ ->
   link: (scope, element, attrs) ->
     scope.getFormattedShDatetime = ->
       if scope.shDatetime?
-        if moment(scope.shDatetime, 'YYYY-MM-DD').isValid()
+        if moment(scope.shDatetime, 'YYYY-MM-DD', true).isValid()
           # Date
           shDateFormat = scope.shDateFormat ? 'DD-MM-YYYY'
           moment(scope.shDatetime).format(shDateFormat)

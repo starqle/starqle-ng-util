@@ -564,7 +564,7 @@ shDatepickerModule.directive("shDatetime", [
         scope.getFormattedShDatetime = function() {
           var ref, ref1, shDateFormat, shDatetimeFormat;
           if (scope.shDatetime != null) {
-            if (moment(scope.shDatetime, 'YYYY-MM-DD').isValid()) {
+            if (moment(scope.shDatetime, 'YYYY-MM-DD', true).isValid()) {
               shDateFormat = (ref = scope.shDateFormat) != null ? ref : 'DD-MM-YYYY';
               return moment(scope.shDatetime).format(shDateFormat);
             } else {
