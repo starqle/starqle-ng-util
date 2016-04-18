@@ -62,8 +62,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
             fields: fields
             directions: directions
           filter_params: {}
-
-        gridParams.column_defs = JSON.stringify @getProcessedColumnDefs(opts.columnDefs) if opts.columnDefs?.length > 0
+          column_defs: JSON.stringify @getProcessedColumnDefs(opts.columnDefs)
 
         if opts.filterParams
           angular.extend gridParams.filter_params, opts.filterParams
