@@ -49,7 +49,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @columnDefs = [] unless @columnDefs?
       @localLookup = {}
       @sorting = {} unless @sorting?
-      @name = {} unless @name?
+      @name = '' unless @name?
 
       shTableProcessor = {}
 
