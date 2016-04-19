@@ -38,9 +38,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       # Variables
       self = this
 
-      storageKey = if self.name then self.name else $location.path()
-      filterLabelStorageKey = storageKey + "/filterLabel"
-
+      storageKey = if self.name then self.name.concat($location.path()) else $location.path()
 
       @beforeRefreshGridHooks.push () ->
         # get Current filterParams and Ger Current LocalStorage
