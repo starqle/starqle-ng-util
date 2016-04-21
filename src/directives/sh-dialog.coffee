@@ -288,7 +288,7 @@ shDialogModule.directive('shDialogDismissButton', ->
   restrict: 'EA'
   template: (element, attrs) ->
     """
-      <button type="button" data-dismiss="modal" class="btn btn-default margin-left">
+      <button type="button" data-dismiss="modal" class="btn btn-default margin-left" translate="ACTION_CANCEL">
       </button>
     """
 )
