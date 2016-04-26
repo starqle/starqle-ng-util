@@ -106,7 +106,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
 
     updateMaxDate = (value)  ->
       if value?
-        element.data('DateTimePicker')?.maxDate(moment(value))
+        element.data('DateTimePicker')?.maxDate(new Date(value))
       else
         element.data('DateTimePicker')?.maxDate(false)
       return

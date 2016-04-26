@@ -382,7 +382,7 @@ shDatepickerModule.directive("shDatepicker", [
           var ref1, ref2;
           if (value != null) {
             if ((ref1 = element.data('DateTimePicker')) != null) {
-              ref1.maxDate(moment(value));
+              ref1.maxDate(new Date(value));
             }
           } else {
             if ((ref2 = element.data('DateTimePicker')) != null) {
