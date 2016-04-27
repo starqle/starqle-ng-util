@@ -49,6 +49,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       @columnDefs = [] unless @columnDefs?
       @localLookup = {}
       @sorting = {} unless @sorting?
+      @perPage = 10 unless @perPage?
       @name = '' unless @name?
 
       shTableProcessor = {}
@@ -66,7 +67,7 @@ shTableModule.run ['$rootScope', ($rootScope) ->
       #
       @tableParams = new ShTableParams(
         pageNumber: 1
-        perPage: 10
+        perPage: @perPage
         sortInfo: 'this is sort info'
         sorting: @sorting
         getData: () ->

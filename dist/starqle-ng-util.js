@@ -3910,6 +3910,9 @@ shTableModule.run([
         if (this.sorting == null) {
           this.sorting = {};
         }
+        if (this.perPage == null) {
+          this.perPage = 10;
+        }
         if (this.name == null) {
           this.name = '';
         }
@@ -3922,7 +3925,7 @@ shTableModule.run([
         $injector.invoke($rootScope.shTableFilterStorage, this);
         this.tableParams = new ShTableParams({
           pageNumber: 1,
-          perPage: 10,
+          perPage: this.perPage,
           sortInfo: 'this is sort info',
           sorting: this.sorting,
           getData: function() {
