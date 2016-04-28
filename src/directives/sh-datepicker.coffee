@@ -53,13 +53,34 @@ shDatepickerModule.directive("shDatepicker", [ ->
     #
     parser = (value) ->
       if moment(value, displayFormat).isValid()
-        moment(value, displayFormat).format(valueFormat)
+        valueFormatted = moment(value, displayFormat).format(valueFormat)
+        if isValid(valueFormatted)
+          updateDate(valueFormatted)
+          valueFormatted
+        else
+          updateDate(null)
+          ngModelCtrl.$setViewValue(null)
+          value = null
+          undefined
       else
         value = null
         undefined
 
     ngModelCtrl.$parsers.push parser
 
+    #
+    #
+    #
+    isValid = (value) ->
+      if element.data('DateTimePicker')?.maxDate()? and element.data('DateTimePicker')?.maxDate()
+        maxValue = element.data('DateTimePicker').maxDate().format(valueFormat)
+        return false if moment(value).isAfter(maxValue)
+
+      if element.data('DateTimePicker')?.minDate()? and element.data('DateTimePicker')?.minDate()
+        minValue = element.data('DateTimePicker').minDate().format(valueFormat)
+        return false if moment(value).isBefore(minValue)
+
+      return true
 
     #
     # SETUP
@@ -98,9 +119,9 @@ shDatepickerModule.directive("shDatepicker", [ ->
 
     updateMinDate = (value)  ->
       if value?
-
-        maxValue = element.data('DateTimePicker')?.maxDate()?.format(valueFormat) ? '2099-12-31'
-        value = maxValue if maxValue and moment(value).isAfter(maxValue)
+        if element.data('DateTimePicker')?.maxDate()? and element.data('DateTimePicker')?.maxDate()
+          maxValue = element.data('DateTimePicker').maxDate().format(valueFormat)
+          value = maxValue if moment(value).isAfter(maxValue)
 
         element.data('DateTimePicker')?.minDate(moment(value))
       else
@@ -110,9 +131,9 @@ shDatepickerModule.directive("shDatepicker", [ ->
 
     updateMaxDate = (value)  ->
       if value?
-
-        minValue = element.data('DateTimePicker')?.minDate()?.format(valueFormat) ? '1970-01-01'
-        value = minValue if minValue and moment(value).isBefore(minValue)
+        if element.data('DateTimePicker')?.minDate()? and element.data('DateTimePicker')?.minDate()
+          minValue = element.data('DateTimePicker').minDate().format(valueFormat)
+          value = minValue if moment(value).isBefore(minValue)
 
         element.data('DateTimePicker')?.maxDate(new Date(value))
       else
@@ -206,12 +227,36 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     #
     parser = (value) ->
       if moment.tz(value, displayFormat, moment.defaultZone.name).isValid()
-        moment.tz(value, displayFormat, moment.defaultZone.name).format(valueFormat)
+        valueFormatted =moment.tz(value, displayFormat, moment.defaultZone.name).format(valueFormat)
+        if isValid(valueFormatted)
+          updateDate(valueFormatted)
+          valueFormatted
+        else
+          updateDate(null)
+          ngModelCtrl.$setViewValue(null)
+          value = null
+          undefined
+
+
       else
         value = null
         undefined
 
     ngModelCtrl.$parsers.push parser
+
+    #
+    #
+    #
+    isValid = (value) ->
+      if element.data('DateTimePicker')?.maxDate()? and element.data('DateTimePicker')?.maxDate()
+        maxValue = element.data('DateTimePicker').maxDate().valueOf()
+        return false if maxValue < value
+
+      if element.data('DateTimePicker')?.minDate()? and element.data('DateTimePicker')?.minDate()
+        minValue = element.data('DateTimePicker').minDate().valueOf()
+        return false if minValue > value
+
+      return true
 
 
     #
@@ -259,8 +304,11 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
         unless (isNaN(value) and moment(value, moment.ISO_8601).isValid())
           # should be millisecond from epoch
           value *= 1
-        maxValue = element.data('DateTimePicker')?.maxDate()?.valueOf() ? 9999999999999
-        value = maxValue if maxValue and maxValue < value
+
+        if element.data('DateTimePicker')?.maxDate()? and element.data('DateTimePicker')?.maxDate()
+          maxValue = element.data('DateTimePicker').maxDate().valueOf()
+          value = maxValue if maxValue < value
+
         element.data('DateTimePicker')?.minDate(moment(value).tz(moment.defaultZone.name))
       else
         element.data('DateTimePicker')?.minDate(false)
@@ -272,8 +320,11 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
         unless (isNaN(value) and moment(value, moment.ISO_8601).isValid())
           # should be millisecond from epoch
           value *= 1
-        minValue = element.data('DateTimePicker')?.minDate()?.valueOf() ? 0
-        value = minValue if minValue and minValue > value
+
+        if element.data('DateTimePicker')?.minDate()? and element.data('DateTimePicker')?.minDate()
+          minValue = element.data('DateTimePicker').minDate().valueOf()
+          value = minValue if minValue > value
+
         element.data('DateTimePicker')?.maxDate(moment(value).tz(moment.defaultZone.name))
       else
         element.data('DateTimePicker')?.maxDate(false)
