@@ -98,6 +98,10 @@ shDatepickerModule.directive("shDatepicker", [ ->
 
     updateMinDate = (value)  ->
       if value?
+
+        maxValue = element.data('DateTimePicker')?.maxDate()?.format(valueFormat) ? '2099-12-31'
+        value = maxValue if maxValue and moment(value).isAfter(maxValue)
+
         element.data('DateTimePicker')?.minDate(moment(value))
       else
         element.data('DateTimePicker')?.minDate(false)
@@ -106,6 +110,10 @@ shDatepickerModule.directive("shDatepicker", [ ->
 
     updateMaxDate = (value)  ->
       if value?
+
+        minValue = element.data('DateTimePicker')?.minDate()?.format(valueFormat) ? '1970-01-01'
+        value = minValue if minValue and moment(value).isBefore(minValue)
+
         element.data('DateTimePicker')?.maxDate(new Date(value))
       else
         element.data('DateTimePicker')?.maxDate(false)
@@ -251,6 +259,8 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
         unless (isNaN(value) and moment(value, moment.ISO_8601).isValid())
           # should be millisecond from epoch
           value *= 1
+        maxValue = element.data('DateTimePicker')?.maxDate()?.valueOf() ? 9999999999999
+        value = maxValue if maxValue and maxValue < value
         element.data('DateTimePicker')?.minDate(moment(value).tz(moment.defaultZone.name))
       else
         element.data('DateTimePicker')?.minDate(false)
@@ -262,6 +272,8 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
         unless (isNaN(value) and moment(value, moment.ISO_8601).isValid())
           # should be millisecond from epoch
           value *= 1
+        minValue = element.data('DateTimePicker')?.minDate()?.valueOf() ? 0
+        value = minValue if minValue and minValue > value
         element.data('DateTimePicker')?.maxDate(moment(value).tz(moment.defaultZone.name))
       else
         element.data('DateTimePicker')?.maxDate(false)
