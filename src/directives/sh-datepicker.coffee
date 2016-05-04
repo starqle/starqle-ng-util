@@ -227,7 +227,7 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     #
     parser = (value) ->
       if moment.tz(value, displayFormat, moment.defaultZone.name).isValid()
-        valueFormatted =moment.tz(value, displayFormat, moment.defaultZone.name).format(valueFormat)
+        valueFormatted = moment.tz(value, displayFormat, moment.defaultZone.name).format(valueFormat)
         if isValid(valueFormatted)
           updateDate(valueFormatted)
           valueFormatted
@@ -391,10 +391,8 @@ shDatepickerModule.directive("shDatetime", [ ->
           shDateFormat = scope.shDateFormat ? 'DD-MM-YYYY'
           moment(scope.shDatetime).format(shDateFormat)
         else
-          # Time or Millisecond
-          unless (isNaN(scope.shDatetime) and moment(scope.shDatetime, moment.ISO_8601).isValid())
-            # should be millisecond from epoch
-            scope.shDatetime *= 1
+          # TODO
+          # Time or Millisecond (Assumption only)
           shDatetimeFormat = scope.shDatetimeFormat ? 'DD MMM YYYY, HH:mm (z)'
           moment(scope.shDatetime).tz(moment.defaultZone.name).format(shDatetimeFormat)
       else
