@@ -645,7 +645,10 @@ shDatepickerModule.directive("shDatetime", [
               return moment(scope.shDatetime).format(shDateFormat);
             } else {
               shDatetimeFormat = (ref1 = scope.shDatetimeFormat) != null ? ref1 : 'DD MMM YYYY, HH:mm (z)';
-              shDatetimeTmp = scope.shDatetime * 1;
+              shDatetimeTmp = scope.shDatetime;
+              if (!(isNaN(shDatetimeTmp) && moment(shDatetimeTmp, moment.ISO_8601).isValid())) {
+                shDatetimeTmp = shDatetimeTmp * 1;
+              }
               return moment(shDatetimeTmp).tz(moment.defaultZone.name).format(shDatetimeFormat);
             }
           } else {

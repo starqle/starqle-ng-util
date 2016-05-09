@@ -394,7 +394,12 @@ shDatepickerModule.directive("shDatetime", [ ->
           # TODO
           # Time or Millisecond (Assumption only)
           shDatetimeFormat = scope.shDatetimeFormat ? 'DD MMM YYYY, HH:mm (z)'
-          shDatetimeTmp = scope.shDatetime * 1
+          shDatetimeTmp = scope.shDatetime
+
+          unless (isNaN(shDatetimeTmp) and moment(shDatetimeTmp, moment.ISO_8601).isValid())
+            # should be millisecond from epoch
+            shDatetimeTmp = shDatetimeTmp * 1
+
           moment(shDatetimeTmp).tz(moment.defaultZone.name).format(shDatetimeFormat)
       else
         '-'
