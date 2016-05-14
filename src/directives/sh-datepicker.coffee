@@ -35,6 +35,8 @@ shDatepickerModule.directive("shDatepicker", [ ->
     valueFormat = 'YYYY-MM-DD' # millisecond from epoch
     displayFormat = scope.shDisplayFormat ? 'DD-MM-YYYY'
 
+    dpChangeTriggered = false
+    jqValue = -1
 
     #
     # ngModelCtrl: Formatter
@@ -151,6 +153,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
     #
 
     dpChange = (data) ->
+      dpChangeTriggered = true
       if data.date
         ngModelCtrl.$setViewValue(data.date.format(displayFormat))
       else
@@ -182,10 +185,13 @@ shDatepickerModule.directive("shDatepicker", [ ->
       () ->
         ngModelCtrl.$modelValue
       (newVal, oldVal) ->
-        if newVal isnt oldVal
-          setupDatepicker(ngModelCtrl.$modelValue)
+        unless dpChangeTriggered
+          if newVal isnt jqValue and angular.isDefined(newVal)
+            jqValue = newVal
+            setupDatepicker(jqValue)
         return
     )
+
 
     return
 
@@ -199,6 +205,7 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
   #
   restrict: 'A'
   scope:
+    ngModel: '='
     shDisplayFormat: '@?'
     shFromTime: '=?'
     shIcons: '=?'
@@ -210,6 +217,8 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     valueFormat = 'x' # millisecond from epoch
     displayFormat = scope.shDisplayFormat ? 'DD-MM-YYYY, HH:mm (z)'
 
+    dpChangeTriggered = false
+    jqValue = -1
 
     #
     # ngModelCtrl: Formatter
@@ -346,6 +355,7 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     #
 
     dpChange = (data) ->
+      dpChangeTriggered = true
       if data.date
         ngModelCtrl.$setViewValue(data.date.tz(moment.defaultZone.name).format(displayFormat))
       else
@@ -377,8 +387,16 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
       () ->
         ngModelCtrl.$modelValue
       (newVal, oldVal) ->
-        if newVal isnt oldVal
-          setupDatepicker(ngModelCtrl.$modelValue)
+        unless dpChangeTriggered
+          if newVal isnt jqValue and angular.isDefined(newVal)
+            jqValue = newVal
+
+            if isNaN(jqValue) and moment(jqValue, moment.ISO_8601).isValid()
+              # Must be an ISO-8601
+              jqValue = moment(jqValue).format('x')
+              scope.ngModel = jqValue
+
+            setupDatepicker(jqValue)
         return
     )
 
