@@ -61,10 +61,10 @@ shDatepickerModule.directive("shDatepicker", [ ->
           updateDate(null)
           ngModelCtrl.$setViewValue(null)
           value = null
-          undefined
+          null
       else
         value = null
-        undefined
+        null
 
     ngModelCtrl.$parsers.push parser
 
@@ -169,18 +169,23 @@ shDatepickerModule.directive("shDatepicker", [ ->
       updateMaxDate(newVal)
       return
 
-    #
-    # INITIALIZATION
-    #
     scope.$watch(
       () ->
         moment.defaultZone.name
       (newVal, oldVal) ->
-        if newVal?
+        if newVal? and newVal isnt oldVal
           setupDatepicker(ngModelCtrl.$modelValue)
         return
     )
 
+    scope.$watch(
+      () ->
+        ngModelCtrl.$modelValue
+      (newVal, oldVal) ->
+        if newVal isnt oldVal
+          setupDatepicker(ngModelCtrl.$modelValue)
+        return
+    )
 
     return
 
@@ -235,12 +240,12 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
           updateDate(null)
           ngModelCtrl.$setViewValue(null)
           value = null
-          undefined
+          null
 
 
       else
         value = null
-        undefined
+        null
 
     ngModelCtrl.$parsers.push parser
 
@@ -363,11 +368,19 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
       () ->
         moment.defaultZone.name
       (newVal, oldVal) ->
-        if newVal?
+        if newVal? and newVal isnt oldVal
           setupDatepicker(ngModelCtrl.$modelValue)
         return
     )
 
+    scope.$watch(
+      () ->
+        ngModelCtrl.$modelValue
+      (newVal, oldVal) ->
+        if newVal isnt oldVal
+          setupDatepicker(ngModelCtrl.$modelValue)
+        return
+    )
 
     return
 
