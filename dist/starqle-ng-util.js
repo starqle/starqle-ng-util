@@ -348,6 +348,11 @@ shDatepickerModule.directive("shDatepicker", [
           }
         };
         ngModelCtrl.$parsers.push(parser);
+        ngModelCtrl.$render = function() {
+          if (!angular.isDefined(ngModelCtrl.$modelValue)) {
+            ngModelCtrl.$modelValue = null;
+          }
+        };
         isValid = function(value) {
           var maxValue, minValue, ref1, ref2, ref3, ref4;
           if ((((ref1 = element.data('DateTimePicker')) != null ? ref1.maxDate() : void 0) != null) && ((ref2 = element.data('DateTimePicker')) != null ? ref2.maxDate() : void 0)) {
@@ -520,6 +525,11 @@ shDatepickerModule.directive("shDatetimepicker", [
           }
         };
         ngModelCtrl.$parsers.push(parser);
+        ngModelCtrl.$render = function() {
+          if (!angular.isDefined(ngModelCtrl.$modelValue)) {
+            ngModelCtrl.$modelValue = null;
+          }
+        };
         isValid = function(value) {
           var maxValue, minValue, ref1, ref2, ref3, ref4;
           if ((((ref1 = element.data('DateTimePicker')) != null ? ref1.maxDate() : void 0) != null) && ((ref2 = element.data('DateTimePicker')) != null ? ref2.maxDate() : void 0)) {
@@ -1812,510 +1822,6 @@ angular.module('sh.truncate', []).filter("shTruncate", [
   }
 ]);
 
-shApiModule.run([
-  '$rootScope', function($rootScope) {
-
-    /**
-     * @ngdoc factory
-     * @name shApiHook
-     *
-     * @description
-     * ShTableRest
-     */
-    $rootScope.shApiHook = [
-      '$q', '$injector', function($q, $injector) {
-        var self, shApi;
-        self = this;
-        if (this.resource == null) {
-          this.resource = null;
-        }
-        if (this.entity == null) {
-          this.entity = {};
-        }
-        if (this.lookup == null) {
-          this.lookup = {};
-        }
-        if (this.optParams == null) {
-          this.optParams = {};
-        }
-        this.createdIds = [];
-        this.updatedIds = [];
-        this.deletedIds = [];
-        shApi = {
-          resource: self.resource
-        };
-        this.beforeApiCallEntityHooks = {};
-        this.apiCallEntitySuccessHooks = {};
-        this.apiCallEntityErrorHooks = {};
-        this.afterApiCallEntityHooks = {};
-
-        /**
-         * @ngdoc method
-         * @name apiCall
-         *
-         * @description
-         * Call api by name
-         *
-         * @param {Object} opts Parameter objects method, name, id, entity
-         *
-         * @returns {promise}
-         */
-        this.apiCallEntity = function(opts) {
-          var apiParameters, base, base1, base2, base3, data, deferred, hook, i, len, name, name1, name2, name3, ref, ref1;
-          deferred = $q.defer();
-          if (!((opts.method != null) && ((ref = opts.method) === 'GET' || ref === 'POST' || ref === 'PUT' || ref === 'DELETE'))) {
-            console.error('STARQLE_NG_UTIL: Unknown Method');
-            deferred.reject({});
-          } else if (opts.name == null) {
-            console.error('STARQLE_NG_UTIL: Options name is required');
-            deferred.reject({});
-          } else {
-            apiParameters = {
-              name: opts.name,
-              method: opts.method,
-              params: this.optParams
-            };
-            if (opts.id) {
-              apiParameters.id = opts.id;
-            }
-            switch (opts.method) {
-              case 'GET':
-              case 'DELETE':
-                if (opts.entity != null) {
-                  console.error('STARQLE_NG_UTIL: Options entity should not be provided');
-                  deferred.reject({});
-                }
-                break;
-              case 'POST':
-              case 'PUT':
-                if (opts.entity == null) {
-                  console.error('STARQLE_NG_UTIL: Options entity is required');
-                  deferred.reject({});
-                } else {
-                  data = {
-                    data: opts.entity
-                  };
-                  if (Object.prototype.toString.call(opts.entity).slice(8, -1) === 'FormData') {
-                    data = opts.entity;
-                  }
-                  apiParameters.data = data;
-                }
-            }
-            if ((base = self.beforeApiCallEntityHooks)[name = opts.name] == null) {
-              base[name] = [];
-            }
-            if ((base1 = self.apiCallEntitySuccessHooks)[name1 = opts.name] == null) {
-              base1[name1] = [];
-            }
-            if ((base2 = self.apiCallEntityErrorHooks)[name2 = opts.name] == null) {
-              base2[name2] = [];
-            }
-            if ((base3 = self.afterApiCallEntityHooks)[name3 = opts.name] == null) {
-              base3[name3] = [];
-            }
-            ref1 = self.beforeApiCallEntityHooks[opts.name];
-            for (i = 0, len = ref1.length; i < len; i++) {
-              hook = ref1[i];
-              hook();
-            }
-            shApi.apiCall(apiParameters).then(function(success) {
-              var j, len1, ref2;
-              ref2 = self.apiCallEntitySuccessHooks[opts.name];
-              for (j = 0, len1 = ref2.length; j < len1; j++) {
-                hook = ref2[j];
-                hook(success);
-              }
-              return deferred.resolve(success);
-            }, function(error) {
-              var j, len1, ref2;
-              ref2 = self.apiCallEntityErrorHooks[opts.name];
-              for (j = 0, len1 = ref2.length; j < len1; j++) {
-                hook = ref2[j];
-                hook(error);
-              }
-              return deferred.reject(error);
-            })["finally"](function() {
-              var j, len1, ref2, results;
-              ref2 = self.afterApiCallEntityHooks[opts.name];
-              results = [];
-              for (j = 0, len1 = ref2.length; j < len1; j++) {
-                hook = ref2[j];
-                results.push(hook());
-              }
-              return results;
-            });
-          }
-          return deferred.promise;
-        };
-        $injector.invoke($rootScope.shApi, shApi);
-      }
-    ];
-  }
-]);
-
-shApiModule.run([
-  '$rootScope', function($rootScope) {
-
-    /**
-     * @ngdoc factory
-     * @name shApi
-     *
-     * @description
-     * ShTableRest
-     */
-    $rootScope.shApi = [
-      '$q', function($q) {
-        if (this.resource == null) {
-          this.resource = null;
-        }
-
-        /**
-         * @ngdoc method
-         * @name index
-         *
-         * @description
-         * Get list of records based on params. `GET`
-         *
-         * @param {Object} params Parameter objects
-         *
-         * @returns {promise}
-         */
-        this.index = function(params) {
-          var deferred;
-          deferred = $q.defer();
-          this.resource.get(params).$promise.then(function(success) {
-            return deferred.resolve(success);
-          }, function(error) {
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-
-        /**
-         * @ngdoc method
-         * @name new
-         *
-         * @description
-         * Get a new Record. `GET`
-         *
-         * @returns {promise}
-         */
-        this["new"] = function(params) {
-          var deferred;
-          deferred = $q.defer();
-          this.resource["new"](params).$promise.then(function(success) {
-            return deferred.resolve(success);
-          }, function(error) {
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-
-        /**
-         * @ngdoc method
-         * @name create
-         *
-         * @description
-         * Create/persist an record to database. `POST`
-         *
-         * @param {Object} params Parameter objects
-         * @param {Object} data Data object. Usualy it's formed `{data: entity}`
-         *
-         * @returns {promise}
-         */
-        this.create = function(params, data) {
-          var deferred;
-          deferred = $q.defer();
-          this.resource.save(params, data).$promise.then(function(success) {
-            return deferred.resolve(success);
-          }, function(error) {
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-
-        /**
-         * @ngdoc method
-         * @name edit
-         *
-         * @description
-         * Get a record, equals with show. `GET`
-         *
-         * @param {String} id Record id in string or UUID
-         * @param {Object} params Parameter objects
-         *
-         * @returns {promise}
-         */
-        this.edit = function(id, params) {
-          var deferred;
-          deferred = $q.defer();
-          this.resource.edit(angular.extend({
-            id: id
-          }, params)).$promise.then(function(success) {
-            return deferred.resolve(success);
-          }, function(error) {
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-
-        /**
-         * @ngdoc method
-         * @name update
-         *
-         * @description
-         * Update a record
-         *
-         * @param {String} id Record id in string or UUID. `PUT`
-         * @param {Object} params Parameter objects
-         * @param {Object} data Data object. Usualy it's formed `{data: entity}`
-         *
-         * @returns {promise}
-         */
-        this.update = function(id, params, data) {
-          var deferred;
-          deferred = $q.defer();
-          this.resource.update(angular.extend({
-            id: id
-          }, params), data).$promise.then(function(success) {
-            return deferred.resolve(success);
-          }, function(error) {
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-
-        /**
-         * @ngdoc method
-         * @name delete
-         *
-         * @description
-         * Delete a record. `DELETE`
-         *
-         * @param {String} id Record id in string or UUID
-         * @param {Object} params Parameter objects
-         *
-         * @returns {promise}
-         */
-        this["delete"] = function(id, params) {
-          var deferred;
-          deferred = $q.defer();
-          this.resource["delete"](angular.extend({
-            id: id
-          }, params)).$promise.then(function(success) {
-            return deferred.resolve(success);
-          }, function(error) {
-            return deferred.reject(error);
-          });
-          return deferred.promise;
-        };
-
-        /**
-         * @ngdoc method
-         * @name apiCall
-         *
-         * @description
-         * apiCall `GET`
-         * apiCall `POST`
-         * apiCall `PUT`
-         * apiCall `DELETE`
-         *
-         * @param {String} id Record id in string or UUID
-         * @param {Object} params Parameter objects
-         *
-         * @returns {promise}
-         */
-        this.apiCall = function(opts) {
-          var deferred;
-          deferred = $q.defer();
-          switch (opts.method) {
-            case 'GET':
-            case 'DELETE':
-              this.resource[opts.name](angular.extend({
-                id: opts.id
-              }, opts.params)).$promise.then(function(success) {
-                return deferred.resolve(success);
-              }, function(error) {
-                return deferred.reject(error);
-              });
-              break;
-            case 'POST':
-            case 'PUT':
-              this.resource[opts.name](angular.extend({
-                id: opts.id
-              }, opts.params), opts.data).$promise.then(function(success) {
-                return deferred.resolve(success);
-              }, function(error) {
-                return deferred.reject(error);
-              });
-              break;
-            default:
-              console.error('STARQLE_NG_UTIL: Unknown Method');
-              deferred.reject({});
-          }
-          return deferred.promise;
-        };
-      }
-    ];
-  }
-]);
-
-shFormModule.run([
-  '$rootScope', function($rootScope) {
-
-    /**
-     * @ngdoc factory
-     * @name shForm
-     *
-     * @description
-     * ShForm
-     */
-    $rootScope.shForm = [
-      function() {
-        var self;
-        self = this;
-        if (this.entityForm == null) {
-          this.entityForm = null;
-        }
-        if (this.entity == null) {
-          this.entity = null;
-        }
-
-        /**
-         * @ngdoc method
-         * @name validationClass
-         *
-         * @description
-         * Gives elements a class that mark its fieldname state
-         *
-         * @returns {String} String as class that mark element state
-         */
-        this.validationClass = function(fieldName) {
-          var ref, result;
-          result = '';
-          if (((ref = this.entityForm) != null ? ref[fieldName] : void 0) != null) {
-            if (this.entityForm[fieldName].$invalid) {
-              if (this.entityForm[fieldName].$dirty) {
-                result += 'has-error ';
-              } else {
-                result += 'has-pristine-error ';
-              }
-            } else if (this.entityForm[fieldName].$dirty && this.entityForm[fieldName].$valid) {
-              result += 'has-success ';
-            }
-          }
-          return result;
-        };
-
-        /**
-         * @ngdoc method
-         * @name reset
-         *
-         * @description
-         * Resset all the form state. `$dirty: false`, `$pristine: true`, `$submitted: false`, `$invalid: true`
-         *
-         * @returns {*}
-         */
-        this.reset = function() {
-          var ref, ref1;
-          if ((ref = this.entityForm) != null) {
-            ref.$setPristine();
-          }
-          return (ref1 = this.entityForm) != null ? ref1.$setUntouched() : void 0;
-        };
-
-        /**
-         * @ngdoc method
-         * @name resetSubmitted
-         *
-         * @description
-         * Set `$submitted` to `false`, but not change the `$dirty` state.
-         * Should be used for failing submission.
-         *
-         * @returns {*}
-         */
-        this.resetSubmitted = function() {
-          var ref;
-          return (ref = this.entityForm) != null ? ref.$submitted = false : void 0;
-        };
-
-        /**
-         * @ngdoc method
-         * @name isDisabled
-         *
-         * @description
-         * Return this entity form state
-         *
-         * @returns {Boolean} entityForm state
-         */
-        this.isDisabled = function() {
-          var ref, ref1, ref2;
-          if (this.entityForm == null) {
-            return true;
-          }
-          return ((ref = this.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = this.entityForm) != null ? ref1.$invalid : void 0) || ((ref2 = this.entityForm) != null ? ref2.$submitted : void 0);
-        };
-
-        /**
-         * @ngdoc method
-         * @name isCompleted
-         *
-         * @description
-         * Predicate to check whether the form in completed
-         *
-         * @returns {Boolean} true if `$pristine`, `$valid`, & not in `$submitted` state
-         */
-        this.isCompleted = function() {
-          var ref, ref1;
-          return ((ref = this.entityForm) != null ? ref.$pristine : void 0) && ((ref1 = this.entityForm) != null ? ref1.$valid : void 0) && !this.entityForm.$submitted;
-        };
-
-        /**
-         * @ngdoc method
-         * @name isDirtyAndValid
-         *
-         * @description
-         * Predicate to check whether the form in `$dirty` and `$valid` state
-         *
-         * @returns {Boolean} true if `$dirty` and `$valid`
-         */
-        this.isDirtyAndValid = function() {
-          var ref, ref1;
-          return ((ref = this.entityForm) != null ? ref.$dirty : void 0) && ((ref1 = this.entityForm) != null ? ref1.$valid : void 0);
-        };
-
-        /**
-         * @ngdoc method
-         * @name isDirtyAndInvalid
-         *
-         * @description
-         * Predicate to check whether the form in `$dirty` and `$invalid` state
-         *
-         * @returns {Boolean} true if `$dirty` and `$invalid`
-         */
-        this.isDirtyAndInvalid = function() {
-          var ref, ref1;
-          return ((ref = this.entityForm) != null ? ref.$dirty : void 0) && ((ref1 = this.entityForm) != null ? ref1.$invalid : void 0);
-        };
-
-        /**
-         * @ngdoc method
-         * @name isResetButtonDisabled
-         *
-         * @description
-         * Predicate to check whether the reset button should disabled or not
-         *
-         * @returns {Boolean} true if `$pristine` or `$submitted`
-         */
-        this.isResetButtonDisabled = function() {
-          var ref, ref1;
-          return ((ref = this.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = this.entityForm) != null ? ref1.$submitted : void 0);
-        };
-      }
-    ];
-  }
-]);
-
 shPersistenceModule.run([
   '$rootScope', function($rootScope) {
 
@@ -2781,6 +2287,510 @@ shPersistenceModule.run([
           };
         }
         $injector.invoke($rootScope.shPersistenceHook, this);
+      }
+    ];
+  }
+]);
+
+shFormModule.run([
+  '$rootScope', function($rootScope) {
+
+    /**
+     * @ngdoc factory
+     * @name shForm
+     *
+     * @description
+     * ShForm
+     */
+    $rootScope.shForm = [
+      function() {
+        var self;
+        self = this;
+        if (this.entityForm == null) {
+          this.entityForm = null;
+        }
+        if (this.entity == null) {
+          this.entity = null;
+        }
+
+        /**
+         * @ngdoc method
+         * @name validationClass
+         *
+         * @description
+         * Gives elements a class that mark its fieldname state
+         *
+         * @returns {String} String as class that mark element state
+         */
+        this.validationClass = function(fieldName) {
+          var ref, result;
+          result = '';
+          if (((ref = this.entityForm) != null ? ref[fieldName] : void 0) != null) {
+            if (this.entityForm[fieldName].$invalid) {
+              if (this.entityForm[fieldName].$dirty) {
+                result += 'has-error ';
+              } else {
+                result += 'has-pristine-error ';
+              }
+            } else if (this.entityForm[fieldName].$dirty && this.entityForm[fieldName].$valid) {
+              result += 'has-success ';
+            }
+          }
+          return result;
+        };
+
+        /**
+         * @ngdoc method
+         * @name reset
+         *
+         * @description
+         * Resset all the form state. `$dirty: false`, `$pristine: true`, `$submitted: false`, `$invalid: true`
+         *
+         * @returns {*}
+         */
+        this.reset = function() {
+          var ref, ref1;
+          if ((ref = this.entityForm) != null) {
+            ref.$setPristine();
+          }
+          return (ref1 = this.entityForm) != null ? ref1.$setUntouched() : void 0;
+        };
+
+        /**
+         * @ngdoc method
+         * @name resetSubmitted
+         *
+         * @description
+         * Set `$submitted` to `false`, but not change the `$dirty` state.
+         * Should be used for failing submission.
+         *
+         * @returns {*}
+         */
+        this.resetSubmitted = function() {
+          var ref;
+          return (ref = this.entityForm) != null ? ref.$submitted = false : void 0;
+        };
+
+        /**
+         * @ngdoc method
+         * @name isDisabled
+         *
+         * @description
+         * Return this entity form state
+         *
+         * @returns {Boolean} entityForm state
+         */
+        this.isDisabled = function() {
+          var ref, ref1, ref2;
+          if (this.entityForm == null) {
+            return true;
+          }
+          return ((ref = this.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = this.entityForm) != null ? ref1.$invalid : void 0) || ((ref2 = this.entityForm) != null ? ref2.$submitted : void 0);
+        };
+
+        /**
+         * @ngdoc method
+         * @name isCompleted
+         *
+         * @description
+         * Predicate to check whether the form in completed
+         *
+         * @returns {Boolean} true if `$pristine`, `$valid`, & not in `$submitted` state
+         */
+        this.isCompleted = function() {
+          var ref, ref1;
+          return ((ref = this.entityForm) != null ? ref.$pristine : void 0) && ((ref1 = this.entityForm) != null ? ref1.$valid : void 0) && !this.entityForm.$submitted;
+        };
+
+        /**
+         * @ngdoc method
+         * @name isDirtyAndValid
+         *
+         * @description
+         * Predicate to check whether the form in `$dirty` and `$valid` state
+         *
+         * @returns {Boolean} true if `$dirty` and `$valid`
+         */
+        this.isDirtyAndValid = function() {
+          var ref, ref1;
+          return ((ref = this.entityForm) != null ? ref.$dirty : void 0) && ((ref1 = this.entityForm) != null ? ref1.$valid : void 0);
+        };
+
+        /**
+         * @ngdoc method
+         * @name isDirtyAndInvalid
+         *
+         * @description
+         * Predicate to check whether the form in `$dirty` and `$invalid` state
+         *
+         * @returns {Boolean} true if `$dirty` and `$invalid`
+         */
+        this.isDirtyAndInvalid = function() {
+          var ref, ref1;
+          return ((ref = this.entityForm) != null ? ref.$dirty : void 0) && ((ref1 = this.entityForm) != null ? ref1.$invalid : void 0);
+        };
+
+        /**
+         * @ngdoc method
+         * @name isResetButtonDisabled
+         *
+         * @description
+         * Predicate to check whether the reset button should disabled or not
+         *
+         * @returns {Boolean} true if `$pristine` or `$submitted`
+         */
+        this.isResetButtonDisabled = function() {
+          var ref, ref1;
+          return ((ref = this.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = this.entityForm) != null ? ref1.$submitted : void 0);
+        };
+      }
+    ];
+  }
+]);
+
+shApiModule.run([
+  '$rootScope', function($rootScope) {
+
+    /**
+     * @ngdoc factory
+     * @name shApiHook
+     *
+     * @description
+     * ShTableRest
+     */
+    $rootScope.shApiHook = [
+      '$q', '$injector', function($q, $injector) {
+        var self, shApi;
+        self = this;
+        if (this.resource == null) {
+          this.resource = null;
+        }
+        if (this.entity == null) {
+          this.entity = {};
+        }
+        if (this.lookup == null) {
+          this.lookup = {};
+        }
+        if (this.optParams == null) {
+          this.optParams = {};
+        }
+        this.createdIds = [];
+        this.updatedIds = [];
+        this.deletedIds = [];
+        shApi = {
+          resource: self.resource
+        };
+        this.beforeApiCallEntityHooks = {};
+        this.apiCallEntitySuccessHooks = {};
+        this.apiCallEntityErrorHooks = {};
+        this.afterApiCallEntityHooks = {};
+
+        /**
+         * @ngdoc method
+         * @name apiCall
+         *
+         * @description
+         * Call api by name
+         *
+         * @param {Object} opts Parameter objects method, name, id, entity
+         *
+         * @returns {promise}
+         */
+        this.apiCallEntity = function(opts) {
+          var apiParameters, base, base1, base2, base3, data, deferred, hook, i, len, name, name1, name2, name3, ref, ref1;
+          deferred = $q.defer();
+          if (!((opts.method != null) && ((ref = opts.method) === 'GET' || ref === 'POST' || ref === 'PUT' || ref === 'DELETE'))) {
+            console.error('STARQLE_NG_UTIL: Unknown Method');
+            deferred.reject({});
+          } else if (opts.name == null) {
+            console.error('STARQLE_NG_UTIL: Options name is required');
+            deferred.reject({});
+          } else {
+            apiParameters = {
+              name: opts.name,
+              method: opts.method,
+              params: this.optParams
+            };
+            if (opts.id) {
+              apiParameters.id = opts.id;
+            }
+            switch (opts.method) {
+              case 'GET':
+              case 'DELETE':
+                if (opts.entity != null) {
+                  console.error('STARQLE_NG_UTIL: Options entity should not be provided');
+                  deferred.reject({});
+                }
+                break;
+              case 'POST':
+              case 'PUT':
+                if (opts.entity == null) {
+                  console.error('STARQLE_NG_UTIL: Options entity is required');
+                  deferred.reject({});
+                } else {
+                  data = {
+                    data: opts.entity
+                  };
+                  if (Object.prototype.toString.call(opts.entity).slice(8, -1) === 'FormData') {
+                    data = opts.entity;
+                  }
+                  apiParameters.data = data;
+                }
+            }
+            if ((base = self.beforeApiCallEntityHooks)[name = opts.name] == null) {
+              base[name] = [];
+            }
+            if ((base1 = self.apiCallEntitySuccessHooks)[name1 = opts.name] == null) {
+              base1[name1] = [];
+            }
+            if ((base2 = self.apiCallEntityErrorHooks)[name2 = opts.name] == null) {
+              base2[name2] = [];
+            }
+            if ((base3 = self.afterApiCallEntityHooks)[name3 = opts.name] == null) {
+              base3[name3] = [];
+            }
+            ref1 = self.beforeApiCallEntityHooks[opts.name];
+            for (i = 0, len = ref1.length; i < len; i++) {
+              hook = ref1[i];
+              hook();
+            }
+            shApi.apiCall(apiParameters).then(function(success) {
+              var j, len1, ref2;
+              ref2 = self.apiCallEntitySuccessHooks[opts.name];
+              for (j = 0, len1 = ref2.length; j < len1; j++) {
+                hook = ref2[j];
+                hook(success);
+              }
+              return deferred.resolve(success);
+            }, function(error) {
+              var j, len1, ref2;
+              ref2 = self.apiCallEntityErrorHooks[opts.name];
+              for (j = 0, len1 = ref2.length; j < len1; j++) {
+                hook = ref2[j];
+                hook(error);
+              }
+              return deferred.reject(error);
+            })["finally"](function() {
+              var j, len1, ref2, results;
+              ref2 = self.afterApiCallEntityHooks[opts.name];
+              results = [];
+              for (j = 0, len1 = ref2.length; j < len1; j++) {
+                hook = ref2[j];
+                results.push(hook());
+              }
+              return results;
+            });
+          }
+          return deferred.promise;
+        };
+        $injector.invoke($rootScope.shApi, shApi);
+      }
+    ];
+  }
+]);
+
+shApiModule.run([
+  '$rootScope', function($rootScope) {
+
+    /**
+     * @ngdoc factory
+     * @name shApi
+     *
+     * @description
+     * ShTableRest
+     */
+    $rootScope.shApi = [
+      '$q', function($q) {
+        if (this.resource == null) {
+          this.resource = null;
+        }
+
+        /**
+         * @ngdoc method
+         * @name index
+         *
+         * @description
+         * Get list of records based on params. `GET`
+         *
+         * @param {Object} params Parameter objects
+         *
+         * @returns {promise}
+         */
+        this.index = function(params) {
+          var deferred;
+          deferred = $q.defer();
+          this.resource.get(params).$promise.then(function(success) {
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name new
+         *
+         * @description
+         * Get a new Record. `GET`
+         *
+         * @returns {promise}
+         */
+        this["new"] = function(params) {
+          var deferred;
+          deferred = $q.defer();
+          this.resource["new"](params).$promise.then(function(success) {
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name create
+         *
+         * @description
+         * Create/persist an record to database. `POST`
+         *
+         * @param {Object} params Parameter objects
+         * @param {Object} data Data object. Usualy it's formed `{data: entity}`
+         *
+         * @returns {promise}
+         */
+        this.create = function(params, data) {
+          var deferred;
+          deferred = $q.defer();
+          this.resource.save(params, data).$promise.then(function(success) {
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name edit
+         *
+         * @description
+         * Get a record, equals with show. `GET`
+         *
+         * @param {String} id Record id in string or UUID
+         * @param {Object} params Parameter objects
+         *
+         * @returns {promise}
+         */
+        this.edit = function(id, params) {
+          var deferred;
+          deferred = $q.defer();
+          this.resource.edit(angular.extend({
+            id: id
+          }, params)).$promise.then(function(success) {
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name update
+         *
+         * @description
+         * Update a record
+         *
+         * @param {String} id Record id in string or UUID. `PUT`
+         * @param {Object} params Parameter objects
+         * @param {Object} data Data object. Usualy it's formed `{data: entity}`
+         *
+         * @returns {promise}
+         */
+        this.update = function(id, params, data) {
+          var deferred;
+          deferred = $q.defer();
+          this.resource.update(angular.extend({
+            id: id
+          }, params), data).$promise.then(function(success) {
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name delete
+         *
+         * @description
+         * Delete a record. `DELETE`
+         *
+         * @param {String} id Record id in string or UUID
+         * @param {Object} params Parameter objects
+         *
+         * @returns {promise}
+         */
+        this["delete"] = function(id, params) {
+          var deferred;
+          deferred = $q.defer();
+          this.resource["delete"](angular.extend({
+            id: id
+          }, params)).$promise.then(function(success) {
+            return deferred.resolve(success);
+          }, function(error) {
+            return deferred.reject(error);
+          });
+          return deferred.promise;
+        };
+
+        /**
+         * @ngdoc method
+         * @name apiCall
+         *
+         * @description
+         * apiCall `GET`
+         * apiCall `POST`
+         * apiCall `PUT`
+         * apiCall `DELETE`
+         *
+         * @param {String} id Record id in string or UUID
+         * @param {Object} params Parameter objects
+         *
+         * @returns {promise}
+         */
+        this.apiCall = function(opts) {
+          var deferred;
+          deferred = $q.defer();
+          switch (opts.method) {
+            case 'GET':
+            case 'DELETE':
+              this.resource[opts.name](angular.extend({
+                id: opts.id
+              }, opts.params)).$promise.then(function(success) {
+                return deferred.resolve(success);
+              }, function(error) {
+                return deferred.reject(error);
+              });
+              break;
+            case 'POST':
+            case 'PUT':
+              this.resource[opts.name](angular.extend({
+                id: opts.id
+              }, opts.params), opts.data).$promise.then(function(success) {
+                return deferred.resolve(success);
+              }, function(error) {
+                return deferred.reject(error);
+              });
+              break;
+            default:
+              console.error('STARQLE_NG_UTIL: Unknown Method');
+              deferred.reject({});
+          }
+          return deferred.promise;
+        };
       }
     ];
   }

@@ -70,6 +70,16 @@ shDatepickerModule.directive("shDatepicker", [ ->
 
     ngModelCtrl.$parsers.push parser
 
+
+    #
+    # ngModelCtrl: Render
+    #
+    ngModelCtrl.$render = () ->
+      unless angular.isDefined(ngModelCtrl.$modelValue)
+        ngModelCtrl.$modelValue = null
+      return
+
+
     #
     #
     #
@@ -192,7 +202,6 @@ shDatepickerModule.directive("shDatepicker", [ ->
         return
     )
 
-
     return
 
 ])
@@ -257,6 +266,14 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
         null
 
     ngModelCtrl.$parsers.push parser
+
+    #
+    # ngModelCtrl: Render
+    #
+    ngModelCtrl.$render = () ->
+      unless angular.isDefined(ngModelCtrl.$modelValue)
+        ngModelCtrl.$modelValue = null
+      return
 
     #
     #
