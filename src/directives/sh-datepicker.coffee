@@ -135,7 +135,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
           maxValue = element.data('DateTimePicker').maxDate().format(valueFormat)
           value = maxValue if moment(value).isAfter(maxValue)
 
-        element.data('DateTimePicker')?.minDate(new Date(value))
+        element.data('DateTimePicker')?.minDate(moment(value).startOf('day'))
       else
         element.data('DateTimePicker')?.minDate(false)
       return
@@ -147,7 +147,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
           minValue = element.data('DateTimePicker').minDate().format(valueFormat)
           value = minValue if moment(value).isBefore(minValue)
 
-        element.data('DateTimePicker')?.maxDate(new Date(value))
+        element.data('DateTimePicker')?.maxDate(moment(value).endOf('day'))
       else
         element.data('DateTimePicker')?.maxDate(false)
       return
