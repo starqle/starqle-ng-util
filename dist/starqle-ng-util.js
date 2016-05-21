@@ -761,7 +761,7 @@ shDialogModule.directive("shDialog", [
         title: '@?'
       },
       link: function(scope, element, attrs) {
-        var hideModal, onHandleClick, ref, ref1, ref2, shDialogLabelCancel, shDialogLabelClose, shDialogLabelOk;
+        var onHandleClick, ref, ref1, ref2, shDialogLabelCancel, shDialogLabelClose, shDialogLabelOk;
         shDialogLabelOk = (ref = scope.shDialogLabelOk) != null ? ref : 'Submit';
         shDialogLabelClose = (ref1 = scope.shDialogLabelClose) != null ? ref1 : 'Close';
         shDialogLabelCancel = (ref2 = scope.shDialogLabelCancel) != null ? ref2 : 'Cancel';
@@ -770,6 +770,15 @@ shDialogModule.directive("shDialog", [
             onHandleClick();
           }
         });
+        scope.showModal = function(elmt) {
+          console.log('bar');
+          $timeout(function() {
+            elmt.modal('show');
+          }, 20);
+        };
+        scope.hideModal = function() {
+          angular.element('.modal').modal('hide');
+        };
         onHandleClick = function() {
           var buttonOkElement, compiledShDialogBody, compiledShDialogFooter, compiledShDialogHeader, modalIdSuffix, parent, ref3, ref4, ref5, shDialogModal;
           modalIdSuffix = scope.$id;
@@ -819,7 +828,7 @@ shDialogModule.directive("shDialog", [
             }, function(error) {
 
               /* */
-              hideModal();
+              scope.hideModal();
               return deferred.reject(error);
             })["finally"](function() {
 
@@ -831,9 +840,7 @@ shDialogModule.directive("shDialog", [
             shDialogModal.remove();
             parent.shDialogEntity = {};
           });
-          $timeout(function() {
-            return shDialogModal.modal('show');
-          }, 20);
+          scope.showModal(shDialogModal);
           parent.aliasShDialogDisabled = function() {
             var ref6, ref7, ref8;
             if (parent.shDialogLoading) {
@@ -854,7 +861,7 @@ shDialogModule.directive("shDialog", [
             $q.when((scope.shDialogOk || angular.noop)({
               $event: $event
             })).then(function(success) {
-              hideModal();
+              scope.hideModal();
               return deferred.resolve();
             }, function(error) {
               var ref6;
@@ -870,9 +877,6 @@ shDialogModule.directive("shDialog", [
             return deferred.promise;
           };
           parent.aliasShDialogForm = scope.shDialogForm;
-        };
-        hideModal = function() {
-          angular.element('.modal').modal('hide');
         };
         scope.$watch('$parent.shDialogLoading', function(newVal, oldVal) {
           if (newVal != null) {

@@ -65,6 +65,30 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
       return
     )
 
+
+    #
+    # Show the modal
+    # using scope for decorateable
+    #
+    scope.showModal = (elmt) ->
+      console.log 'bar'
+      # TODO
+      $timeout(
+        () ->
+          elmt.modal('show')
+          return
+        20
+      )
+      return
+
+    #
+    # Hide the modal
+    # using scope for decorateable
+    #
+    scope.hideModal = () ->
+      angular.element('.modal').modal('hide')
+      return
+
     #
     #
     #
@@ -203,7 +227,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
             (error) ->
               ### ###
               # Close this modal
-              hideModal()
+              scope.hideModal()
               deferred.reject error
           ).finally(
             () ->
@@ -221,11 +245,9 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
           return
       )
 
-      # TODO
-      $timeout( ->
-        shDialogModal.modal('show')
-      , 20
-      )
+
+      scope.showModal(shDialogModal)
+
 
       parent.aliasShDialogDisabled = () ->
         return true if parent.shDialogLoading
@@ -247,7 +269,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
           (scope.shDialogOk || angular.noop)({$event: $event})
         ).then(
           (success) ->
-            hideModal()
+            scope.hideModal()
             # It doesnt need to enable the button, the form is already hidden
             deferred.resolve()
 
@@ -268,12 +290,6 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
 
       return
 
-    #
-    #
-    #
-    hideModal = () ->
-      angular.element('.modal').modal('hide')
-      return
 
     scope.$watch '$parent.shDialogLoading', (newVal, oldVal) ->
       if newVal?
@@ -281,6 +297,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
       return
 
     return
+
 ]
 
 
