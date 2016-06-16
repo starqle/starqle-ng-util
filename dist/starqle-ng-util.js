@@ -1695,6 +1695,2291 @@ shTableModule.factory('ShTableParams', [
   }
 ]);
 
+
+/**
+ * @ngdoc object
+ * @name ShApiHook
+ *
+ * @description
+ * ShApiHook factory
+ *
+ */
+shApiModule.factory('ShApiHook', [
+  '$q', 'ShApi', function($q, ShApi) {
+    var ShApiHook;
+    ShApiHook = function(params) {
+      var base, base1, base2, self, shApi;
+      self = this;
+      self.shApiInstance = params.shApiInstance;
+      if ((base = self.shApiInstance).resource == null) {
+        base.resource = null;
+      }
+      if ((base1 = self.shApiInstance).entity == null) {
+        base1.entity = {};
+      }
+      if ((base2 = self.shApiInstance).optParams == null) {
+        base2.optParams = {};
+      }
+      self.shApiInstance.updatedIds = [];
+      self.shApiInstance.deletedIds = [];
+      self.shApiInstance.beforeApiCallEntityHooks = {};
+      self.shApiInstance.apiCallEntitySuccessHooks = {};
+      self.shApiInstance.apiCallEntityErrorHooks = {};
+      self.shApiInstance.afterApiCallEntityHooks = {};
+      shApi = new ShApi({
+        resource: self.shApiInstance.resource
+      });
+
+      /**
+       * @ngdoc method
+       * @name apiCall
+       *
+       * @description
+       * Call api by name
+       *
+       * @param {Object} opts Parameter objects method, name, id, entity
+       *
+       * @returns {promise}
+       */
+      self.shApiInstance.apiCallEntity = function(opts) {
+        var apiParameters, base3, base4, base5, base6, data, deferred, hook, i, len, name, name1, name2, name3, ref, ref1;
+        deferred = $q.defer();
+        if (!((opts.method != null) && ((ref = opts.method) === 'GET' || ref === 'POST' || ref === 'PUT' || ref === 'DELETE'))) {
+          console.error('STARQLE_NG_UTIL: Unknown Method');
+          deferred.reject({});
+        } else if (opts.name == null) {
+          console.error('STARQLE_NG_UTIL: Options name is required');
+          deferred.reject({});
+        } else {
+          apiParameters = {
+            name: opts.name,
+            method: opts.method,
+            params: self.shApiInstance.optParams
+          };
+          if (opts.id) {
+            apiParameters.id = opts.id;
+          }
+          switch (opts.method) {
+            case 'GET':
+            case 'DELETE':
+              if (opts.entity != null) {
+                console.error('STARQLE_NG_UTIL: Options entity should not be provided');
+                deferred.reject({});
+              }
+              break;
+            case 'POST':
+            case 'PUT':
+              if (opts.entity == null) {
+                console.error('STARQLE_NG_UTIL: Options entity is required');
+                deferred.reject({});
+              } else {
+                data = {
+                  data: opts.entity
+                };
+                if (Object.prototype.toString.call(opts.entity).slice(8, -1) === 'FormData') {
+                  data = opts.entity;
+                }
+                apiParameters.data = data;
+              }
+          }
+          if ((base3 = self.shApiInstance.beforeApiCallEntityHooks)[name = opts.name] == null) {
+            base3[name] = [];
+          }
+          if ((base4 = self.shApiInstance.apiCallEntitySuccessHooks)[name1 = opts.name] == null) {
+            base4[name1] = [];
+          }
+          if ((base5 = self.shApiInstance.apiCallEntityErrorHooks)[name2 = opts.name] == null) {
+            base5[name2] = [];
+          }
+          if ((base6 = self.shApiInstance.afterApiCallEntityHooks)[name3 = opts.name] == null) {
+            base6[name3] = [];
+          }
+          ref1 = self.shApiInstance.beforeApiCallEntityHooks[opts.name];
+          for (i = 0, len = ref1.length; i < len; i++) {
+            hook = ref1[i];
+            hook();
+          }
+          shApi.apiCall(apiParameters).then(function(success) {
+            var j, len1, ref2;
+            ref2 = self.shApiInstance.apiCallEntitySuccessHooks[opts.name];
+            for (j = 0, len1 = ref2.length; j < len1; j++) {
+              hook = ref2[j];
+              hook(success);
+            }
+            return deferred.resolve(success);
+          }, function(error) {
+            var j, len1, ref2;
+            ref2 = self.shApiInstance.apiCallEntityErrorHooks[opts.name];
+            for (j = 0, len1 = ref2.length; j < len1; j++) {
+              hook = ref2[j];
+              hook(error);
+            }
+            return deferred.reject(error);
+          })["finally"](function() {
+            var j, len1, ref2, results;
+            ref2 = self.shApiInstance.afterApiCallEntityHooks[opts.name];
+            results = [];
+            for (j = 0, len1 = ref2.length; j < len1; j++) {
+              hook = ref2[j];
+              results.push(hook());
+            }
+            return results;
+          });
+        }
+        return deferred.promise;
+      };
+      return this;
+    };
+    return ShApiHook;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShApi
+ *
+ * @description
+ * ShApi factory
+ *
+ */
+shApiModule.factory('ShApi', [
+  '$q', function($q) {
+    var ShApi;
+    ShApi = function(params) {
+      var self;
+      self = this;
+      self.resource = params.resource;
+
+      /**
+       * @ngdoc method
+       * @name index
+       *
+       * @description
+       * Get list of records based on params. `GET`
+       *
+       * @param {Object} params Parameter objects
+       *
+       * @returns {promise}
+       */
+      self.index = function(params) {
+        var deferred;
+        deferred = $q.defer();
+        self.resource.get(params).$promise.then(function(success) {
+          return deferred.resolve(success);
+        }, function(error) {
+          return deferred.reject(error);
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name new
+       *
+       * @description
+       * Get a new Record. `GET`
+       *
+       * @returns {promise}
+       */
+      self["new"] = function(params) {
+        var deferred;
+        deferred = $q.defer();
+        self.resource["new"](params).$promise.then(function(success) {
+          return deferred.resolve(success);
+        }, function(error) {
+          return deferred.reject(error);
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name create
+       *
+       * @description
+       * Create/persist an record to database. `POST`
+       *
+       * @param {Object} params Parameter objects
+       * @param {Object} data Data object. Usualy it's formed `{data: entity}`
+       *
+       * @returns {promise}
+       */
+      self.create = function(params, data) {
+        var deferred;
+        deferred = $q.defer();
+        self.resource.save(params, data).$promise.then(function(success) {
+          return deferred.resolve(success);
+        }, function(error) {
+          return deferred.reject(error);
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name edit
+       *
+       * @description
+       * Get a record, equals with show. `GET`
+       *
+       * @param {String} id Record id in string or UUID
+       * @param {Object} params Parameter objects
+       *
+       * @returns {promise}
+       */
+      self.edit = function(id, params) {
+        var deferred;
+        deferred = $q.defer();
+        self.resource.edit(angular.extend({
+          id: id
+        }, params)).$promise.then(function(success) {
+          return deferred.resolve(success);
+        }, function(error) {
+          return deferred.reject(error);
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name update
+       *
+       * @description
+       * Update a record
+       *
+       * @param {String} id Record id in string or UUID. `PUT`
+       * @param {Object} params Parameter objects
+       * @param {Object} data Data object. Usualy it's formed `{data: entity}`
+       *
+       * @returns {promise}
+       */
+      self.update = function(id, params, data) {
+        var deferred;
+        deferred = $q.defer();
+        self.resource.update(angular.extend({
+          id: id
+        }, params), data).$promise.then(function(success) {
+          return deferred.resolve(success);
+        }, function(error) {
+          return deferred.reject(error);
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name delete
+       *
+       * @description
+       * Delete a record. `DELETE`
+       *
+       * @param {String} id Record id in string or UUID
+       * @param {Object} params Parameter objects
+       *
+       * @returns {promise}
+       */
+      self["delete"] = function(id, params) {
+        var deferred;
+        deferred = $q.defer();
+        self.resource["delete"](angular.extend({
+          id: id
+        }, params)).$promise.then(function(success) {
+          return deferred.resolve(success);
+        }, function(error) {
+          return deferred.reject(error);
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name apiCall
+       *
+       * @description
+       * apiCall `GET`
+       * apiCall `POST`
+       * apiCall `PUT`
+       * apiCall `DELETE`
+       *
+       * @param {String} id Record id in string or UUID
+       * @param {Object} params Parameter objects
+       *
+       * @returns {promise}
+       */
+      self.apiCall = function(opts) {
+        var deferred;
+        deferred = $q.defer();
+        switch (opts.method) {
+          case 'GET':
+          case 'DELETE':
+            self.resource[opts.name](angular.extend({
+              id: opts.id
+            }, opts.params)).$promise.then(function(success) {
+              return deferred.resolve(success);
+            }, function(error) {
+              return deferred.reject(error);
+            });
+            break;
+          case 'POST':
+          case 'PUT':
+            self.resource[opts.name](angular.extend({
+              id: opts.id
+            }, opts.params), opts.data).$promise.then(function(success) {
+              return deferred.resolve(success);
+            }, function(error) {
+              return deferred.reject(error);
+            });
+            break;
+          default:
+            console.error('STARQLE_NG_UTIL: Unknown Method');
+            deferred.reject({});
+        }
+        return deferred.promise;
+      };
+      return this;
+    };
+    return ShApi;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShForm
+ *
+ * @description
+ * ShForm factory
+ *
+ */
+shFormModule.factory('ShForm', [
+  function() {
+    var ShForm;
+    ShForm = function() {
+      var self;
+      self = this;
+      self.entityForm = null;
+
+      /**
+       * @ngdoc method
+       * @name validationClass
+       *
+       * @description
+       * Gives elements a class that mark its fieldname state
+       *
+       * @returns {String} String as class that mark element state
+       */
+      self.validationClass = function(fieldName) {
+        var ref, result;
+        result = '';
+        if (((ref = self.entityForm) != null ? ref[fieldName] : void 0) != null) {
+          if (self.entityForm[fieldName].$invalid) {
+            if (self.entityForm[fieldName].$dirty) {
+              result += 'has-error ';
+            } else {
+              result += 'has-pristine-error ';
+            }
+          } else if (self.entityForm[fieldName].$dirty && self.entityForm[fieldName].$valid) {
+            result += 'has-success ';
+          }
+        }
+        return result;
+      };
+
+      /**
+       * @ngdoc method
+       * @name reset
+       *
+       * @description
+       * Resset all the form state. `$dirty: false`, `$pristine: true`, `$submitted: false`, `$invalid: true`
+       *
+       * @returns {*}
+       */
+      self.reset = function() {
+        var ref, ref1;
+        if ((ref = self.entityForm) != null) {
+          ref.$setPristine();
+        }
+        return (ref1 = self.entityForm) != null ? ref1.$setUntouched() : void 0;
+      };
+
+      /**
+       * @ngdoc method
+       * @name resetSubmitted
+       *
+       * @description
+       * Set `$submitted` to `false`, but not change the `$dirty` state.
+       * Should be used for failing submission.
+       *
+       * @returns {*}
+       */
+      self.resetSubmitted = function() {
+        var ref;
+        return (ref = self.entityForm) != null ? ref.$submitted = false : void 0;
+      };
+
+      /**
+       * @ngdoc method
+       * @name isDisabled
+       *
+       * @description
+       * Return this entity form state
+       *
+       * @returns {Boolean} entityForm state
+       */
+      self.isDisabled = function() {
+        var ref, ref1, ref2;
+        if (self.entityForm == null) {
+          return true;
+        }
+        return ((ref = self.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = self.entityForm) != null ? ref1.$invalid : void 0) || ((ref2 = self.entityForm) != null ? ref2.$submitted : void 0);
+      };
+
+      /**
+       * @ngdoc method
+       * @name isCompleted
+       *
+       * @description
+       * Predicate to check whether the form in completed
+       *
+       * @returns {Boolean} true if `$pristine`, `$valid`, & not in `$submitted` state
+       */
+      self.isCompleted = function() {
+        var ref, ref1;
+        return ((ref = self.entityForm) != null ? ref.$pristine : void 0) && ((ref1 = self.entityForm) != null ? ref1.$valid : void 0) && !self.entityForm.$submitted;
+      };
+
+      /**
+       * @ngdoc method
+       * @name isDirtyAndValid
+       *
+       * @description
+       * Predicate to check whether the form in `$dirty` and `$valid` state
+       *
+       * @returns {Boolean} true if `$dirty` and `$valid`
+       */
+      self.isDirtyAndValid = function() {
+        var ref, ref1;
+        return ((ref = self.entityForm) != null ? ref.$dirty : void 0) && ((ref1 = self.entityForm) != null ? ref1.$valid : void 0);
+      };
+
+      /**
+       * @ngdoc method
+       * @name isDirtyAndInvalid
+       *
+       * @description
+       * Predicate to check whether the form in `$dirty` and `$invalid` state
+       *
+       * @returns {Boolean} true if `$dirty` and `$invalid`
+       */
+      self.isDirtyAndInvalid = function() {
+        var ref, ref1;
+        return ((ref = self.entityForm) != null ? ref.$dirty : void 0) && ((ref1 = self.entityForm) != null ? ref1.$invalid : void 0);
+      };
+
+      /**
+       * @ngdoc method
+       * @name isResetButtonDisabled
+       *
+       * @description
+       * Predicate to check whether the reset button should disabled or not
+       *
+       * @returns {Boolean} true if `$pristine` or `$submitted`
+       */
+      self.isResetButtonDisabled = function() {
+        var ref, ref1;
+        return ((ref = self.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = self.entityForm) != null ? ref1.$submitted : void 0);
+      };
+      return this;
+    };
+    return ShForm;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShPersistenceHookNotification
+ *
+ * @description
+ * ShPersistenceHookNotification factory
+ *
+ */
+shPersistenceModule.factory('ShPersistenceHookNotification', [
+  'ShNotification', function(ShNotification) {
+    var ShPersistenceHookNotification;
+    ShPersistenceHookNotification = function(params) {
+      var self;
+      self = this;
+      self.shPersistence = params.shPersistence;
+      self.shPersistence.newEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      self.shPersistence.createEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      self.shPersistence.editEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      self.shPersistence.updateEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      return this;
+    };
+    return ShPersistenceHookNotification;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShPersistenceHook
+ *
+ * @description
+ * ShPersistenceHook factory
+ *
+ */
+shPersistenceModule.factory('ShPersistenceHook', [
+  '$q', 'ShApi', 'ShApiHook', 'ShPersistenceHookNotification', function($q, ShApi, ShApiHook, ShPersistenceHookNotification) {
+    var ShPersistenceHook;
+    ShPersistenceHook = function(params) {
+      var base, base1, base2, base3, base4, self, shApi, shApiHook, shPersistenceHookNotification;
+      self = this;
+      self.shPersistence = params.shPersistence;
+      if ((base = self.shPersistence).id == null) {
+        base.id = null;
+      }
+      if ((base1 = self.shPersistence).resource == null) {
+        base1.resource = null;
+      }
+      if ((base2 = self.shPersistence).entity == null) {
+        base2.entity = {};
+      }
+      if ((base3 = self.shPersistence).lookup == null) {
+        base3.lookup = {};
+      }
+      if ((base4 = self.shPersistence).optParams == null) {
+        base4.optParams = {};
+      }
+      self.shPersistence.beforeNewEntityHooks = [];
+      self.shPersistence.newEntitySuccessHooks = [];
+      self.shPersistence.newEntityErrorHooks = [];
+      self.shPersistence.afterNewEntityHooks = [];
+      self.shPersistence.beforeCreateEntityHooks = [];
+      self.shPersistence.createEntitySuccessHooks = [];
+      self.shPersistence.createEntityErrorHooks = [];
+      self.shPersistence.afterCreateEntityHooks = [];
+      self.shPersistence.beforeEditEntityHooks = [];
+      self.shPersistence.editEntitySuccessHooks = [];
+      self.shPersistence.editEntityErrorHooks = [];
+      self.shPersistence.afterEditEntityHooks = [];
+      self.shPersistence.beforeUpdateEntityHooks = [];
+      self.shPersistence.updateEntitySuccessHooks = [];
+      self.shPersistence.updateEntityErrorHooks = [];
+      self.shPersistence.afterUpdateEntityHooks = [];
+      self.shPersistence.beforeDeleteEntityHooks = [];
+      self.shPersistence.deleteEntitySuccessHooks = [];
+      self.shPersistence.deleteEntityErrorHooks = [];
+      self.shPersistence.afterDeleteEntityHooks = [];
+      self.shPersistence.beforeInitEntityHooks = [];
+      self.shPersistence.initEntitySuccessHooks = [];
+      self.shPersistence.initEntityErrorHooks = [];
+      self.shPersistence.afterInitEntityHooks = [];
+      shApi = new ShApi({
+        resource: self.shPersistence.resource
+      });
+      shApiHook = new ShApiHook({
+        shApiInstance: self.shPersistence
+      });
+      shPersistenceHookNotification = new ShPersistenceHookNotification({
+        shPersistence: self.shPersistence
+      });
+
+      /**
+       * @ngdoc method
+       * @name newEntity
+       *
+       * @description
+       * New an entity
+       *
+       * @returns {promise}
+       */
+      self.shPersistence.newEntity = function() {
+        var deferred, hook, i, len, ref;
+        ref = self.shPersistence.beforeNewEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        shApi["new"](self.shPersistence.optParams).then(function(success) {
+          var j, len1, ref1;
+          self.shPersistence.entity = success.data;
+          if (success.lookup != null) {
+            self.shPersistence.lookup = success.lookup;
+          }
+          ref1 = self.shPersistence.newEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.newEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shPersistence.afterNewEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name createEntity
+       *
+       * @description
+       * Create/persist an entity to database
+       *
+       * @param {Object} entity Entity object which should not contain an id
+       *
+       * @returns {promise}
+       */
+      self.shPersistence.createEntity = function(entity) {
+        var data, deferred, hook, i, len, ref;
+        ref = self.shPersistence.beforeCreateEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        data = {
+          data: entity
+        };
+        if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
+          data = entity;
+        }
+        shApi.create(self.shPersistence.optParams, data).then(function(success) {
+          var j, len1, ref1;
+          self.shPersistence.entity = success.data;
+          if (success.lookup != null) {
+            self.shPersistence.lookup = success.lookup;
+          }
+          ref1 = self.shPersistence.createEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.createEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shPersistence.afterCreateEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name editEntity
+       *
+       * @description
+       * Edit an entity
+       *
+       * @param {String} id Entity id in string or UUID
+       *
+       * @returns {promise}
+       */
+      self.shPersistence.editEntity = function(id) {
+        var deferred, hook, i, len, ref;
+        ref = self.shPersistence.beforeEditEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        if (!id) {
+          id = self.shPersistence.id;
+        }
+        shApi.edit(id, self.shPersistence.optParams).then(function(success) {
+          var j, len1, ref1;
+          self.shPersistence.entity = success.data;
+          if (success.lookup != null) {
+            self.shPersistence.lookup = success.lookup;
+          }
+          ref1 = self.shPersistence.editEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.editEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shPersistence.afterEditEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name updateEntity
+       *
+       * @description
+       * Update an entity
+       *
+       * @param {String} id Entity id in string or UUID
+       * @param {Object} entity Entity object which should contain an id
+       *
+       * @returns {promise}
+       */
+      self.shPersistence.updateEntity = function(id, entity) {
+        var data, deferred, hook, i, len, ref;
+        ref = self.shPersistence.beforeUpdateEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        if (angular.isObject(id)) {
+          entity = id;
+          id = self.shPersistence.id;
+        }
+        data = {
+          data: entity
+        };
+        if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
+          data = entity;
+        }
+        shApi.update(id, self.shPersistence.optParams, data).then(function(success) {
+          var j, len1, ref1;
+          self.shPersistence.entity = success.data;
+          if (success.lookup != null) {
+            self.shPersistence.lookup = success.lookup;
+          }
+          ref1 = self.shPersistence.updateEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.updateEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shPersistence.afterUpdateEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name deleteEntity
+       *
+       * @description
+       * Delete an entity
+       *
+       * @param {String} id Entity id in string or UUID
+       *
+       * @returns {promise}
+       */
+      self.shPersistence.deleteEntity = function(id) {
+        var deferred, hook, i, len, ref;
+        ref = self.shPersistence.beforeDeleteEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        if (!id) {
+          id = self.shPersistence.id;
+        }
+        shApi["delete"](id, self.shPersistence.optParams).then(function(success) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.deleteEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.deleteEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shPersistence.afterDeleteEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name initEntity
+       *
+       * @description
+       * Update an entity
+       *
+       * @param {String} id Entity id in string or UUID
+       * @param {Object} entity Entity object which should contain an id
+       *
+       * @returns {promise}
+       */
+      self.shPersistence.initEntity = function() {
+        var deferred, hook, i, len, ref;
+        ref = self.shPersistence.beforeInitEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        $q.when(self.shPersistence.id != null ? self.shPersistence.editEntity(self.shPersistence.id) : self.shPersistence.newEntity()).then(function(success) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.initEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.initEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shPersistence.afterInitEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name getLookup
+       *
+       * @description
+       * Return an array of objects
+       *
+       * @param {String} key The expected local lookups key
+       *
+       * @returns {Object|Array} Reference to `obj`.
+       */
+      self.shPersistence.getLookup = function(key) {
+        var ref;
+        return (ref = self.shPersistence.lookup) != null ? ref[key] : void 0;
+      };
+      return this;
+    };
+    return ShPersistenceHook;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShPersistence
+ *
+ * @description
+ * ShPersistence factory
+ *
+ */
+shPersistenceModule.factory('ShPersistence', [
+  '$q', 'ShPersistenceHook', function($q, ShPersistenceHook) {
+    var ShPersistence;
+    ShPersistence = function(params) {
+      var ref, ref1, ref2, ref3, self, shPersistenceHook;
+      self = this;
+      self.entity = {};
+      self.id = (ref = params.id) != null ? ref : null;
+      self.localLookup = {};
+      self.optParams = (ref1 = params.optParams) != null ? ref1 : {};
+      self.resource = (ref2 = params.resource) != null ? ref2 : null;
+      self.sorting = (ref3 = params.sorting) != null ? ref3 : {
+        id: "desc"
+      };
+      shPersistenceHook = new ShPersistenceHook({
+        shPersistence: self
+      });
+      return this;
+    };
+    return ShPersistence;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShTableFilterStorage
+ *
+ * @description
+ * ShTableFilterStorage factory
+ *
+ */
+shTableModule.factory('ShTableFilterStorage', [
+  '$location', 'localStorageService', function($location, localStorageService) {
+    var ShTableFilterStorage;
+    ShTableFilterStorage = function(params) {
+      var getCurrentFilterParams, getCurrentLocalStorage, self, setFilterCollection, setFilterLabel, setFilterParams, setLocalStorage, storageKey;
+      self = this;
+      self.shTable = params.shTable;
+      storageKey = [self.shTable.name, $location.path()].join('');
+      self.shTable.beforeRefreshGridHooks.push(function() {
+        var collectionKey, currentFilterParams, currentLocalStorage, i, j, key, keysCollections, lastUnderscore, len, len1, new_key, obj, ref, ref1, resultFilterCollection, resultFilterLabel, resultFilterParams;
+        currentFilterParams = (ref = getCurrentFilterParams()) != null ? ref : {};
+        currentLocalStorage = getCurrentLocalStorage() === 'undefined' ? self.shTable.filterParams : getCurrentLocalStorage();
+        resultFilterParams = self.shTable.filterParams.fromShFilter != null ? currentFilterParams : currentLocalStorage;
+        resultFilterLabel = {};
+        resultFilterCollection = {};
+        if (resultFilterParams != null) {
+          keysCollections = Object.keys(resultFilterParams);
+          for (i = 0, len = keysCollections.length; i < len; i++) {
+            key = keysCollections[i];
+            lastUnderscore = key.lastIndexOf("_");
+            new_key = key.substring(0, lastUnderscore);
+            collectionKey = key.substring(lastUnderscore);
+            if (new_key) {
+              if (collectionKey === "_in") {
+                resultFilterCollection[new_key] = [];
+                ref1 = resultFilterParams[key];
+                for (j = 0, len1 = ref1.length; j < len1; j++) {
+                  obj = ref1[j];
+                  resultFilterCollection[new_key].push({
+                    value: obj
+                  });
+                }
+                resultFilterLabel[new_key] = resultFilterParams[key].join(", ");
+              } else {
+                resultFilterLabel[new_key] = resultFilterParams[key];
+              }
+            } else {
+              resultFilterLabel[key] = resultFilterParams[key];
+            }
+          }
+          setFilterParams(resultFilterParams);
+          setLocalStorage(resultFilterParams);
+          setFilterLabel(resultFilterLabel);
+          setFilterCollection(resultFilterCollection);
+        }
+      });
+      getCurrentFilterParams = function() {
+        return self.shTable.filterParams;
+      };
+      getCurrentLocalStorage = function() {
+        return localStorageService.get(storageKey);
+      };
+      setFilterParams = function(currentLocalStorage) {
+        self.shTable.filterParams = currentLocalStorage;
+      };
+      setLocalStorage = function(currentLocalStorage) {
+        return localStorageService.set(storageKey, currentLocalStorage);
+      };
+      setFilterLabel = function(resultFilterLabel) {
+        self.shTable.filterLabel = resultFilterLabel;
+      };
+      setFilterCollection = function(resultFilterCollection) {
+        self.shTable.filterCollection = resultFilterCollection;
+      };
+      return this;
+    };
+    return ShTableFilterStorage;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShTableFilter
+ *
+ * @description
+ * ShTableFilter factory
+ *
+ */
+shTableModule.factory('ShTableFilter', [
+  '$filter', 'HelperService', function($filter, HelperService) {
+    var ShTableFilter;
+    ShTableFilter = function(params) {
+      var base, dateParams, numberParams, self;
+      self = this;
+      self.shTable = params.shTable;
+      if ((base = self.shTable).filterParams == null) {
+        base.filterParams = {};
+      }
+      self.shTable.filterRegion = {
+        visible: true
+      };
+      dateParams = {};
+      self.shTable.filterLabel = {};
+      self.shTable.filterCollection = {};
+      self.shTable.prepareFilterDate = function(shFilter) {
+        dateParams = {};
+        delete self.shTable.filterParams[shFilter + "_eqdate"];
+        delete self.shTable.filterParams[shFilter + "_lteqdate"];
+        return delete self.shTable.filterParams[shFilter + "_gteqdate"];
+      };
+      self.shTable.executeFilterDate = function() {
+        jQuery.extend(self.shTable.filterParams, dateParams);
+        self.shTable.tableParams.$params.pageNumber = 1;
+        return self.shTable.refreshGrid();
+      };
+      self.shTable.filterDateLabel = function(keyword, shFilter, n) {
+        switch (keyword) {
+          case 'ANY':
+            return $filter('translate')('LABEL_ALL');
+          case 'TODAY':
+            return $filter('translate')('LABEL_TODAY');
+          case 'PAST_N_DAYS':
+            return $filter('translate')('LABEL_FROM') + ' ' + (n === 1 ? $filter('translate')('LABEL_YESTERDAY') : moment().subtract(n, 'days').fromNow());
+          case 'PAST_N_WEEKS':
+            return $filter('translate')('LABEL_FROM') + ' ' + moment().subtract(n, 'weeks').fromNow();
+          case 'PAST_N_MONTHS':
+            return $filter('translate')('LABEL_FROM') + ' ' + moment().subtract(n, 'months').fromNow();
+          case 'PAST_N_YEARS':
+            return $filter('translate')('LABEL_FROM') + ' ' + moment().subtract(n, 'years').fromNow();
+          case 'NEXT_N_DAYS':
+            if (n === 1) {
+              return $filter('translate')('LABEL_THRU') + ' ' + $filter('translate')('LABEL_TOMORROW');
+            } else {
+              return moment().add(n, 'days').fromNow() + ' ' + $filter('translate')('LABEL_AHEAD');
+            }
+            break;
+          case 'NEXT_N_WEEKS':
+            return moment().add(n, 'weeks').fromNow() + ' ' + $filter('translate')('LABEL_AHEAD');
+          case 'NEXT_N_MONTHS':
+            return moment().add(n, 'months').fromNow() + ' ' + $filter('translate')('LABEL_AHEAD');
+          case 'NEXT_N_YEARS':
+            return moment().add(n, 'years').fromNow() + ' ' + $filter('translate')('LABEL_AHEAD');
+        }
+      };
+      self.shTable.filterDate = function(keyword, shFilter, n) {
+        var fromDate, thruDate;
+        if (keyword === 'RANGE' || keyword === 'CERTAIN') {
+          switch (keyword) {
+            case 'RANGE':
+              fromDate = self.shTable.filterParams[shFilter + "_gteqdate"];
+              thruDate = self.shTable.filterParams[shFilter + "_lteqdate"];
+              self.shTable.prepareFilterDate(shFilter);
+              self.shTable.filterDateRange(shFilter, fromDate, thruDate);
+              self.shTable.filterLabel[shFilter] = moment(fromDate).format('DD-MM-YYYY') + ' - ' + moment(thruDate).format('DD-MM-YYYY');
+              break;
+            case 'CERTAIN':
+              fromDate = self.shTable.filterParams[shFilter + "_gteqdate"];
+              thruDate = fromDate;
+              self.shTable.prepareFilterDate(shFilter);
+              self.shTable.filterDateRange(shFilter, fromDate, thruDate);
+              self.shTable.filterLabel[shFilter] = moment(fromDate).format('DD-MM-YYYY');
+          }
+        } else {
+          self.shTable.prepareFilterDate(shFilter);
+          switch (keyword) {
+            case 'ANY':
+              self.shTable.filterDateAny(shFilter);
+              break;
+            case 'TODAY':
+              self.shTable.filterDateToday(shFilter);
+              break;
+            case 'PAST_N_DAYS':
+              self.shTable.filterDatePastNDays(shFilter, n);
+              break;
+            case 'PAST_N_WEEKS':
+              self.shTable.filterDatePastNWeeks(shFilter, n);
+              break;
+            case 'PAST_N_MONTHS':
+              self.shTable.filterDatePastNMonths(shFilter, n);
+              break;
+            case 'PAST_N_YEARS':
+              self.shTable.filterDatePastNYears(shFilter, n);
+              break;
+            case 'NEXT_N_DAYS':
+              self.shTable.filterDateNextNDays(shFilter, n);
+              break;
+            case 'NEXT_N_WEEKS':
+              self.shTable.filterDateNextNWeeks(shFilter, n);
+              break;
+            case 'NEXT_N_MONTHS':
+              self.shTable.filterDateNextNMonths(shFilter, n);
+              break;
+            case 'NEXT_N_YEARS':
+              self.shTable.filterDateNextNYears(shFilter, n);
+          }
+          self.shTable.filterLabel[shFilter] = self.shTable.filterDateLabel(keyword, shFilter, n);
+        }
+        return self.shTable.executeFilterDate();
+      };
+      self.shTable.filterDateAny = function(shFilter) {
+
+        /* */
+      };
+      self.shTable.filterDateToday = function(shFilter) {
+        dateParams[shFilter + "_eqdate"] = moment().format('YYYY-MM-DD');
+      };
+      self.shTable.filterDatePastNDays = function(shFilter, n) {
+        dateParams[shFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
+        dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'days').format('YYYY-MM-DD');
+      };
+      self.shTable.filterDatePastNWeeks = function(shFilter, n) {
+        dateParams[shFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
+        dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'weeks').format('YYYY-MM-DD');
+      };
+      self.shTable.filterDatePastNMonths = function(shFilter, n) {
+        dateParams[shFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
+        dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'months').format('YYYY-MM-DD');
+      };
+      self.shTable.filterDatePastNYears = function(shFilter, n) {
+        dateParams[shFilter + "_lteqdate"] = moment().format('YYYY-MM-DD');
+        dateParams[shFilter + "_gteqdate"] = moment().subtract(n, 'years').format('YYYY-MM-DD');
+      };
+      self.shTable.filterDateNextNDays = function(shFilter, n) {
+        dateParams[shFilter + "_lteqdate"] = moment().add(n, 'days').format('YYYY-MM-DD');
+        dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
+      };
+      self.shTable.filterDateNextNWeeks = function(shFilter, n) {
+        dateParams[shFilter + "_lteqdate"] = moment().add(n, 'weeks').format('YYYY-MM-DD');
+        dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
+      };
+      self.shTable.filterDateNextNMonths = function(shFilter, n) {
+        dateParams[shFilter + "_lteqdate"] = moment().add(n, 'months').format('YYYY-MM-DD');
+        dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
+      };
+      self.shTable.filterDateNextNYears = function(shFilter, n) {
+        dateParams[shFilter + "_lteqdate"] = moment().add(n, 'years').format('YYYY-MM-DD');
+        dateParams[shFilter + "_gteqdate"] = moment().format('YYYY-MM-DD');
+      };
+      self.shTable.filterDateRange = function(shFilter, fromDate, thruDate) {
+        dateParams[shFilter + "_gteqdate"] = fromDate;
+        dateParams[shFilter + "_lteqdate"] = thruDate;
+      };
+      numberParams = {};
+      self.shTable.prepareFilterNumber = function(shFilter) {
+        numberParams = {};
+        delete self.shTable.filterParams[shFilter + "_eq"];
+        delete self.shTable.filterParams[shFilter + "_lteq"];
+        return delete self.shTable.filterParams[shFilter + "_gteq"];
+      };
+      self.shTable.executeFilterNumber = function() {
+        jQuery.extend(self.shTable.filterParams, numberParams);
+        self.shTable.tableParams.$params.pageNumber = 1;
+        return self.shTable.refreshGrid();
+      };
+      self.shTable.filterNumberLabel = function(keyword, shFilter, leftNumber, rightNumber) {
+        var eqNumber;
+        if (leftNumber == null) {
+          leftNumber = numberParams[shFilter + "_gteq"];
+        }
+        if (rightNumber == null) {
+          rightNumber = numberParams[shFilter + "_lteq"];
+        }
+        eqNumber = numberParams[shFilter + "_eq"] != null ? numberParams[shFilter + "_eq"] : leftNumber;
+        switch (keyword) {
+          case 'ANY':
+            return $filter('translate')('LABEL_ALL');
+          case 'BETWEEN':
+            return $filter('number')(leftNumber) + ' - ' + $filter('number')(rightNumber);
+          case 'LOWER_THAN':
+            return '≤ ' + $filter('number')(rightNumber);
+          case 'GREATER_THAN':
+            return '≥ ' + $filter('number')(leftNumber);
+          case 'RANGE':
+            if ((leftNumber != null) && (rightNumber != null)) {
+              if (leftNumber === rightNumber) {
+                return $filter('number')(leftNumber);
+              } else {
+                return $filter('number')(leftNumber) + ' - ' + $filter('number')(rightNumber);
+              }
+            } else if (leftNumber != null) {
+              return '≥ ' + $filter('number')(leftNumber);
+            } else if (rightNumber != null) {
+              return '≤ ' + $filter('number')(rightNumber);
+            } else {
+              return $filter('translate')('LABEL_ALL');
+            }
+            break;
+          case 'CERTAIN':
+            return $filter('number')(eqNumber);
+        }
+      };
+      self.shTable.filterNumber = function(keyword, shFilter, leftNumber, rightNumber) {
+        var eqNumber;
+        switch (keyword) {
+          case 'ANY':
+            self.shTable.prepareFilterNumber(shFilter);
+            self.shTable.filterNumberAny(shFilter);
+            break;
+          case 'BETWEEN':
+            self.shTable.prepareFilterNumber(shFilter);
+            self.shTable.filterNumberRange(shFilter, leftNumber, rightNumber);
+            break;
+          case 'LOWER_THAN':
+            rightNumber = self.shTable.filterParams[shFilter + "_lteq"];
+            self.shTable.prepareFilterNumber(shFilter);
+            self.shTable.filterNumberRange(shFilter, null, rightNumber);
+            break;
+          case 'GREATER_THAN':
+            leftNumber = self.shTable.filterParams[shFilter + "_gteq"];
+            self.shTable.prepareFilterNumber(shFilter);
+            self.shTable.filterNumberRange(shFilter, leftNumber, null);
+            break;
+          case 'RANGE':
+            leftNumber = self.shTable.filterParams[shFilter + "_gteq"];
+            rightNumber = self.shTable.filterParams[shFilter + "_lteq"];
+            self.shTable.prepareFilterNumber(shFilter);
+            self.shTable.filterNumberRange(shFilter, leftNumber, rightNumber);
+            break;
+          case 'CERTAIN':
+            eqNumber = self.shTable.filterParams[shFilter + "_eq"];
+            self.shTable.prepareFilterNumber(shFilter);
+            self.shTable.filterNumberSpecific(shFilter, eqNumber);
+        }
+        self.shTable.filterLabel[shFilter] = self.shTable.filterNumberLabel(keyword, shFilter);
+        return self.shTable.executeFilterNumber();
+      };
+      self.shTable.filterNumberAny = function(shFilter) {};
+      self.shTable.filterNumberSpecific = function(shFilter, number) {
+        numberParams[shFilter + "_eq"] = number;
+      };
+      self.shTable.filterNumberRange = function(shFilter, leftNumber, rightNumber) {
+        if (leftNumber != null) {
+          numberParams[shFilter + "_gteq"] = leftNumber;
+        }
+        if (rightNumber != null) {
+          numberParams[shFilter + "_lteq"] = rightNumber;
+        }
+        if ((leftNumber != null) && (rightNumber != null) && leftNumber > rightNumber) {
+          numberParams[shFilter + "_gteq"] = rightNumber;
+          numberParams[shFilter + "_lteq"] = leftNumber;
+        }
+      };
+      self.shTable.filterTextCont = function(shFilter) {
+        self.shTable.tableParams.$params.pageNumber = 1;
+        self.shTable.filterParams['fromShFilter'] = true;
+        return self.shTable.refreshGrid();
+      };
+      self.shTable.getLabelTextCont = function(shFilter) {
+        return self.shTable.filterParams[shFilter + "_cont"] || null;
+      };
+      self.shTable.filterYearBetween = function(shFilter, year) {
+        self.shTable.filterParams[shFilter + '_month'] = null;
+        self.shTable.filterParams[shFilter + '_year'] = year;
+        self.shTable.filterParams[shFilter + '_lteqdate'] = year + '-12-31';
+        self.shTable.filterParams[shFilter + '_gteqdate'] = year + '-01-01';
+        self.shTable.filterParams['fromShFilter'] = true;
+        return self.shTable.refreshGrid();
+      };
+      self.shTable.filterMonthBetween = function(shFilter, month) {
+        var mDate, year;
+        if (self.shTable.filterParams[shFilter + '_year']) {
+          year = self.shTable.filterParams[shFilter + '_year'];
+          month = ('00' + month).slice(-2);
+          self.shTable.filterParams[shFilter + '_month'] = month;
+          mDate = moment(year + '-' + month + '-01');
+          self.shTable.filterParams[shFilter + '_lteqdate'] = mDate.endOf('month').format('YYYY-MM-DD');
+          self.shTable.filterParams[shFilter + '_gteqdate'] = mDate.startOf('month').format('YYYY-MM-DD');
+        }
+        self.shTable.filterParams['fromShFilter'] = true;
+        return self.shTable.refreshGrid();
+      };
+      self.shTable.filterInCollection = function(shFilter, key) {
+        if (key == null) {
+          key = null;
+        }
+        if (key != null) {
+          self.shTable.filterLabel[shFilter] = self.shTable.filterCollection[shFilter].map(function(o) {
+            return $filter('translate')(o[key + '']);
+          }).join(', ');
+          self.shTable.filterParams[shFilter + '_in'] = self.shTable.filterCollection[shFilter].map(function(o) {
+            return o[key + ''];
+          });
+        } else {
+          self.shTable.filterLabel[shFilter] = self.shTable.filterCollection[shFilter].map(function(o) {
+            return $filter('translate')(o);
+          }).join(', ');
+          self.shTable.filterParams[shFilter + '_in'] = self.shTable.filterCollection[shFilter];
+        }
+        self.shTable.filterParams['fromShFilter'] = true;
+        return self.shTable.refreshGrid();
+      };
+      self.shTable.collectionNavbarFilterSelect = function(shFilter, item, key) {
+        if (key == null) {
+          key = null;
+        }
+        if (self.shTable.filterCollection[shFilter] == null) {
+          self.shTable.filterCollection[shFilter] = [];
+        }
+        HelperService.rowSelect(item, self.shTable.filterCollection[shFilter], key);
+        return self.shTable.filterInCollection(shFilter, key);
+      };
+      self.shTable.collectionNavbarFilterDeselect = function(shFilter, item, key) {
+        if (key == null) {
+          key = null;
+        }
+        if (self.shTable.filterCollection[shFilter] == null) {
+          self.shTable.filterCollection[shFilter] = [];
+        }
+        HelperService.rowDeselect(item, self.shTable.filterCollection[shFilter], key);
+        return self.shTable.filterInCollection(shFilter, key);
+      };
+      self.shTable.collectionNavbarFilterIsSelected = function(shFilter, item, key) {
+        if (key == null) {
+          key = null;
+        }
+        if (self.shTable.filterCollection[shFilter] == null) {
+          self.shTable.filterCollection[shFilter] = [];
+        }
+        return HelperService.isRowSelected(item, self.shTable.filterCollection[shFilter], key);
+      };
+      self.shTable.collectionNavbarClearSelection = function(shFilter, key) {
+        if (key == null) {
+          key = null;
+        }
+        if (self.shTable.filterCollection[shFilter] == null) {
+          self.shTable.filterCollection[shFilter] = [];
+        }
+        HelperService.clearRowSelection(self.shTable.filterCollection[shFilter]);
+        return self.shTable.filterInCollection(shFilter, key);
+      };
+      self.shTable.collectionNavbarFilterIsSelectionEmpty = function(shFilter, key) {
+        if (key == null) {
+          key = null;
+        }
+        if (self.shTable.filterCollection[shFilter] == null) {
+          self.shTable.filterCollection[shFilter] = [];
+        }
+        return HelperService.isRowSelectionEmpty(self.shTable.filterCollection[shFilter]);
+      };
+      self.shTable.toggleFilterRegion = function() {
+        self.shTable.filterRegion.visible = !self.shTable.filterRegion.visible;
+      };
+      self.shTable.resetFilter = function() {
+        var k, ref, v;
+        self.shTable.filterParams = {};
+        self.shTable.filterLabel = {};
+        ref = self.shTable.filterCollection;
+        for (k in ref) {
+          v = ref[k];
+          HelperService.clearRowSelection(self.shTable.filterCollection[k]);
+        }
+        self.shTable.filterParams['fromShFilter'] = true;
+        return self.shTable.refreshGrid();
+      };
+      self.shTable.isNoFilter = function() {
+        return jQuery.isEmptyObject(self.shTable.filterParams);
+      };
+      return this;
+    };
+    return ShTableFilter;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShTableHelper
+ *
+ * @description
+ * ShTableHelper factory
+ *
+ */
+shTableModule.factory('ShTableHelper', [
+  '$q', function($q) {
+    var ShTableHelper;
+    ShTableHelper = function(params) {
+      var self;
+      self = this;
+      self.shTable = params.shTable;
+
+      /**
+       * @ngdoc method
+       * @name sortableClass
+       *
+       * @description
+       * Get CSS class based on sortable state
+       *
+       * @param {String} fieldName Field/column name
+       *
+       * @returns {String} class for CSS usage
+       */
+      self.shTable.sortableClass = function(fieldName) {
+        if (self.shTable.tableParams.isSortBy(fieldName, 'asc')) {
+          return 'sortable sort-asc';
+        } else if (self.shTable.tableParams.isSortBy(fieldName, 'desc')) {
+          return 'sortable sort-desc';
+        } else {
+          return 'sortable';
+        }
+      };
+
+      /**
+       * @ngdoc method
+       * @name sortableClick
+       *
+       * @description
+       * Called from ng-click as <th> attributes within ng-table
+       * Call ng-table tableParams sorting
+       *
+       * @param {String} fieldName Field/column name
+       *
+       * @returns {String} class for CSS usage
+       */
+      self.shTable.sortableClick = function(fieldName) {
+        var newDirection;
+        newDirection = self.shTable.tableParams.isSortBy(fieldName, 'asc') ? 'desc' : 'asc';
+        self.shTable.tableParams.sortData(fieldName, newDirection);
+        self.shTable.refreshGrid();
+      };
+
+      /**
+       * @ngdoc method
+       * @name rowRestEventClass
+       *
+       * @description
+       * Get CSS class based on state
+       * Priority is important. `'recently-deleted'` must come first, then `'recently-updated'` and `'recently-created'`
+       *
+       * @param {Object} entity Entity object or string `UUID`
+       *
+       * @returns {String} class for CSS usage
+       */
+      self.shTable.rowRestEventClass = function(obj) {
+        if (self.shTable.isRecentlyDeleted(obj)) {
+          return 'recently-deleted';
+        }
+        if (self.shTable.isRecentlyUpdated(obj)) {
+          return 'recently-updated';
+        }
+        if (self.shTable.isRecentlyCreated(obj)) {
+          return 'recently-created';
+        }
+        return '';
+      };
+
+      /**
+       * @ngdoc method
+       * @name isRecentlyCreated
+       *
+       * @description
+       * Return true if given object/entity/entity-id is recently created (found in createdIds)
+       *
+       * @param {Object} entity Entity object or string `UUID`
+       *
+       * @returns {Boolean}
+       */
+      self.shTable.isRecentlyCreated = function(obj) {
+        return self.shTable.createdIds.indexOf((obj != null ? obj.id : void 0) || obj) >= 0;
+      };
+
+      /**
+       * @ngdoc method
+       * @name isRecentlyUpdated
+       *
+       * @description
+       * Return true if given object/entity/entity-id is recently updated (found in updatedIds)
+       *
+       * @param {Object} entity Entity object or string `UUID`
+       *
+       * @returns {Boolean}
+       */
+      self.shTable.isRecentlyUpdated = function(obj) {
+        return self.shTable.updatedIds.indexOf((obj != null ? obj.id : void 0) || obj) >= 0;
+      };
+
+      /**
+       * @ngdoc method
+       * @name isRecentlyDeleted
+       *
+       * @description
+       * Return true if given object/entity/entity-id is recently deleted (found in deletedIds)
+       *
+       * @param {Object} entity Entity object or string `UUID`
+       *
+       * @returns {Boolean}
+       */
+      self.shTable.isRecentlyDeleted = function(obj) {
+        return self.shTable.deletedIds.indexOf((obj != null ? obj.id : void 0) || obj) >= 0;
+      };
+      return this;
+    };
+    return ShTableHelper;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShTableHookNotification
+ *
+ * @description
+ * ShTableHookNotification factory
+ *
+ */
+shTableModule.factory('ShTableHookNotification', [
+  'ShNotification', function(ShNotification) {
+    var ShTableHookNotification;
+    ShTableHookNotification = function(params) {
+      var self;
+      self = this;
+      self.shTable = params.shTable;
+      self.shTable.getEntitiesErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      self.shTable.newEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      self.shTable.createEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      self.shTable.editEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      self.shTable.updateEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      self.shTable.deleteEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      return this;
+    };
+    return ShTableHookNotification;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShTableHook
+ *
+ * @description
+ * ShTableHook factory
+ *
+ */
+shTableModule.factory('ShTableHook', [
+  '$q', 'localStorageService', 'ShApi', 'ShApiHook', 'ShTableHookNotification', function($q, localStorageService, ShApi, ShApiHook, ShTableHookNotification) {
+    var ShTableHook;
+    ShTableHook = function(params) {
+      var base, base1, base2, base3, self, shApi, shApiHook, shTableHookNotification;
+      self = this;
+      self.shTable = params.shTable;
+      if ((base = self.shTable).resource == null) {
+        base.resource = null;
+      }
+      if ((base1 = self.shTable).entity == null) {
+        base1.entity = {};
+      }
+      if ((base2 = self.shTable).lookup == null) {
+        base2.lookup = {};
+      }
+      if ((base3 = self.shTable).optParams == null) {
+        base3.optParams = {};
+      }
+      self.shTable.createdIds = [];
+      self.shTable.updatedIds = [];
+      self.shTable.deletedIds = [];
+      self.shTable.beforeGetEntitiesHooks = [];
+      self.shTable.getEntitiesSuccessHooks = [];
+      self.shTable.getEntitiesErrorHooks = [];
+      self.shTable.afterGetEntitiesHooks = [];
+      self.shTable.beforeNewEntityHooks = [];
+      self.shTable.newEntitySuccessHooks = [];
+      self.shTable.newEntityErrorHooks = [];
+      self.shTable.afterNewEntityHooks = [];
+      self.shTable.beforeCreateEntityHooks = [];
+      self.shTable.createEntitySuccessHooks = [];
+      self.shTable.createEntityErrorHooks = [];
+      self.shTable.afterCreateEntityHooks = [];
+      self.shTable.beforeEditEntityHooks = [];
+      self.shTable.editEntitySuccessHooks = [];
+      self.shTable.editEntityErrorHooks = [];
+      self.shTable.afterEditEntityHooks = [];
+      self.shTable.beforeUpdateEntityHooks = [];
+      self.shTable.updateEntitySuccessHooks = [];
+      self.shTable.updateEntityErrorHooks = [];
+      self.shTable.afterUpdateEntityHooks = [];
+      self.shTable.beforeDeleteEntityHooks = [];
+      self.shTable.deleteEntitySuccessHooks = [];
+      self.shTable.deleteEntityErrorHooks = [];
+      self.shTable.afterDeleteEntityHooks = [];
+      shApi = new ShApi({
+        resource: self.shTable.resource
+      });
+      shApiHook = new ShApiHook({
+        shApiInstance: self.shTable
+      });
+      shTableHookNotification = new ShTableHookNotification({
+        shTable: self.shTable
+      });
+
+      /**
+       * @ngdoc method
+       * @name getEntities
+       *
+       * @description
+       * Get list of entities based on `optParams`
+       *
+       * @returns {promise}
+       */
+      self.shTable.getEntities = function() {
+        var deferred, hook, i, len, ref;
+        ref = self.shTable.beforeGetEntitiesHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        shApi.index(self.shTable.optParams).then(function(success) {
+          var j, len1, ref1;
+          ref1 = self.shTable.getEntitiesSuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shTable.getEntitiesErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shTable.afterGetEntitiesHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name newEntity
+       *
+       * @description
+       * New an entity
+       *
+       * @returns {promise}
+       */
+      self.shTable.newEntity = function() {
+        var deferred, hook, i, len, ref;
+        ref = self.shTable.beforeNewEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        shApi["new"](self.shTable.optParams).then(function(success) {
+          var j, len1, ref1;
+          self.shTable.entity = success.data;
+          if (success.lookup != null) {
+            self.shTable.lookup = success.lookup;
+          }
+          ref1 = self.shTable.newEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shTable.newEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shTable.afterNewEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name createEntity
+       *
+       * @description
+       * Create/persist an entity to database
+       *
+       * @param {Object} entity Entity object which should not contain an id
+       *
+       * @returns {promise}
+       */
+      self.shTable.createEntity = function(entity) {
+        var data, deferred, hook, i, len, ref;
+        ref = self.shTable.beforeCreateEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        data = {
+          data: entity
+        };
+        if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
+          data = entity;
+        }
+        shApi.create(self.shTable.optParams, data).then(function(success) {
+          var j, len1, ref1;
+          self.shTable.createdIds.push(success.data.id);
+          self.shTable.entity = success.data;
+          if (success.lookup != null) {
+            self.shTable.lookup = success.lookup;
+          }
+          self.shTable.refreshGrid();
+          ref1 = self.shTable.createEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shTable.createEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shTable.afterCreateEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name editEntity
+       *
+       * @description
+       * Edit an entity
+       *
+       * @param {String} id Entity id in string or UUID
+       *
+       * @returns {promise}
+       */
+      self.shTable.editEntity = function(id) {
+        var deferred, hook, i, len, ref;
+        ref = self.shTable.beforeEditEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        shApi.edit(id, self.shTable.optParams).then(function(success) {
+          var j, len1, ref1;
+          self.shTable.entity = success.data;
+          if (success.lookup != null) {
+            self.shTable.lookup = success.lookup;
+          }
+          ref1 = self.shTable.editEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shTable.editEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shTable.afterEditEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name updateEntity
+       *
+       * @description
+       * Update an entity
+       *
+       * @param {String} id Entity id in string or UUID
+       * @param {Object} entity Entity object which should contain an id
+       *
+       * @returns {promise}
+       */
+      self.shTable.updateEntity = function(id, entity) {
+        var data, deferred, hook, i, len, ref;
+        ref = self.shTable.beforeUpdateEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        data = {
+          data: entity
+        };
+        if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
+          data = entity;
+        }
+        shApi.update(id, self.shTable.optParams, data).then(function(success) {
+          var j, len1, ref1;
+          self.shTable.updatedIds.push(success.data.id);
+          self.shTable.entity = success.data;
+          if (success.lookup != null) {
+            self.shTable.lookup = success.lookup;
+          }
+          self.shTable.refreshGrid();
+          ref1 = self.shTable.updateEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shTable.updateEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shTable.afterUpdateEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name deleteEntity
+       *
+       * @description
+       * Delete an entity
+       *
+       * @param {String} id Entity id in string or UUID
+       *
+       * @returns {promise}
+       */
+      self.shTable.deleteEntity = function(id) {
+        var deferred, hook, i, len, ref;
+        ref = self.shTable.beforeDeleteEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        shApi["delete"](id, self.shTable.optParams).then(function(success) {
+          var j, len1, ref1;
+          self.shTable.deletedIds.push(id);
+          self.shTable.refreshGrid();
+          ref1 = self.shTable.deleteEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shTable.deleteEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shTable.afterDeleteEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name getLookup
+       *
+       * @description
+       * Return an array of objects
+       *
+       * @param {String} key The expected local lookups key
+       *
+       * @returns {Object|Array} Reference to `obj`.
+       */
+      self.shTable.getLookup = function(key) {
+        var ref;
+        return (ref = self.shTable.lookup) != null ? ref[key] : void 0;
+      };
+      return this;
+    };
+    return ShTableHook;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShTableParamsHook
+ *
+ * @description
+ * ShTableParamsHook factory
+ *
+ */
+shTableModule.factory('ShTableParamsHook', [
+  '$q', function($q) {
+    var ShTableParamsHook;
+    ShTableParamsHook = function(params) {
+      var self;
+      self = this;
+      self.shTable = params.shTable;
+      self.shTable.beforeRefreshGridHooks = [];
+      self.shTable.refreshGridSuccessHooks = [];
+      self.shTable.refreshGridErrorHooks = [];
+      self.shTable.afterRefreshGridHooks = [];
+
+      /**
+       * @ngdoc method
+       * @name goToPage
+       *
+       * @description
+       * Assign page number to `this.tableParams.$params.pageNumber`, then calling `this.refreshGrid()` in appropriate format
+       *
+       * @returns {*}
+       */
+      self.shTable.goToPage = function(pageNumber, perPage) {
+        if (pageNumber != null) {
+          self.shTable.tableParams.$params.perPage = perPage || self.shTable.tableParams.$params.perPage;
+          self.shTable.tableParams.$params.pageNumber = pageNumber;
+        }
+        self.shTable.refreshGrid();
+      };
+
+      /**
+       * @ngdoc method
+       * @name refreshGrid
+       *
+       * @description
+       * Calling `tableParams.reload()`
+       *
+       * @returns {*}
+       */
+      self.shTable.refreshGrid = function() {
+        var deferred, hook, i, len, ref;
+        ref = self.shTable.beforeRefreshGridHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        self.shTable.tableParams.reload().then(function(success) {
+          var j, len1, ref1;
+          ref1 = self.shTable.refreshGridSuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shTable.refreshGridErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shTable.afterRefreshGridHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name getPagedDataAsync
+       *
+       * @description
+       * Calling `this.getEntities()` after processing `this.optParams`
+       *
+       * @returns {promise}
+       */
+      self.shTable.getPagedDataAsync = function() {
+        var deferred;
+        deferred = $q.defer();
+        self.shTable.getEntities().then(function(success) {
+          return deferred.resolve({
+            items: success.data.items,
+            totalCount: success.data.total_server_items
+          });
+        });
+        return deferred.promise;
+      };
+      return this;
+    };
+    return ShTableParamsHook;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShTableProcessor
+ *
+ * @description
+ * ShTableProcessor factory
+ *
+ */
+shTableModule.factory('ShTableProcessor', [
+  function() {
+    var ShTableProcessor;
+    ShTableProcessor = function() {
+      var self;
+      self = this;
+
+      /**
+       * @ngdoc method
+       * @name generateGridParams
+       *
+       * @description
+       * Generate appropriate GET parameters from `tableParams.$params`.
+       * Providing `column_defs`, `page`, `per_page`, `sort_info`, and `filter_params`
+       *
+       * @returns {Object} Grid params object
+       */
+      self.generateGridParams = function(opts) {
+        var directions, fields, gridParams, params, property;
+        params = opts.params;
+        fields = [];
+        directions = [];
+        for (property in params.sorting) {
+          fields.push(property);
+          directions.push(params.sorting[property]);
+        }
+        gridParams = {
+          page: params.pageNumber,
+          per_page: params.perPage,
+          sort_info: JSON.stringify({
+            fields: fields,
+            directions: directions
+          }),
+          filter_params: {},
+          column_defs: JSON.stringify(self.getProcessedColumnDefs(opts.columnDefs))
+        };
+        if (opts.filterParams) {
+          angular.extend(gridParams.filter_params, opts.filterParams);
+        }
+        return gridParams;
+      };
+
+      /**
+       * @ngdoc method
+       * @name getProcessedColumnDefs
+       *
+       * @description
+       * Returns processedColumnDefs
+       *
+       * @param Array columnDefs
+       *
+       * @returns Array class for CSS usage
+       */
+      self.getProcessedColumnDefs = function(columnDefs) {
+        var columnDef, i, len, processedColumnDefs;
+        processedColumnDefs = [];
+        for (i = 0, len = columnDefs.length; i < len; i++) {
+          columnDef = columnDefs[i];
+          if (columnDef.field !== '') {
+            processedColumnDefs.push({
+              field: columnDef.field
+            });
+          }
+        }
+        return processedColumnDefs;
+      };
+      return this;
+    };
+    return ShTableProcessor;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShTableParams
+ *
+ * @description
+ * ShTableParams factory
+ *
+ */
+shTableModule.factory('ShTable', [
+  '$q', 'ShTableFilter', 'ShTableHelper', 'ShTableHook', 'ShTableParamsHook', 'ShTableProcessor', 'ShTableFilterStorage', 'ShTableParams', function($q, ShTableFilter, ShTableHelper, ShTableHook, ShTableParamsHook, ShTableProcessor, ShTableFilterStorage, ShTableParams) {
+
+    /**
+     * @ngdoc method
+     * @name ShTableParams
+     *
+     * @param {}
+     *
+     * @returns ShTableParams
+     *
+     * @description
+     * ShTableParams self object
+     *
+     */
+    var ShTable;
+    ShTable = function(params) {
+      var ref, ref1, ref2, ref3, ref4, ref5, ref6, self, shTableFilter, shTableFilterStorage, shTableHelper, shTableHook, shTableParamsHook, shTableProcessor;
+      self = this;
+      self.entity = {};
+      self.columnDefs = (ref = params.columnDefs) != null ? ref : [];
+      self.filterParams = (ref1 = params.filterParams) != null ? ref1 : {};
+      self.localLookup = {};
+      self.name = (ref2 = params.name) != null ? ref2 : '';
+      self.optParams = (ref3 = params.optParams) != null ? ref3 : {};
+      self.perPage = (ref4 = params.perPage) != null ? ref4 : 10;
+      self.resource = (ref5 = params.resource) != null ? ref5 : null;
+      self.sorting = (ref6 = params.sorting) != null ? ref6 : {};
+      shTableFilter = new ShTableFilter({
+        shTable: self
+      });
+      shTableHelper = new ShTableHelper({
+        shTable: self
+      });
+      shTableHook = new ShTableHook({
+        shTable: self
+      });
+      shTableParamsHook = new ShTableParamsHook({
+        shTable: self
+      });
+      shTableProcessor = new ShTableProcessor();
+      shTableFilterStorage = new ShTableFilterStorage({
+        shTable: self
+      });
+      self.tableParams = new ShTableParams({
+        pageNumber: 1,
+        perPage: self.perPage,
+        sortInfo: 'this is sort info',
+        sorting: self.sorting,
+        getData: function() {
+          var gridParams;
+          gridParams = shTableProcessor.generateGridParams({
+            params: self.tableParams.$params,
+            columnDefs: self.columnDefs,
+            filterParams: self.filterParams
+          });
+          angular.extend(self.optParams, gridParams);
+          return self.getPagedDataAsync();
+        }
+      });
+      return this;
+    };
+    return ShTable;
+  }
+]);
+
 angular.module('sh.filter.collection', []).filter("shFilterCollection", function() {
   return function(collection, callback, entity) {
     if (collection && entity) {
