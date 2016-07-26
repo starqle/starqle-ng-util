@@ -54,14 +54,24 @@ angular.module('sh.segment', []
   restrict: 'C'
   scope: {}
   link: (scope, elem, attrs) ->
-    scope.height = 0
+    # scope.height = 0
+
+    # scope.$watch ->
+    #   scope.height = elem.outerHeight()
+    #   return
+
+    # scope.$watch 'height', (newVal, oldVal) ->
+    #   elem.next().css( 'top', newVal + 'px' )
+    #   return
+
 
     scope.$watch ->
-      scope.height = elem.outerHeight()
+      newVal = elem.outerHeight()
+      elem.next().css( 'top', newVal + 'px' )
       return
 
-    scope.$watch 'height', (newVal, oldVal) ->
-      elem.next().css( 'top', newVal + 'px' )
+
+    return
 
 
 
@@ -72,14 +82,24 @@ angular.module('sh.segment', []
   restrict: 'C'
   scope: {}
   link: (scope, elem, attrs) ->
-    scope.height = 0
+    # scope.height = 0
+
+    # scope.$watch ->
+    #   scope.height = elem.outerHeight()
+    #   return
+
+    # scope.$watch 'height', (newVal, oldVal) ->
+    #   elem.prev().css( 'bottom', newVal + 'px' )
+    #   return
+
 
     scope.$watch ->
-      scope.height = elem.outerHeight()
+      newVal = elem.outerHeight()
+      elem.prev().css( 'bottom', newVal + 'px' )
       return
 
-    scope.$watch 'height', (newVal, oldVal) ->
-      elem.prev().css( 'bottom', newVal + 'px' )
+
+    return
 
 
 
@@ -185,5 +205,7 @@ angular.module('sh.segment', []
     scope.$watch ->
       refreshFreezedPane()
       return
+
+    return
   ]
 )
