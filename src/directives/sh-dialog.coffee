@@ -71,7 +71,6 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
     # using scope for decorateable
     #
     scope.showModal = (elmt) ->
-      console.log 'bar'
       # TODO
       $timeout(
         () ->
