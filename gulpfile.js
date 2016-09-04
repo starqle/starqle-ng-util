@@ -9,6 +9,7 @@ var gulp = require('gulp'),
     gulpJade = require('gulp-jade'),
     gulpPlumber = require('gulp-plumber'),
     gulpSass = require('gulp-sass'),
+    gulpUglify = require('gulp-uglify'),
     gulpUtil = require('gulp-util'),
     gulpWatch = require('gulp-watch'),
     modRewrite = require('connect-modrewrite'),
@@ -20,6 +21,8 @@ var errorHandler = function(error) {
 }
 
 var dest = 'dist/';
+// var dest = '../job-verp-web/.tmp/bower_components/starqle-ng-util/dist/';
+// var dest = '../sm-fulcrum-web/.tmp/bower_components/starqle-ng-util/dist/';
 
 // ----------------------------------------------------------------------------
 // Production tasks
@@ -89,9 +92,14 @@ gulp.task('build-coffee', ['build-clean'], function() {
     'src/main.coffee',
     'src/outro.js'
   ]
-  return gulp.src(source)
+  gulp.src(source)
     .pipe(gulpIf('*.coffee', gulpCoffee({bare: true, map: true, compile: true})))
     .pipe(gulpConcat("starqle-ng-util.js"))
+    .pipe(gulp.dest(dest));
+  return gulp.src(source)
+    .pipe(gulpIf('*.coffee', gulpCoffee({bare: true, map: true, compile: true})))
+    .pipe(gulpConcat("starqle-ng-util.min.js"))
+    .pipe(gulpUglify())
     .pipe(gulp.dest(dest));
 });
 
