@@ -937,7 +937,8 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
         shGreaterThanEqual: '=?',
         shNumberInvalidMessage: '@?',
         shNumberHint: '@?',
-        ngModel: '='
+        ngModel: '=',
+        decimalPlaces: '@?'
       },
       require: '?ngModel',
       link: function(scope, element, attributes, ngModel) {
@@ -971,6 +972,9 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
           var number;
           number = String(value).replace(/\,/g, '');
           number = parseFloat(number);
+          if (scope.decimalPlaces != null) {
+            number = parseFloat(number.toFixed(scope.decimalPlaces));
+          }
           if (isNaN(number)) {
             return null;
           }
