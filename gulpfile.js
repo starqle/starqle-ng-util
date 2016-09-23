@@ -21,8 +21,6 @@ var errorHandler = function(error) {
 }
 
 var dest = 'dist/';
-// var dest = '../job-verp-web/.tmp/bower_components/starqle-ng-util/dist/';
-// var dest = '../sm-fulcrum-web/.tmp/bower_components/starqle-ng-util/dist/';
 
 // ----------------------------------------------------------------------------
 // Production tasks
