@@ -31,6 +31,7 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
     shNumberInvalidMessage: '@?'
     shNumberHint: '@?'
     ngModel: '='
+    decimalPlaces: '@?'
   require: '?ngModel'
   link: (scope, element, attributes, ngModel) ->
     classId = 'sh-number-' + Math.random().toString().slice(2)
@@ -56,7 +57,11 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
 
     ngModel.$parsers.push (value) ->
       number = String(value).replace(/\,/g, '')
-      number = parseFloat number
+      number = parseFloat(number)
+
+      if scope.decimalPlaces?
+        number = parseFloat( number.toFixed( scope.decimalPlaces ) )
+
       if isNaN(number)
         return null
 
