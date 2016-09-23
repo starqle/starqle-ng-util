@@ -54,21 +54,21 @@ angular.module('sh.segment', []
   restrict: 'C'
   scope: {}
   link: (scope, elem, attrs) ->
-    # scope.height = 0
-
-    # scope.$watch ->
-    #   scope.height = elem.outerHeight()
-    #   return
-
-    # scope.$watch 'height', (newVal, oldVal) ->
-    #   elem.next().css( 'top', newVal + 'px' )
-    #   return
-
+    scope.height = 0
 
     scope.$watch ->
-      newVal = elem.outerHeight()
+      scope.height = elem.outerHeight()
+      return
+
+    scope.$watch 'height', (newVal, oldVal) ->
       elem.next().css( 'top', newVal + 'px' )
       return
+
+
+    # scope.$watch ->
+    #   newVal = elem.outerHeight()
+    #   elem.next().css( 'top', newVal + 'px' )
+    #   return
 
 
     return
@@ -82,21 +82,21 @@ angular.module('sh.segment', []
   restrict: 'C'
   scope: {}
   link: (scope, elem, attrs) ->
-    # scope.height = 0
-
-    # scope.$watch ->
-    #   scope.height = elem.outerHeight()
-    #   return
-
-    # scope.$watch 'height', (newVal, oldVal) ->
-    #   elem.prev().css( 'bottom', newVal + 'px' )
-    #   return
-
+    scope.height = 0
 
     scope.$watch ->
-      newVal = elem.outerHeight()
+      scope.height = elem.outerHeight()
+      return
+
+    scope.$watch 'height', (newVal, oldVal) ->
       elem.prev().css( 'bottom', newVal + 'px' )
       return
+
+
+    # scope.$watch ->
+    #   newVal = elem.outerHeight()
+    #   elem.prev().css( 'bottom', newVal + 'px' )
+    #   return
 
 
     return
