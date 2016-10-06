@@ -24,10 +24,10 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
     shAllowZero: '@?'
     shMin: '=?' # Not for validation, only for autolimit if model value is out of range
     shMax: '=?'
-    shLowerThan: '=?' # for validation purpose, also applied for shGreaterThan, shLowerThanEqual, shGreaterThanEqual
-    shGreaterThan: '=?'
-    shLowerThanEqual: '=?'
-    shGreaterThanEqual: '=?'
+    shLowerThan: '@?' # for validation purpose, also applied for shGreaterThan, shLowerThanEqual, shGreaterThanEqual
+    shGreaterThan: '@?'
+    shLowerThanEqual: '@?'
+    shGreaterThanEqual: '@?'
     shNumberInvalidMessage: '@?'
     shNumberHint: '@?'
     ngModel: '='
@@ -37,8 +37,21 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
     classId = 'sh-number-' + Math.random().toString().slice(2)
 
     shAllowZero = if scope.shAllowZero is 'false' then false else true
-    scope.shLowerThanEqual = scope.shLowerThanEqual ? scope.shMax
-    scope.shGreaterThanEqual = scope.shGreaterThanEqual ? scope.shMin
+
+    returnNumberOrNull = (val) ->
+      if val? and val isnt '' then val * 1 else null
+
+    setupRestriction = () ->
+      scope.lowerThan = returnNumberOrNull(scope.shLowerThan)
+      scope.greaterThan = returnNumberOrNull(scope.shGreaterThan)
+      scope.lowerThanEqual = returnNumberOrNull(scope.shLowerThanEqual)
+      scope.greaterThanEqual = returnNumberOrNull(scope.shGreaterThanEqual)
+
+      scope.lowerThanEqual = scope.lowerThanEqual ? scope.shMax ? Infinity
+      scope.greaterThanEqual = scope.greaterThanEqual ? scope.shMin ? -Infinity
+      return
+
+    setupRestriction()
 
     updatePopover = ->
       popoverContent = element.attr('data-content')
@@ -82,10 +95,10 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
 
       # shMin equals to GreaterThanOrEqual (>=)
       # shGreaterThan equals to GreaterThan (>)
-      valid = valid and +scope.ngModel <= scope.shLowerThanEqual if scope.shLowerThanEqual?
-      valid = valid and +scope.ngModel >= scope.shGreaterThanEqual if scope.shGreaterThanEqual?
-      valid = valid and +scope.ngModel < scope.shLowerThan if scope.shLowerThan?
-      valid = valid and +scope.ngModel > scope.shGreaterThan if scope.shGreaterThan?
+      valid = valid and +scope.ngModel <= scope.lowerThanEqual if scope.lowerThanEqual?
+      valid = valid and +scope.ngModel >= scope.greaterThanEqual if scope.greaterThanEqual?
+      valid = valid and +scope.ngModel < scope.lowerThan if scope.lowerThan?
+      valid = valid and +scope.ngModel > scope.greaterThan if scope.greaterThan?
       valid = valid and +scope.ngModel isnt 0 unless shAllowZero
       ngModel.$setValidity 'out_of_range', valid
 
@@ -93,6 +106,8 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
         validRequired = true
         validRequired = false unless scope.ngModel?
         ngModel.$setValidity 'required', validRequired
+
+      return
 
     element.on 'focusout', ->
       ngModel.$viewValue = if ngModel.$modelValue? then String($filter('number') ngModel.$modelValue) else ''
@@ -119,6 +134,20 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
     scope.$watch 'ngModel', (newValue, oldValue) ->
       # Always apply validity eventhough newVal equals oldVal
       scope.applyValidity()
+
+    scope.$watchCollection(
+      () ->
+        [
+          scope.shLowerThan
+          scope.shGreaterThan
+          scope.shLowerThanEqual
+          scope.shGreaterThanEqual
+        ]
+      (newVal, oldVal) ->
+        if newVal?
+          setupRestriction()
+        return
+    )
 
     #
     # Initialize
