@@ -49,6 +49,7 @@ angular.module('sh.number.format',[]).directive "shNumberFormat", ['$filter', ($
 
       scope.lowerThanEqual = scope.lowerThanEqual ? scope.shMax ? Infinity
       scope.greaterThanEqual = scope.greaterThanEqual ? scope.shMin ? -Infinity
+      scope.applyValidity and scope.applyValidity()
       return
 
     setupRestriction()
