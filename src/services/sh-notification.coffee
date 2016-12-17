@@ -118,7 +118,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
   @runInterval = (self) ->
     $interval ->
       for toast, i in self.toasts
-        if toast.alive and toast.deathtime < Date.now()
+        if toast?.alive and toast?.deathtime < Date.now()
           toast.alive = false
           self.removeToast(i, 1) unless toast.type in ['error', 'danger']
     , 500
