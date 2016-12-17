@@ -4141,13 +4141,14 @@ angular.module('sh.truncate', []).filter("shTruncate", [
 
 angular.module('sh.notification', []).service("ShNotification", [
   '$timeout', '$interval', function($timeout, $interval) {
-    var defaultDuration, defaultLifetime;
+    var defaultDuration, defaultLifetime, defaultLifetimeForError;
     defaultLifetime = 3000;
+    defaultLifetimeForError = 8000;
     defaultDuration = 500;
     this.toasts = [];
     this.notifications = [];
     this.addToast = function(options, lifetimeOpt, durationOpt) {
-      var opts;
+      var opts, ref;
       opts = {
         index: 0,
         lifetime: defaultLifetime,
@@ -4166,6 +4167,9 @@ angular.module('sh.notification', []).service("ShNotification", [
           opts.duration = durationOpt;
         }
         opts.toast.deathtime = Date.now() + opts.lifetime;
+        if ((ref = options.type) === 'error' || ref === 'danger') {
+          opts.toast.deathtime = Date.now() + defaultLifetimeForError;
+        }
         opts.toast.alive = true;
       } else {
         angular.extend(opts, options);
@@ -4210,18 +4214,14 @@ angular.module('sh.notification', []).service("ShNotification", [
     };
     this.runInterval = function(self) {
       $interval(function() {
-        var i, j, len, ref, ref1, results, toast;
+        var i, j, len, ref, results, toast;
         ref = self.toasts;
         results = [];
         for (i = j = 0, len = ref.length; j < len; i = ++j) {
           toast = ref[i];
-          if (toast.alive && toast.deathtime < Date.now()) {
+          if ((toast != null ? toast.alive : void 0) && (toast != null ? toast.deathtime : void 0) < Date.now()) {
             toast.alive = false;
-            if ((ref1 = toast.type) !== 'error' && ref1 !== 'danger') {
-              results.push(self.removeToast(i, 1));
-            } else {
-              results.push(void 0);
-            }
+            results.push(self.removeToast(i, 1));
           } else {
             results.push(void 0);
           }
