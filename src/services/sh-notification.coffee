@@ -21,6 +21,7 @@
 angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$interval', ($timeout, $interval) ->
 
   defaultLifetime = 3000
+  defaultLifetimeForError = 8000
   defaultDuration = 500
 
   @toasts = []
@@ -53,6 +54,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
       opts.lifetime = lifetimeOpt if lifetimeOpt?
       opts.duration = durationOpt if durationOpt?
       opts.toast.deathtime = Date.now() + opts.lifetime
+      opts.toast.deathtime = Date.now() + defaultLifetimeForError if options.type in ['error', 'danger']
       opts.toast.alive = true
     else
       angular.extend(opts, options)
@@ -120,7 +122,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
       for toast, i in self.toasts
         if toast?.alive and toast?.deathtime < Date.now()
           toast.alive = false
-          self.removeToast(i, 1) unless toast.type in ['error', 'danger']
+          self.removeToast(i, 1)
     , 500
     , 0
     , false
