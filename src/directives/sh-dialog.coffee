@@ -28,6 +28,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
   scope:
     shDialogOk: '&?'
     shDialogBeforeShow: '&?'
+    shDialogOnHide: '&?'
     shDialogCancel: '&?'
 
     shDialogHeader: '@?'
@@ -239,6 +240,7 @@ shDialogModule.directive "shDialog", ['$compile', '$templateCache', '$timeout', 
 
       ).on(
         'hidden.bs.modal', ->
+          scope.shDialogOnHide && scope.shDialogOnHide()
           shDialogModal.remove()
           parent.shDialogEntity = {}
           return

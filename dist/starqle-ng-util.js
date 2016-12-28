@@ -745,6 +745,7 @@ shDialogModule.directive("shDialog", [
       scope: {
         shDialogOk: '&?',
         shDialogBeforeShow: '&?',
+        shDialogOnHide: '&?',
         shDialogCancel: '&?',
         shDialogHeader: '@?',
         shDialogBody: '@?',
@@ -836,6 +837,7 @@ shDialogModule.directive("shDialog", [
             });
             return deferred.promise;
           }).on('hidden.bs.modal', function() {
+            scope.shDialogOnHide && scope.shDialogOnHide();
             shDialogModal.remove();
             parent.shDialogEntity = {};
           });
@@ -931,34 +933,51 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
         shAllowZero: '@?',
         shMin: '=?',
         shMax: '=?',
-        shLowerThan: '=?',
-        shGreaterThan: '=?',
-        shLowerThanEqual: '=?',
-        shGreaterThanEqual: '=?',
+        shLowerThan: '@?',
+        shGreaterThan: '@?',
+        shLowerThanEqual: '@?',
+        shGreaterThanEqual: '@?',
         shNumberInvalidMessage: '@?',
         shNumberHint: '@?',
-        ngModel: '='
+        ngModel: '=',
+        decimalPlaces: '@?'
       },
       require: '?ngModel',
       link: function(scope, element, attributes, ngModel) {
-        var classId, ref, ref1, shAllowZero, updatePopover;
+        var classId, returnNumberOrNull, setupRestriction, shAllowZero, updatePopover;
         classId = 'sh-number-' + Math.random().toString().slice(2);
         shAllowZero = scope.shAllowZero === 'false' ? false : true;
-        scope.shLowerThanEqual = (ref = scope.shLowerThanEqual) != null ? ref : scope.shMax;
-        scope.shGreaterThanEqual = (ref1 = scope.shGreaterThanEqual) != null ? ref1 : scope.shMin;
+        returnNumberOrNull = function(val) {
+          if ((val != null) && val !== '') {
+            return val * 1;
+          } else {
+            return null;
+          }
+        };
+        setupRestriction = function() {
+          var ref, ref1, ref2, ref3;
+          scope.lowerThan = returnNumberOrNull(scope.shLowerThan);
+          scope.greaterThan = returnNumberOrNull(scope.shGreaterThan);
+          scope.lowerThanEqual = returnNumberOrNull(scope.shLowerThanEqual);
+          scope.greaterThanEqual = returnNumberOrNull(scope.shGreaterThanEqual);
+          scope.lowerThanEqual = (ref = (ref1 = scope.lowerThanEqual) != null ? ref1 : scope.shMax) != null ? ref : Infinity;
+          scope.greaterThanEqual = (ref2 = (ref3 = scope.greaterThanEqual) != null ? ref3 : scope.shMin) != null ? ref2 : -Infinity;
+          scope.applyValidity && scope.applyValidity();
+        };
+        setupRestriction();
         updatePopover = function() {
-          var popoverContent, ref2, ref3, ref4;
+          var popoverContent, ref, ref1, ref2;
           popoverContent = element.attr('data-content');
           if (ngModel.$invalid) {
             if (ngModel.$error.out_of_range) {
-              popoverContent = (ref2 = scope.shNumberInvalidMessage) != null ? ref2 : 'Invalid Number';
+              popoverContent = (ref = scope.shNumberInvalidMessage) != null ? ref : 'Invalid Number';
             }
             if (ngModel.$error.required) {
-              popoverContent = (ref3 = scope.shNumberInvalidMessage) != null ? ref3 : 'Please insert a number';
+              popoverContent = (ref1 = scope.shNumberInvalidMessage) != null ? ref1 : 'Please insert a number';
             }
           } else {
             if (ngModel.$modelValue == null) {
-              popoverContent = (ref4 = scope.shNumberHint) != null ? ref4 : 'Insert valid number';
+              popoverContent = (ref2 = scope.shNumberHint) != null ? ref2 : 'Insert valid number';
             }
           }
           angular.element('.' + classId).find('.popover-content').html(popoverContent);
@@ -971,6 +990,9 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
           var number;
           number = String(value).replace(/\,/g, '');
           number = parseFloat(number);
+          if (scope.decimalPlaces != null) {
+            number = parseFloat(number.toFixed(scope.decimalPlaces));
+          }
           if (isNaN(number)) {
             return null;
           }
@@ -992,17 +1014,17 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
         scope.applyValidity = function() {
           var valid, validRequired;
           valid = true;
-          if (scope.shLowerThanEqual != null) {
-            valid = valid && +scope.ngModel <= scope.shLowerThanEqual;
+          if (scope.lowerThanEqual != null) {
+            valid = valid && +scope.ngModel <= scope.lowerThanEqual;
           }
-          if (scope.shGreaterThanEqual != null) {
-            valid = valid && +scope.ngModel >= scope.shGreaterThanEqual;
+          if (scope.greaterThanEqual != null) {
+            valid = valid && +scope.ngModel >= scope.greaterThanEqual;
           }
-          if (scope.shLowerThan != null) {
-            valid = valid && +scope.ngModel < scope.shLowerThan;
+          if (scope.lowerThan != null) {
+            valid = valid && +scope.ngModel < scope.lowerThan;
           }
-          if (scope.shGreaterThan != null) {
-            valid = valid && +scope.ngModel > scope.shGreaterThan;
+          if (scope.greaterThan != null) {
+            valid = valid && +scope.ngModel > scope.greaterThan;
           }
           if (!shAllowZero) {
             valid = valid && +scope.ngModel !== 0;
@@ -1013,7 +1035,7 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
             if (scope.ngModel == null) {
               validRequired = false;
             }
-            return ngModel.$setValidity('required', validRequired);
+            ngModel.$setValidity('required', validRequired);
           }
         };
         element.on('focusout', function() {
@@ -1029,8 +1051,8 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
           return updatePopover();
         });
         element.on('keydown', function(e) {
-          var ref2, ref3;
-          if (((ref2 = e.keyCode) === 16 || ref2 === 17 || ref2 === 18 || ref2 === 46 || ref2 === 8 || ref2 === 9 || ref2 === 27 || ref2 === 13 || ref2 === 110 || ref2 === 173 || ref2 === 190 || ref2 === 189) || (e.keyCode >= 112 && e.keyCode <= 123) || (((ref3 = e.keyCode) === 65 || ref3 === 67 || ref3 === 86) && (e.ctrlKey === true || e.metaKey === true)) || (e.keyCode >= 35 && e.keyCode <= 40)) {
+          var ref, ref1;
+          if (((ref = e.keyCode) === 16 || ref === 17 || ref === 18 || ref === 46 || ref === 8 || ref === 9 || ref === 27 || ref === 13 || ref === 110 || ref === 173 || ref === 190 || ref === 189) || (e.keyCode >= 112 && e.keyCode <= 123) || (((ref1 = e.keyCode) === 65 || ref1 === 67 || ref1 === 86) && (e.ctrlKey === true || e.metaKey === true)) || (e.keyCode >= 35 && e.keyCode <= 40)) {
 
             /*let it happen, don't do anything */
           } else if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
@@ -1039,6 +1061,13 @@ angular.module('sh.number.format', []).directive("shNumberFormat", [
         });
         scope.$watch('ngModel', function(newValue, oldValue) {
           return scope.applyValidity();
+        });
+        scope.$watchCollection(function() {
+          return [scope.shLowerThan, scope.shGreaterThan, scope.shLowerThanEqual, scope.shGreaterThanEqual];
+        }, function(newVal, oldVal) {
+          if (newVal != null) {
+            setupRestriction();
+          }
         });
         element.popover({
           trigger: 'focus',
