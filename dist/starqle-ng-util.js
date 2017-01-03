@@ -3141,6 +3141,61 @@ shTableModule.factory('ShTableFilter', [
         }
         return HelperService.isRowSelectionEmpty(self.shTable.filterCollection[shFilter]);
       };
+      self.shTable.filterRadio = {};
+      self.shTable.filterInRadio = function(shFilter, key) {
+        var ref, ref1;
+        if (key == null) {
+          key = null;
+        }
+        if (key != null) {
+          self.shTable.filterLabel[shFilter] = (ref = self.shTable.filterRadio[shFilter]) != null ? ref[key + ''] : void 0;
+          self.shTable.filterParams[shFilter + '_eq'] = (ref1 = self.shTable.filterRadio[shFilter]) != null ? ref1[key + ''] : void 0;
+        } else {
+          self.shTable.filterLabel[shFilter] = self.shTable.filterRadio[shFilter];
+          self.shTable.filterParams[shFilter + '_eq'] = self.shTable.filterRadio[shFilter];
+        }
+        self.shTable.tableParams.$params.pageNumber = 1;
+        self.shTable.filterParams['fromShFilter'] = true;
+        return self.shTable.refreshGrid();
+      };
+      self.shTable.radioNavbarFilterSelect = function(shFilter, item, key) {
+        if (key == null) {
+          key = null;
+        }
+        self.shTable.filterRadio[shFilter] = item;
+        return self.shTable.filterInRadio(shFilter, key);
+      };
+      self.shTable.radioNavbarFilterDeselect = function(shFilter, item, key) {
+        if (key == null) {
+          key = null;
+        }
+        self.shTable.filterRadio[shFilter] = null;
+        return self.shTable.filterInRadio(shFilter, key);
+      };
+      self.shTable.radioNavbarFilterIsSelected = function(shFilter, item, key) {
+        var ref;
+        if (key == null) {
+          key = null;
+        }
+        if (key != null) {
+          return ((ref = self.shTable.filterRadio[shFilter]) != null ? ref[key + ''] : void 0) === item[key + ''];
+        } else {
+          return self.shTable.filterRadio[shFilter] === item;
+        }
+      };
+      self.shTable.radioNavbarClearSelection = function(shFilter, key) {
+        if (key == null) {
+          key = null;
+        }
+        self.shTable.filterRadio[shFilter] = null;
+        return self.shTable.filterInRadio(shFilter, key);
+      };
+      self.shTable.radioNavbarFilterIsSelectionEmpty = function(shFilter, key) {
+        if (key == null) {
+          key = null;
+        }
+        return self.shTable.filterRadio[shFilter] === null;
+      };
       self.shTable.toggleFilterRegion = function() {
         self.shTable.filterRegion.visible = !self.shTable.filterRegion.visible;
       };
@@ -3148,6 +3203,7 @@ shTableModule.factory('ShTableFilter', [
         var k, ref, v;
         self.shTable.filterParams = {};
         self.shTable.filterLabel = {};
+        self.shTable.filterRadio = {};
         ref = self.shTable.filterCollection;
         for (k in ref) {
           v = ref[k];
