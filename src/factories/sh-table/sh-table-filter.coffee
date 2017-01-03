@@ -399,6 +399,43 @@ shTableModule.factory(
           self.shTable.filterCollection[shFilter] = [] unless self.shTable.filterCollection[shFilter]?
           HelperService.isRowSelectionEmpty(self.shTable.filterCollection[shFilter])
 
+        # =========================================================================
+        # Radio filters
+        # =========================================================================
+        self.shTable.filterRadio = {}
+
+        self.shTable.filterInRadio = (shFilter, key = null) ->
+          if key?
+            self.shTable.filterLabel[shFilter] =          self.shTable.filterRadio[shFilter]?[key + '']
+            self.shTable.filterParams[shFilter + '_eq'] = self.shTable.filterRadio[shFilter]?[key + '']
+          else
+            self.shTable.filterLabel[shFilter] =          self.shTable.filterRadio[shFilter]
+            self.shTable.filterParams[shFilter + '_eq'] = self.shTable.filterRadio[shFilter]
+
+          self.shTable.tableParams.$params.pageNumber = 1
+          self.shTable.filterParams['fromShFilter'] = true
+          self.shTable.refreshGrid()
+
+        self.shTable.radioNavbarFilterSelect = (shFilter, item, key = null) ->
+          self.shTable.filterRadio[shFilter] = item
+          self.shTable.filterInRadio(shFilter, key)
+
+        self.shTable.radioNavbarFilterDeselect = (shFilter, item, key = null) ->
+          self.shTable.filterRadio[shFilter] = null
+          self.shTable.filterInRadio(shFilter, key)
+
+        self.shTable.radioNavbarFilterIsSelected = (shFilter, item, key = null) ->
+          if key?
+            self.shTable.filterRadio[shFilter]?[key + ''] is item[key + '']
+          else
+            self.shTable.filterRadio[shFilter] is item
+
+        self.shTable.radioNavbarClearSelection = (shFilter, key = null) ->
+          self.shTable.filterRadio[shFilter] = null
+          self.shTable.filterInRadio(shFilter, key)
+
+        self.shTable.radioNavbarFilterIsSelectionEmpty = (shFilter, key = null) ->
+          self.shTable.filterRadio[shFilter] is null
 
         # =========================================================================
         # Helpers
@@ -411,6 +448,7 @@ shTableModule.factory(
         self.shTable.resetFilter = () ->
           self.shTable.filterParams = {}
           self.shTable.filterLabel = {}
+          self.shTable.filterRadio = {}
 
           # Clear filter-collections
           for k, v of self.shTable.filterCollection
