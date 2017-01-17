@@ -54,7 +54,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
     # ngModelCtrl: Parser
     #
     parser = (value) ->
-      if moment(value, displayFormat).isValid()
+      if moment(value, displayFormat, true).isValid()
         valueFormatted = moment(value, displayFormat).format(valueFormat)
         if isValid(valueFormatted)
           updateDate(valueFormatted)
@@ -117,6 +117,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
       updateMaxDate(scope.shThruDate)
 
       element.bind 'dp.change', dpChange
+      element.bind 'dp.hide', dpHide
 
       return
 
@@ -170,6 +171,11 @@ shDatepickerModule.directive("shDatepicker", [ ->
         ngModelCtrl.$setViewValue(null)
       return
 
+    dpHide = (data) ->
+      unless ngModelCtrl.$modelValue?
+        ngModelCtrl.$setViewValue(data.date.format(displayFormat))
+      return
+
 
     #
     # WATCHERS
@@ -191,6 +197,8 @@ shDatepickerModule.directive("shDatepicker", [ ->
         return
     )
 
+    initiated = false
+
     scope.$watch(
       () ->
         ngModelCtrl.$modelValue
@@ -198,7 +206,9 @@ shDatepickerModule.directive("shDatepicker", [ ->
         unless dpChangeTriggered
           if newVal isnt jqValue and angular.isDefined(newVal)
             jqValue = newVal
-            setupDatepicker(jqValue)
+            unless initiated
+              initiated = true
+              setupDatepicker(jqValue)
         return
     )
 

@@ -316,7 +316,7 @@ shDatepickerModule.directive("shDatepicker", [
       },
       require: '?ngModel',
       link: function(scope, element, attrs, ngModelCtrl) {
-        var displayFormat, dpChange, dpChangeTriggered, formatter, isValid, jqValue, parser, ref, setupDatepicker, updateDate, updateIcon, updateMaxDate, updateMinDate, valueFormat;
+        var displayFormat, dpChange, dpChangeTriggered, dpHide, formatter, initiated, isValid, jqValue, parser, ref, setupDatepicker, updateDate, updateIcon, updateMaxDate, updateMinDate, valueFormat;
         valueFormat = 'YYYY-MM-DD';
         displayFormat = (ref = scope.shDisplayFormat) != null ? ref : 'DD-MM-YYYY';
         dpChangeTriggered = false;
@@ -331,7 +331,7 @@ shDatepickerModule.directive("shDatepicker", [
         ngModelCtrl.$formatters.push(formatter);
         parser = function(value) {
           var valueFormatted;
-          if (moment(value, displayFormat).isValid()) {
+          if (moment(value, displayFormat, true).isValid()) {
             valueFormatted = moment(value, displayFormat).format(valueFormat);
             if (isValid(valueFormatted)) {
               updateDate(valueFormatted);
@@ -391,6 +391,7 @@ shDatepickerModule.directive("shDatepicker", [
           updateMinDate(scope.shFromDate);
           updateMaxDate(scope.shThruDate);
           element.bind('dp.change', dpChange);
+          element.bind('dp.hide', dpHide);
         };
         updateDate = function(value) {
           if (value != null) {
@@ -448,6 +449,11 @@ shDatepickerModule.directive("shDatepicker", [
             ngModelCtrl.$setViewValue(null);
           }
         };
+        dpHide = function(data) {
+          if (ngModelCtrl.$modelValue == null) {
+            ngModelCtrl.$setViewValue(data.date.format(displayFormat));
+          }
+        };
         scope.$watch('shFromDate', function(newVal, oldVal) {
           updateMinDate(newVal);
         });
@@ -461,13 +467,17 @@ shDatepickerModule.directive("shDatepicker", [
             setupDatepicker(ngModelCtrl.$modelValue);
           }
         });
+        initiated = false;
         scope.$watch(function() {
           return ngModelCtrl.$modelValue;
         }, function(newVal, oldVal) {
           if (!dpChangeTriggered) {
             if (newVal !== jqValue && angular.isDefined(newVal)) {
               jqValue = newVal;
-              setupDatepicker(jqValue);
+              if (!initiated) {
+                initiated = true;
+                setupDatepicker(jqValue);
+              }
             }
           }
         });
