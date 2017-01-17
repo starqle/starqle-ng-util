@@ -202,7 +202,7 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
   #
   @toastByResponse = (response, defaultToast) ->
     if response.notification
-      for n in response.notification.notifications
+      for n in response.notification.success
         do (n) =>
           @addToast
             type: n.type

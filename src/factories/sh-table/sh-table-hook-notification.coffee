@@ -42,6 +42,15 @@ shTableModule.factory(
         self.shTable = params.shTable
 
 
+        self.shTable.createEntitySuccessHooks.push (success) ->
+          ShNotification.toastByResponse success
+          return
+
+        self.shTable.updateEntitySuccessHooks.push (success) ->
+          ShNotification.toastByResponse success
+          return
+
+
         self.shTable.getEntitiesErrorHooks.push (error) ->
           ShNotification.toastByResponse error
           return
