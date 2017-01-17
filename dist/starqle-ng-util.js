@@ -146,7 +146,7 @@ shTableModule.directive("shTablePagination", function() {
     template: '<div ng-if="shTablePagination.totalCount > 10" class="pagination form-inline pull-left">\n  <select ng-model=\'perPage\' ng-change="shTablePaginationAction({pageNumber: 1, perPage: perPage})" ng-options="perPage for perPage in getPerPages()" class="form-control text-right"></select>&nbsp;\n  &nbsp;\n  &nbsp;\n</div>\n\n<ul class="pagination pull-left">\n  <li ng-repeat="page in shTablePagination.pages" ng-switch="page.type">\n    <a ng-switch-when="FIRST" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">«</a>\n    <a ng-switch-when="PREV" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">&lt;</a>\n    <a ng-switch-when="PAGE" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">\n      <span ng-bind="page.number"></span>\n    </a>\n    <a ng-switch-when="MORE" ng-disabled="page.disabled">…</a>\n    <a ng-switch-when="NEXT" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">&gt;</a>\n    <a ng-switch-when="LAST" ng-disabled="page.disabled" ng-click="shTablePaginationAction({pageNumber: page.number})">»</a>\n  </li>\n</ul>\n\n<div class="pagination pull-left">\n  <div class="btn disabled">\n    <span class="page-count">\n      &nbsp;{{shTablePagination.currentPageCount}}&nbsp;\n    </span>\n    <span>\n      <em translate="LABEL_OF"></em>\n    </span>\n    <span class="page-total">\n      &nbsp;{{shTablePagination.totalCount}}&nbsp;\n    </span>\n  </div>\n</div>\n\n<div class="pagination pull-left">\n  <div ng-click="shTablePaginationAction()" class="btn">\n    <i class="fa fa-refresh"></i>\n  </div>\n</div>',
     controller: [
       '$scope', function($scope) {
-        $scope.perPage = 10;
+        $scope.perPage = 20;
         $scope.getPerPages = function() {
           return [10, 20, 50, 100];
         };
@@ -1563,7 +1563,7 @@ shTableModule.factory('ShTableParams', [
       var ref, ref1, ref2;
       this.$params = {
         pageNumber: (ref = params.pageNumber) != null ? ref : 1,
-        perPage: (ref1 = params.perPage) != null ? ref1 : 10,
+        perPage: (ref1 = params.perPage) != null ? ref1 : 20,
         sortInfo: params.sortInfo,
         sorting: params.sorting,
         autoload: (ref2 = params.autoload) != null ? ref2 : true
@@ -3369,6 +3369,12 @@ shTableModule.factory('ShTableHookNotification', [
       var self;
       self = this;
       self.shTable = params.shTable;
+      self.shTable.createEntitySuccessHooks.push(function(success) {
+        ShNotification.toastByResponse(success);
+      });
+      self.shTable.updateEntitySuccessHooks.push(function(success) {
+        ShNotification.toastByResponse(success);
+      });
       self.shTable.getEntitiesErrorHooks.push(function(error) {
         ShNotification.toastByResponse(error);
       });
@@ -4023,7 +4029,7 @@ shTableModule.factory('ShTable', [
       self.localLookup = {};
       self.name = (ref2 = params.name) != null ? ref2 : '';
       self.optParams = (ref3 = params.optParams) != null ? ref3 : {};
-      self.perPage = (ref4 = params.perPage) != null ? ref4 : 10;
+      self.perPage = (ref4 = params.perPage) != null ? ref4 : 20;
       self.resource = (ref5 = params.resource) != null ? ref5 : null;
       self.sorting = (ref6 = params.sorting) != null ? ref6 : {};
       shTableFilter = new ShTableFilter({
@@ -4333,7 +4339,7 @@ angular.module('sh.notification', []).service("ShNotification", [
     this.toastByResponse = function(response, defaultToast) {
       var fn, fn1, j, k, len, len1, n, ref, ref1;
       if (response.notification) {
-        ref = response.notification.notifications;
+        ref = response.notification.success;
         fn = (function(_this) {
           return function(n) {
             return _this.addToast({
