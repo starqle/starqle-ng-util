@@ -73,7 +73,7 @@ shTableModule.factory(
         self.localLookup = {}
         self.name = params.name ? ''
         self.optParams = params.optParams ? {}
-        self.perPage = params.perPage ? 10
+        self.perPage = params.perPage ? 20
         self.resource = params.resource ? null
         self.sorting = params.sorting ? {}
 

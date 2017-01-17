@@ -46,7 +46,7 @@ shTableModule.factory(
     ShTableParams = (params) ->
       @$params =
         pageNumber: params.pageNumber ? 1
-        perPage: params.perPage ? 10
+        perPage: params.perPage ? 20
         sortInfo :params.sortInfo
         sorting :params.sorting # Backward compatibility
         autoload: params.autoload ? true
