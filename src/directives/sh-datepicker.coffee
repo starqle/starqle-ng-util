@@ -206,9 +206,11 @@ shDatepickerModule.directive("shDatepicker", [ ->
         unless dpChangeTriggered
           if newVal isnt jqValue and angular.isDefined(newVal)
             jqValue = newVal
-            unless initiated
+            if not initiated
               initiated = true
               setupDatepicker(jqValue)
+            else
+              element.data('DateTimePicker').date(moment(jqValue))
         return
     )
 
