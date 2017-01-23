@@ -35,8 +35,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
     valueFormat = 'YYYY-MM-DD' # millisecond from epoch
     displayFormat = scope.shDisplayFormat ? 'DD-MM-YYYY'
 
-    dpChangeTriggered = false
-    jqValue = -1
+    lastValid = null
 
     #
     # ngModelCtrl: Formatter
@@ -65,19 +64,9 @@ shDatepickerModule.directive("shDatepicker", [ ->
           value = null
           null
       else
-        value = null
-        null
+        value
 
     ngModelCtrl.$parsers.push parser
-
-
-    #
-    # ngModelCtrl: Render
-    #
-    ngModelCtrl.$render = () ->
-      unless angular.isDefined(ngModelCtrl.$modelValue)
-        ngModelCtrl.$modelValue = null
-      return
 
 
     #
@@ -99,6 +88,8 @@ shDatepickerModule.directive("shDatepicker", [ ->
     #
     setupDatepicker = (value) ->
       element.unbind 'dp.change', dpChange
+      element.unbind 'dp.show', dpShow
+      element.unbind 'dp.hide', dpHide
       element.data('DateTimePicker')?.destroy()
 
       element.datetimepicker
@@ -117,6 +108,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
       updateMaxDate(scope.shThruDate)
 
       element.bind 'dp.change', dpChange
+      element.bind 'dp.show', dpShow
       element.bind 'dp.hide', dpHide
 
       return
@@ -164,16 +156,21 @@ shDatepickerModule.directive("shDatepicker", [ ->
     #
 
     dpChange = (data) ->
-      dpChangeTriggered = true
       if data.date
         ngModelCtrl.$setViewValue(data.date.format(displayFormat))
       else
         ngModelCtrl.$setViewValue(null)
       return
 
+
+    dpShow = () ->
+      lastValid = ngModelCtrl.$modelValue
+      return
+
     dpHide = (data) ->
-      unless ngModelCtrl.$modelValue?
-        ngModelCtrl.$setViewValue(data.date.format(displayFormat))
+      unless moment(data.date.format(displayFormat), displayFormat, true).isValid()
+        ngModelCtrl.$modelValue = lastValid
+      ngModelCtrl.$setViewValue(data.date.format(displayFormat))
       return
 
 
@@ -203,14 +200,12 @@ shDatepickerModule.directive("shDatepicker", [ ->
       () ->
         ngModelCtrl.$modelValue
       (newVal, oldVal) ->
-        unless dpChangeTriggered
-          if newVal isnt jqValue and angular.isDefined(newVal)
-            jqValue = newVal
-            if not initiated
-              initiated = true
-              setupDatepicker(jqValue)
-            else
-              element.data('DateTimePicker').date(moment(jqValue))
+        if (newVal? or oldVal?) and newVal isnt oldVal
+          if newVal?
+            if moment(newVal, displayFormat, true).isValid()
+              setupDatepicker(newVal)
+          else
+            setupDatepicker(null)
         return
     )
 

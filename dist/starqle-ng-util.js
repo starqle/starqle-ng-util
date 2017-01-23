@@ -316,11 +316,10 @@ shDatepickerModule.directive("shDatepicker", [
       },
       require: '?ngModel',
       link: function(scope, element, attrs, ngModelCtrl) {
-        var displayFormat, dpChange, dpChangeTriggered, dpHide, formatter, initiated, isValid, jqValue, parser, ref, setupDatepicker, updateDate, updateIcon, updateMaxDate, updateMinDate, valueFormat;
+        var displayFormat, dpChange, dpHide, dpShow, formatter, initiated, isValid, lastValid, parser, ref, setupDatepicker, updateDate, updateIcon, updateMaxDate, updateMinDate, valueFormat;
         valueFormat = 'YYYY-MM-DD';
         displayFormat = (ref = scope.shDisplayFormat) != null ? ref : 'DD-MM-YYYY';
-        dpChangeTriggered = false;
-        jqValue = -1;
+        lastValid = null;
         formatter = function(value) {
           if (value != null) {
             return moment(value).format(displayFormat);
@@ -343,16 +342,10 @@ shDatepickerModule.directive("shDatepicker", [
               return null;
             }
           } else {
-            value = null;
-            return null;
+            return value;
           }
         };
         ngModelCtrl.$parsers.push(parser);
-        ngModelCtrl.$render = function() {
-          if (!angular.isDefined(ngModelCtrl.$modelValue)) {
-            ngModelCtrl.$modelValue = null;
-          }
-        };
         isValid = function(value) {
           var maxValue, minValue, ref1, ref2, ref3, ref4;
           if ((((ref1 = element.data('DateTimePicker')) != null ? ref1.maxDate() : void 0) != null) && ((ref2 = element.data('DateTimePicker')) != null ? ref2.maxDate() : void 0)) {
@@ -372,6 +365,8 @@ shDatepickerModule.directive("shDatepicker", [
         setupDatepicker = function(value) {
           var ref1;
           element.unbind('dp.change', dpChange);
+          element.unbind('dp.show', dpShow);
+          element.unbind('dp.hide', dpHide);
           if ((ref1 = element.data('DateTimePicker')) != null) {
             ref1.destroy();
           }
@@ -391,6 +386,7 @@ shDatepickerModule.directive("shDatepicker", [
           updateMinDate(scope.shFromDate);
           updateMaxDate(scope.shThruDate);
           element.bind('dp.change', dpChange);
+          element.bind('dp.show', dpShow);
           element.bind('dp.hide', dpHide);
         };
         updateDate = function(value) {
@@ -442,17 +438,20 @@ shDatepickerModule.directive("shDatepicker", [
           }
         };
         dpChange = function(data) {
-          dpChangeTriggered = true;
           if (data.date) {
             ngModelCtrl.$setViewValue(data.date.format(displayFormat));
           } else {
             ngModelCtrl.$setViewValue(null);
           }
         };
+        dpShow = function() {
+          lastValid = ngModelCtrl.$modelValue;
+        };
         dpHide = function(data) {
-          if (ngModelCtrl.$modelValue == null) {
-            ngModelCtrl.$setViewValue(data.date.format(displayFormat));
+          if (!moment(data.date.format(displayFormat), displayFormat, true).isValid()) {
+            ngModelCtrl.$modelValue = lastValid;
           }
+          ngModelCtrl.$setViewValue(data.date.format(displayFormat));
         };
         scope.$watch('shFromDate', function(newVal, oldVal) {
           updateMinDate(newVal);
@@ -471,15 +470,13 @@ shDatepickerModule.directive("shDatepicker", [
         scope.$watch(function() {
           return ngModelCtrl.$modelValue;
         }, function(newVal, oldVal) {
-          if (!dpChangeTriggered) {
-            if (newVal !== jqValue && angular.isDefined(newVal)) {
-              jqValue = newVal;
-              if (!initiated) {
-                initiated = true;
-                setupDatepicker(jqValue);
-              } else {
-                element.data('DateTimePicker').date(moment(jqValue));
+          if (((newVal != null) || (oldVal != null)) && newVal !== oldVal) {
+            if (newVal != null) {
+              if (moment(newVal, displayFormat, true).isValid()) {
+                setupDatepicker(newVal);
               }
+            } else {
+              setupDatepicker(null);
             }
           }
         });
