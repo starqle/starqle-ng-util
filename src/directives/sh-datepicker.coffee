@@ -170,7 +170,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
     dpHide = (data) ->
       unless moment(data.date.format(displayFormat), displayFormat, true).isValid()
         ngModelCtrl.$modelValue = lastValid
-      ngModelCtrl.$setViewValue(data.date.format(displayFormat))
+      # ngModelCtrl.$setViewValue(data.date.format(displayFormat))
       return
 
 
@@ -194,8 +194,6 @@ shDatepickerModule.directive("shDatepicker", [ ->
         return
     )
 
-    initiated = false
-
     scope.$watch(
       () ->
         ngModelCtrl.$modelValue
@@ -208,6 +206,9 @@ shDatepickerModule.directive("shDatepicker", [ ->
             setupDatepicker(null)
         return
     )
+
+    setupDatepicker(null)
+
 
     return
 

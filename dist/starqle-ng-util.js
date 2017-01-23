@@ -316,7 +316,7 @@ shDatepickerModule.directive("shDatepicker", [
       },
       require: '?ngModel',
       link: function(scope, element, attrs, ngModelCtrl) {
-        var displayFormat, dpChange, dpHide, dpShow, formatter, initiated, isValid, lastValid, parser, ref, setupDatepicker, updateDate, updateIcon, updateMaxDate, updateMinDate, valueFormat;
+        var displayFormat, dpChange, dpHide, dpShow, formatter, isValid, lastValid, parser, ref, setupDatepicker, updateDate, updateIcon, updateMaxDate, updateMinDate, valueFormat;
         valueFormat = 'YYYY-MM-DD';
         displayFormat = (ref = scope.shDisplayFormat) != null ? ref : 'DD-MM-YYYY';
         lastValid = null;
@@ -451,7 +451,6 @@ shDatepickerModule.directive("shDatepicker", [
           if (!moment(data.date.format(displayFormat), displayFormat, true).isValid()) {
             ngModelCtrl.$modelValue = lastValid;
           }
-          ngModelCtrl.$setViewValue(data.date.format(displayFormat));
         };
         scope.$watch('shFromDate', function(newVal, oldVal) {
           updateMinDate(newVal);
@@ -466,7 +465,6 @@ shDatepickerModule.directive("shDatepicker", [
             setupDatepicker(ngModelCtrl.$modelValue);
           }
         });
-        initiated = false;
         scope.$watch(function() {
           return ngModelCtrl.$modelValue;
         }, function(newVal, oldVal) {
@@ -480,6 +478,7 @@ shDatepickerModule.directive("shDatepicker", [
             }
           }
         });
+        setupDatepicker(null);
       }
     };
   }
@@ -2083,6 +2082,159 @@ shApiModule.factory('ShApi', [
 
 /**
  * @ngdoc object
+ * @name ShForm
+ *
+ * @description
+ * ShForm factory
+ *
+ */
+shFormModule.factory('ShForm', [
+  function() {
+    var ShForm;
+    ShForm = function() {
+      var self;
+      self = this;
+      self.entityForm = null;
+
+      /**
+       * @ngdoc method
+       * @name validationClass
+       *
+       * @description
+       * Gives elements a class that mark its fieldname state
+       *
+       * @returns {String} String as class that mark element state
+       */
+      self.validationClass = function(fieldName) {
+        var ref, result;
+        result = '';
+        if (((ref = self.entityForm) != null ? ref[fieldName] : void 0) != null) {
+          if (self.entityForm[fieldName].$invalid) {
+            if (self.entityForm[fieldName].$dirty) {
+              result += 'has-error ';
+            } else {
+              result += 'has-pristine-error ';
+            }
+          } else if (self.entityForm[fieldName].$dirty && self.entityForm[fieldName].$valid) {
+            result += 'has-success ';
+          }
+        }
+        return result;
+      };
+
+      /**
+       * @ngdoc method
+       * @name reset
+       *
+       * @description
+       * Resset all the form state. `$dirty: false`, `$pristine: true`, `$submitted: false`, `$invalid: true`
+       *
+       * @returns {*}
+       */
+      self.reset = function() {
+        var ref, ref1;
+        if ((ref = self.entityForm) != null) {
+          ref.$setPristine();
+        }
+        return (ref1 = self.entityForm) != null ? ref1.$setUntouched() : void 0;
+      };
+
+      /**
+       * @ngdoc method
+       * @name resetSubmitted
+       *
+       * @description
+       * Set `$submitted` to `false`, but not change the `$dirty` state.
+       * Should be used for failing submission.
+       *
+       * @returns {*}
+       */
+      self.resetSubmitted = function() {
+        var ref;
+        return (ref = self.entityForm) != null ? ref.$submitted = false : void 0;
+      };
+
+      /**
+       * @ngdoc method
+       * @name isDisabled
+       *
+       * @description
+       * Return this entity form state
+       *
+       * @returns {Boolean} entityForm state
+       */
+      self.isDisabled = function() {
+        var ref, ref1, ref2;
+        if (self.entityForm == null) {
+          return true;
+        }
+        return ((ref = self.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = self.entityForm) != null ? ref1.$invalid : void 0) || ((ref2 = self.entityForm) != null ? ref2.$submitted : void 0);
+      };
+
+      /**
+       * @ngdoc method
+       * @name isCompleted
+       *
+       * @description
+       * Predicate to check whether the form in completed
+       *
+       * @returns {Boolean} true if `$pristine`, `$valid`, & not in `$submitted` state
+       */
+      self.isCompleted = function() {
+        var ref, ref1;
+        return ((ref = self.entityForm) != null ? ref.$pristine : void 0) && ((ref1 = self.entityForm) != null ? ref1.$valid : void 0) && !self.entityForm.$submitted;
+      };
+
+      /**
+       * @ngdoc method
+       * @name isDirtyAndValid
+       *
+       * @description
+       * Predicate to check whether the form in `$dirty` and `$valid` state
+       *
+       * @returns {Boolean} true if `$dirty` and `$valid`
+       */
+      self.isDirtyAndValid = function() {
+        var ref, ref1;
+        return ((ref = self.entityForm) != null ? ref.$dirty : void 0) && ((ref1 = self.entityForm) != null ? ref1.$valid : void 0);
+      };
+
+      /**
+       * @ngdoc method
+       * @name isDirtyAndInvalid
+       *
+       * @description
+       * Predicate to check whether the form in `$dirty` and `$invalid` state
+       *
+       * @returns {Boolean} true if `$dirty` and `$invalid`
+       */
+      self.isDirtyAndInvalid = function() {
+        var ref, ref1;
+        return ((ref = self.entityForm) != null ? ref.$dirty : void 0) && ((ref1 = self.entityForm) != null ? ref1.$invalid : void 0);
+      };
+
+      /**
+       * @ngdoc method
+       * @name isResetButtonDisabled
+       *
+       * @description
+       * Predicate to check whether the reset button should disabled or not
+       *
+       * @returns {Boolean} true if `$pristine` or `$submitted`
+       */
+      self.isResetButtonDisabled = function() {
+        var ref, ref1;
+        return ((ref = self.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = self.entityForm) != null ? ref1.$submitted : void 0);
+      };
+      return this;
+    };
+    return ShForm;
+  }
+]);
+
+
+/**
+ * @ngdoc object
  * @name ShPersistenceHookNotification
  *
  * @description
@@ -2555,159 +2707,6 @@ shPersistenceModule.factory('ShPersistence', [
       return this;
     };
     return ShPersistence;
-  }
-]);
-
-
-/**
- * @ngdoc object
- * @name ShForm
- *
- * @description
- * ShForm factory
- *
- */
-shFormModule.factory('ShForm', [
-  function() {
-    var ShForm;
-    ShForm = function() {
-      var self;
-      self = this;
-      self.entityForm = null;
-
-      /**
-       * @ngdoc method
-       * @name validationClass
-       *
-       * @description
-       * Gives elements a class that mark its fieldname state
-       *
-       * @returns {String} String as class that mark element state
-       */
-      self.validationClass = function(fieldName) {
-        var ref, result;
-        result = '';
-        if (((ref = self.entityForm) != null ? ref[fieldName] : void 0) != null) {
-          if (self.entityForm[fieldName].$invalid) {
-            if (self.entityForm[fieldName].$dirty) {
-              result += 'has-error ';
-            } else {
-              result += 'has-pristine-error ';
-            }
-          } else if (self.entityForm[fieldName].$dirty && self.entityForm[fieldName].$valid) {
-            result += 'has-success ';
-          }
-        }
-        return result;
-      };
-
-      /**
-       * @ngdoc method
-       * @name reset
-       *
-       * @description
-       * Resset all the form state. `$dirty: false`, `$pristine: true`, `$submitted: false`, `$invalid: true`
-       *
-       * @returns {*}
-       */
-      self.reset = function() {
-        var ref, ref1;
-        if ((ref = self.entityForm) != null) {
-          ref.$setPristine();
-        }
-        return (ref1 = self.entityForm) != null ? ref1.$setUntouched() : void 0;
-      };
-
-      /**
-       * @ngdoc method
-       * @name resetSubmitted
-       *
-       * @description
-       * Set `$submitted` to `false`, but not change the `$dirty` state.
-       * Should be used for failing submission.
-       *
-       * @returns {*}
-       */
-      self.resetSubmitted = function() {
-        var ref;
-        return (ref = self.entityForm) != null ? ref.$submitted = false : void 0;
-      };
-
-      /**
-       * @ngdoc method
-       * @name isDisabled
-       *
-       * @description
-       * Return this entity form state
-       *
-       * @returns {Boolean} entityForm state
-       */
-      self.isDisabled = function() {
-        var ref, ref1, ref2;
-        if (self.entityForm == null) {
-          return true;
-        }
-        return ((ref = self.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = self.entityForm) != null ? ref1.$invalid : void 0) || ((ref2 = self.entityForm) != null ? ref2.$submitted : void 0);
-      };
-
-      /**
-       * @ngdoc method
-       * @name isCompleted
-       *
-       * @description
-       * Predicate to check whether the form in completed
-       *
-       * @returns {Boolean} true if `$pristine`, `$valid`, & not in `$submitted` state
-       */
-      self.isCompleted = function() {
-        var ref, ref1;
-        return ((ref = self.entityForm) != null ? ref.$pristine : void 0) && ((ref1 = self.entityForm) != null ? ref1.$valid : void 0) && !self.entityForm.$submitted;
-      };
-
-      /**
-       * @ngdoc method
-       * @name isDirtyAndValid
-       *
-       * @description
-       * Predicate to check whether the form in `$dirty` and `$valid` state
-       *
-       * @returns {Boolean} true if `$dirty` and `$valid`
-       */
-      self.isDirtyAndValid = function() {
-        var ref, ref1;
-        return ((ref = self.entityForm) != null ? ref.$dirty : void 0) && ((ref1 = self.entityForm) != null ? ref1.$valid : void 0);
-      };
-
-      /**
-       * @ngdoc method
-       * @name isDirtyAndInvalid
-       *
-       * @description
-       * Predicate to check whether the form in `$dirty` and `$invalid` state
-       *
-       * @returns {Boolean} true if `$dirty` and `$invalid`
-       */
-      self.isDirtyAndInvalid = function() {
-        var ref, ref1;
-        return ((ref = self.entityForm) != null ? ref.$dirty : void 0) && ((ref1 = self.entityForm) != null ? ref1.$invalid : void 0);
-      };
-
-      /**
-       * @ngdoc method
-       * @name isResetButtonDisabled
-       *
-       * @description
-       * Predicate to check whether the reset button should disabled or not
-       *
-       * @returns {Boolean} true if `$pristine` or `$submitted`
-       */
-      self.isResetButtonDisabled = function() {
-        var ref, ref1;
-        return ((ref = self.entityForm) != null ? ref.$pristine : void 0) || ((ref1 = self.entityForm) != null ? ref1.$submitted : void 0);
-      };
-      return this;
-    };
-    return ShForm;
   }
 ]);
 
