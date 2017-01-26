@@ -28,11 +28,10 @@ angular.module('sh.view.helper', []
   scope:
     yesNo: '='
   template: (element, attrs) ->
-    '''
-      <span ng-if="yesNo == true" class="text-success"><i class="fa fa-left fa-check"></i>{{"LABEL_YES" | translate}}</span>
-      <span ng-if="yesNo == false" class="text-danger"><i class="fa fa-left fa-times"></i>{{"LABEL_NO" | translate}}</span>
-      <span ng-if="yesNo == null || yesNo == undefined" class="text-muted"><i class="fa fa-left fa-dash"></i></span>
-    '''
+    '<span ng-if="yesNo == true" class="text-success"><i class="fa fa-left fa-check"></i>{{"LABEL_YES" | translate}}</span>' +
+    '<span ng-if="yesNo == false" class="text-danger"><i class="fa fa-left fa-times"></i>{{"LABEL_NO" | translate}}</span>' +
+    '<span ng-if="yesNo == null || yesNo == undefined" class="text-muted"><i class="fa fa-left fa-dash"></i></span>'
+
   link: (scope) ->
     if scope.yesNo in [true, "true", 1, "TRUE"]
       scope.yesNo = true
@@ -50,9 +49,5 @@ angular.module('sh.view.helper', []
     codeNameCode: '=?'
     codeNameName: '=?'
   template: (element, attrs) ->
-    '''
-      <span title="{{codeNameCode}} ({{codeNameName}})">
-        {{codeNameCode}} <small class="text-muted">({{codeNameName}})</small>
-      </span>
-    '''
+    '<span title="{{codeNameCode}} ({{codeNameName}})">{{codeNameCode}} <small class="text-muted">({{codeNameName}})</small></span>'
 )
