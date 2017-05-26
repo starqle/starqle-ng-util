@@ -35,15 +35,14 @@ shDatepickerModule.directive("shDatepicker", [ ->
     valueFormat = 'YYYY-MM-DD' # millisecond from epoch
     displayFormat = scope.shDisplayFormat ? 'DD-MM-YYYY'
 
-    dpChangeTriggered = false
-    jqValue = -1
+    lastValid = null
 
     #
     # ngModelCtrl: Formatter
     #
-    formatter = (value) ->
-      if value?
-        moment(value).format(displayFormat)
+    formatter = (modelValue) ->
+      if isValidValueFormat(modelValue)
+        moment(modelValue).format(displayFormat)
       else
         null
 
@@ -53,37 +52,28 @@ shDatepickerModule.directive("shDatepicker", [ ->
     #
     # ngModelCtrl: Parser
     #
-    parser = (value) ->
-      if moment(value, displayFormat).isValid()
-        valueFormatted = moment(value, displayFormat).format(valueFormat)
-        if isValid(valueFormatted)
-          updateDate(valueFormatted)
-          valueFormatted
+    parser = (viewValue) ->
+      if isValidDisplayFormat(viewValue)
+        if isRangeValid(viewValue)
+          moment(viewValue, displayFormat).format(valueFormat)
         else
-          updateDate(null)
-          ngModelCtrl.$setViewValue(null)
-          value = null
           null
       else
-        value = null
+        viewValue
+
+    looseParser = (viewValue) ->
+      if isValidDisplayFormat(viewValue)
+        moment(viewValue, displayFormat).format(valueFormat)
+      else
         null
 
     ngModelCtrl.$parsers.push parser
 
 
     #
-    # ngModelCtrl: Render
-    #
-    ngModelCtrl.$render = () ->
-      unless angular.isDefined(ngModelCtrl.$modelValue)
-        ngModelCtrl.$modelValue = null
-      return
-
-
     #
     #
-    #
-    isValid = (value) ->
+    isRangeValid = (value) ->
       if element.data('DateTimePicker')?.maxDate()? and element.data('DateTimePicker')?.maxDate()
         maxValue = element.data('DateTimePicker').maxDate().format(valueFormat)
         return false if moment(value).isAfter(maxValue)
@@ -97,42 +87,45 @@ shDatepickerModule.directive("shDatepicker", [ ->
     #
     # SETUP
     #
-    setupDatepicker = (value) ->
-      element.unbind 'dp.change', dpChange
-      element.data('DateTimePicker')?.destroy()
+    setupDatepicker = (modelValue, initial) ->
+      newValue = modelValue
+      newValue = lastValid unless isValidValueFormat(modelValue)
 
-      element.datetimepicker
-        format: displayFormat
-        showClear: true
-        showClose: true
-        showTodayButton: false
-        useCurrent: false
-        useStrict: true
-        widgetPositioning:
-          vertical: scope.widgetVerticalPosition or 'auto'
+      if ngModelCtrl.$dirty or initial
+        element.unbind 'dp.change', dpChange
+        element.unbind 'dp.show', dpShow
+        element.unbind 'dp.hide', dpHide
+        element.data('DateTimePicker')?.destroy()
 
-      updateDate(value)
-      updateIcon(scope.shIcons)
-      updateMinDate(scope.shFromDate)
-      updateMaxDate(scope.shThruDate)
-
-      element.bind 'dp.change', dpChange
-
-      return
+        element.datetimepicker
+          format: displayFormat
+          showClear: true
+          showClose: true
+          showTodayButton: false
+          useCurrent: false
+          useStrict: true
+          widgetPositioning:
+            vertical: scope.widgetVerticalPosition or 'auto'
 
 
-    updateDate = (value) ->
-      if value?
-        element.data('DateTimePicker').date(moment(value))
-      else
-        element.data('DateTimePicker').clear()
+        element.data('DateTimePicker').date(moment(newValue))
+        ngModelCtrl.$setViewValue(newValue) unless initial
+
+
+        updateIcon(scope.shIcons)
+        updateMinDate(scope.shFromDate)
+        updateMaxDate(scope.shThruDate)
+
+        element.bind 'dp.change', dpChange
+        element.bind 'dp.show', dpShow
+        element.bind 'dp.hide', dpHide
       return
 
 
     updateMinDate = (value)  ->
-      if value?
+      if value and isValidValueFormat(value)
         if element.data('DateTimePicker')?.maxDate()? and element.data('DateTimePicker')?.maxDate()
-          maxValue = element.data('DateTimePicker').maxDate().format(valueFormat)
+          maxValue = looseParser(element.data('DateTimePicker').maxDate())
           value = maxValue if moment(value).isAfter(maxValue)
 
         element.data('DateTimePicker')?.minDate(moment(value).startOf('day'))
@@ -142,9 +135,9 @@ shDatepickerModule.directive("shDatepicker", [ ->
 
 
     updateMaxDate = (value)  ->
-      if value?
+      if value and isValidValueFormat(value)
         if element.data('DateTimePicker')?.minDate()? and element.data('DateTimePicker')?.minDate()
-          minValue = element.data('DateTimePicker').minDate().format(valueFormat)
+          minValue = looseParser(element.data('DateTimePicker').minDate())
           value = minValue if moment(value).isBefore(minValue)
 
         element.data('DateTimePicker')?.maxDate(moment(value).endOf('day'))
@@ -163,12 +156,47 @@ shDatepickerModule.directive("shDatepicker", [ ->
     #
 
     dpChange = (data) ->
-      dpChangeTriggered = true
       if data.date
         ngModelCtrl.$setViewValue(data.date.format(displayFormat))
       else
         ngModelCtrl.$setViewValue(null)
       return
+
+
+    dpShow = () ->
+      setLastValid(ngModelCtrl.$modelValue)
+      return
+
+    dpHide = (data) ->
+      if isValidDisplayFormat( ngModelCtrl.$viewValue )
+        unless ngModelCtrl.$viewValue is data.date.format(displayFormat)
+          setupDatepicker(ngModelCtrl.$modelValue)
+      else
+        if ngModelCtrl.$viewValue is null
+          setLastValid(null)
+          setupDatepicker(null)
+        else
+          setupDatepicker(lastValid)
+      # ngModelCtrl.$setViewValue(data.date.format(displayFormat))
+      return
+
+
+    isValidValueFormat = (modelValue) ->
+      moment(modelValue, valueFormat, true).isValid()
+
+    isValidDisplayFormat = (viewValue) ->
+      moment(viewValue, displayFormat, true).isValid()
+
+
+    setLastValid = (value) ->
+      if value and isValidValueFormat(value)
+        lastValid = value
+      else
+        lastValid = null
+
+
+
+
 
 
     #
@@ -195,12 +223,14 @@ shDatepickerModule.directive("shDatepicker", [ ->
       () ->
         ngModelCtrl.$modelValue
       (newVal, oldVal) ->
-        unless dpChangeTriggered
-          if newVal isnt jqValue and angular.isDefined(newVal)
-            jqValue = newVal
-            setupDatepicker(jqValue)
+        if newVal? and isValidValueFormat(newVal) and isValidDisplayFormat(ngModelCtrl.$viewValue)
+          if (not oldVal?) or ( oldVal? and isValidValueFormat(oldVal) )
+            setupDatepicker(newVal, true)
         return
     )
+
+    setupDatepicker(null, true)
+
 
     return
 
@@ -214,7 +244,6 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
   #
   restrict: 'A'
   scope:
-    ngModel: '='
     shDisplayFormat: '@?'
     shFromTime: '=?'
     shIcons: '=?'
@@ -226,19 +255,15 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     valueFormat = 'x' # millisecond from epoch
     displayFormat = scope.shDisplayFormat ? 'DD-MM-YYYY, HH:mm (z)'
 
-    dpChangeTriggered = false
-    jqValue = -1
+    lastValid = null
 
     #
     # ngModelCtrl: Formatter
     #
-    formatter = (value) ->
-      if value?
-        unless (isNaN(value) and moment(value, moment.ISO_8601).isValid())
-          # should be millisecond from epoch
-          value *= 1
-
-        moment(value).tz(moment.defaultZone.name).format(displayFormat)
+    formatter = (modelValue) ->
+      if modelValue and isValidValueFormat(modelValue)
+        modelValue *= 1 unless isNaN(modelValue)
+        moment(modelValue).tz(moment.defaultZone.name).format(displayFormat) + ''
       else
         null
 
@@ -248,37 +273,28 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     #
     # ngModelCtrl: Parser
     #
-    parser = (value) ->
-      if moment.tz(value, displayFormat, moment.defaultZone.name).isValid()
-        valueFormatted = moment.tz(value, displayFormat, moment.defaultZone.name).format(valueFormat)
-        if isValid(valueFormatted)
-          updateDate(valueFormatted)
-          valueFormatted
+    parser = (viewValue) ->
+      if isValidDisplayFormat(viewValue)
+        if isRangeValid(viewValue)
+          moment.tz(viewValue, displayFormat, moment.defaultZone.name).format(valueFormat)
         else
-          updateDate(null)
-          ngModelCtrl.$setViewValue(null)
-          value = null
           null
-
-
       else
-        value = null
+        viewValue
+
+    looseParser = (viewValue) ->
+      if isValidDisplayFormat(viewValue)
+        moment.tz(viewValue, displayFormat, moment.defaultZone.name).format(valueFormat)
+      else
         null
 
     ngModelCtrl.$parsers.push parser
 
-    #
-    # ngModelCtrl: Render
-    #
-    ngModelCtrl.$render = () ->
-      unless angular.isDefined(ngModelCtrl.$modelValue)
-        ngModelCtrl.$modelValue = null
-      return
 
     #
     #
     #
-    isValid = (value) ->
+    isRangeValid = (value) ->
       if element.data('DateTimePicker')?.maxDate()? and element.data('DateTimePicker')?.maxDate()
         maxValue = element.data('DateTimePicker').maxDate().valueOf()
         return false if maxValue < value
@@ -293,48 +309,49 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     #
     # SETUP
     #
-    setupDatepicker = (value) ->
-      element.unbind 'dp.change', dpChange
-      element.data('DateTimePicker')?.destroy()
+    setupDatepicker = (modelValue, initial) ->
+      newValue = modelValue
+      newValue = lastValid unless isValidValueFormat(modelValue)
 
-      element.datetimepicker
-        format: displayFormat
-        showClear: true
-        showClose: true
-        showTodayButton: false
-        timeZone: moment.defaultZone.name
-        useCurrent: false
-        useStrict: true
-        widgetPositioning:
-          vertical: scope.widgetVerticalPosition or 'auto'
+      if ngModelCtrl.$dirty or initial
+        element.unbind 'dp.change', dpChange
+        element.unbind 'dp.show', dpShow
+        element.unbind 'dp.hide', dpHide
+        element.data('DateTimePicker')?.destroy()
 
-      updateDate(value)
-      updateIcon(scope.shIcons)
-      updateMinDate(scope.shFromTime)
-      updateMaxDate(scope.shThruTime)
-
-      element.bind 'dp.change', dpChange
-
-      return
+        element.datetimepicker
+          format: displayFormat
+          showClear: true
+          showClose: true
+          showTodayButton: false
+          timeZone: moment.defaultZone.name
+          useCurrent: false
+          useStrict: true
+          widgetPositioning:
+            vertical: scope.widgetVerticalPosition or 'auto'
 
 
-    updateDate = (value) ->
-      if value?
-        unless (isNaN(value) and moment(value, moment.ISO_8601).isValid())
-          # should be millisecond from epoch
-          value *= 1
-        element.data('DateTimePicker').date(moment(value).tz(moment.defaultZone.name))
-      else
-        element.data('DateTimePicker').clear()
+        if newValue
+          newValue *= 1 unless isNaN(newValue)
+          element.data('DateTimePicker').date( moment(newValue).tz(moment.defaultZone.name) )
+        else
+          element.data('DateTimePicker').date( null )
+        ngModelCtrl.$setViewValue(newValue + '') unless initial
 
+
+        updateIcon(scope.shIcons)
+        updateMinDate(scope.shFromTime)
+        updateMaxDate(scope.shThruTime)
+
+        element.bind 'dp.change', dpChange
+        element.bind 'dp.show', dpShow
+        element.bind 'dp.hide', dpHide
       return
 
 
     updateMinDate = (value)  ->
-      if value?
-        unless (isNaN(value) and moment(value, moment.ISO_8601).isValid())
-          # should be millisecond from epoch
-          value *= 1
+      if value and isValidValueFormat(value)
+        value *= 1 unless isNaN(value)
 
         if element.data('DateTimePicker')?.maxDate()? and element.data('DateTimePicker')?.maxDate()
           maxValue = element.data('DateTimePicker').maxDate().valueOf()
@@ -347,10 +364,8 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
 
 
     updateMaxDate = (value)  ->
-      if value?
-        unless (isNaN(value) and moment(value, moment.ISO_8601).isValid())
-          # should be millisecond from epoch
-          value *= 1
+      if value and isValidValueFormat(value)
+        value *= 1 unless isNaN(value)
 
         if element.data('DateTimePicker')?.minDate()? and element.data('DateTimePicker')?.minDate()
           minValue = element.data('DateTimePicker').minDate().valueOf()
@@ -372,12 +387,55 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     #
 
     dpChange = (data) ->
-      dpChangeTriggered = true
       if data.date
         ngModelCtrl.$setViewValue(data.date.tz(moment.defaultZone.name).format(displayFormat))
       else
         ngModelCtrl.$setViewValue(null)
       return
+
+    dpShow = () ->
+      setLastValid(ngModelCtrl.$modelValue)
+      return
+
+    dpHide = (data) ->
+      if isValidDisplayFormat( ngModelCtrl.$viewValue )
+        unless ngModelCtrl.$viewValue is data.date.tz(moment.defaultZone.name).format(displayFormat)
+          setupDatepicker(ngModelCtrl.$modelValue)
+      else
+        if ngModelCtrl.$viewValue is null
+          setLastValid(null)
+          setupDatepicker(null)
+        else
+          setupDatepicker(lastValid)
+      # ngModelCtrl.$setViewValue(data.date.format(displayFormat))
+      return
+
+
+
+    isValidValueFormat = (modelValue) ->
+      isValidMillisecond(modelValue) or isValidIsoFormat(modelValue)
+
+    isValidMillisecond = (modelValue) ->
+      not isNaN(modelValue)
+
+    isValidIsoFormat = (modelValue) ->
+      isNaN(modelValue) and
+      moment(modelValue, moment.ISO_8601).isValid()
+
+
+    isValidDisplayFormat = (viewValue) ->
+      isNaN(viewValue) and
+      viewValue.length is 23 and
+      viewValue[22] is ')' and
+      moment.tz(viewValue.substr(0, 19), displayFormat.substr(0, 19), true, moment.defaultZone.name).isValid()
+
+
+    setLastValid = (modelValue) ->
+      if modelValue and isValidValueFormat(modelValue)
+        lastValid = modelValue
+      else
+        lastValid = null
+
 
 
     #
@@ -404,18 +462,14 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
       () ->
         ngModelCtrl.$modelValue
       (newVal, oldVal) ->
-        unless dpChangeTriggered
-          if newVal isnt jqValue and angular.isDefined(newVal)
-            jqValue = newVal
+        if newVal? and isValidValueFormat(newVal) and isValidDisplayFormat(ngModelCtrl.$viewValue)
+          if (not oldVal?) or ( oldVal? and isValidValueFormat(oldVal) )
+            setupDatepicker(newVal, true)
 
-            if isNaN(jqValue) and moment(jqValue, moment.ISO_8601).isValid()
-              # Must be an ISO-8601
-              jqValue = moment(jqValue).format('x')
-              scope.ngModel = jqValue
-
-            setupDatepicker(jqValue)
         return
     )
+
+    setupDatepicker(null, true)
 
     return
 
@@ -482,7 +536,7 @@ shDatepickerModule.directive("shTimepicker", [ ->
     # ngModelCtrl: Formatter
     #
     formatter = (value) ->
-      if value?
+      if value
         scope.duration.hour = Math.floor(value / (60 * 60))
         scope.duration.minute = Math.floor(value / 60) % 60
       else
