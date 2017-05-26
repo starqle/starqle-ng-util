@@ -33,10 +33,10 @@ angular.module('sh.view.helper', []
     '<span ng-if="yesNo == null || yesNo == undefined" class="text-muted"><i class="fa fa-left fa-dash"></i></span>'
 
   link: (scope) ->
-    if scope.yesNo in [true, "true", 1, "TRUE"]
+    if scope.yesNo in [true, "true", 1, "TRUE", "T", "t", "True"]
       scope.yesNo = true
 
-    if scope.yesNo in [false, "false", 0, "FALSE"]
+    if scope.yesNo in [false, "false", 0, "FALSE", "F", "f", "False", -1]
       scope.yesNo = false
     return
 
