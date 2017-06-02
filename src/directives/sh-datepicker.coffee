@@ -36,6 +36,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
     displayFormat = scope.shDisplayFormat ? 'DD-MM-YYYY'
 
     lastValid = null
+    changedFromPicker = false
 
     #
     # ngModelCtrl: Formatter
@@ -87,11 +88,11 @@ shDatepickerModule.directive("shDatepicker", [ ->
     #
     # SETUP
     #
-    setupDatepicker = (modelValue, initial) ->
+    setupDatepicker = (modelValue) ->
       newValue = modelValue
       newValue = lastValid unless isValidValueFormat(modelValue)
 
-      if ngModelCtrl.$dirty or initial
+      unless changedFromPicker
         element.unbind 'dp.change', dpChange
         element.unbind 'dp.show', dpShow
         element.unbind 'dp.hide', dpHide
@@ -119,6 +120,8 @@ shDatepickerModule.directive("shDatepicker", [ ->
         element.bind 'dp.change', dpChange
         element.bind 'dp.show', dpShow
         element.bind 'dp.hide', dpHide
+
+      changedFromPicker = false
       return
 
 
@@ -156,6 +159,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
     #
 
     dpChange = (data) ->
+      changedFromPicker = true
       if data.date
         ngModelCtrl.$setViewValue(data.date.format(displayFormat))
       else
@@ -225,11 +229,11 @@ shDatepickerModule.directive("shDatepicker", [ ->
       (newVal, oldVal) ->
         if newVal? and isValidValueFormat(newVal) and isValidDisplayFormat(ngModelCtrl.$viewValue)
           if (not oldVal?) or ( oldVal? and isValidValueFormat(oldVal) )
-            setupDatepicker(newVal, true)
+            setupDatepicker(newVal)
         return
     )
 
-    setupDatepicker(null, true)
+    setupDatepicker(null)
 
 
     return
@@ -256,6 +260,7 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     displayFormat = scope.shDisplayFormat ? 'DD-MM-YYYY, HH:mm (z)'
 
     lastValid = null
+    changedFromPicker = false
 
     #
     # ngModelCtrl: Formatter
@@ -309,11 +314,11 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     #
     # SETUP
     #
-    setupDatepicker = (modelValue, initial) ->
+    setupDatepicker = (modelValue) ->
       newValue = modelValue
       newValue = lastValid unless isValidValueFormat(modelValue)
 
-      if ngModelCtrl.$dirty or initial
+      unless changedFromPicker
         element.unbind 'dp.change', dpChange
         element.unbind 'dp.show', dpShow
         element.unbind 'dp.hide', dpHide
@@ -346,6 +351,8 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
         element.bind 'dp.change', dpChange
         element.bind 'dp.show', dpShow
         element.bind 'dp.hide', dpHide
+
+      changedFromPicker = false
       return
 
 
@@ -387,6 +394,7 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
     #
 
     dpChange = (data) ->
+      changedFromPicker = true
       if data.date
         ngModelCtrl.$setViewValue(data.date.tz(moment.defaultZone.name).format(displayFormat))
       else
@@ -464,12 +472,12 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
       (newVal, oldVal) ->
         if newVal? and isValidValueFormat(newVal) and isValidDisplayFormat(ngModelCtrl.$viewValue)
           if (not oldVal?) or ( oldVal? and isValidValueFormat(oldVal) )
-            setupDatepicker(newVal, true)
+            setupDatepicker(newVal)
 
         return
     )
 
-    setupDatepicker(null, true)
+    setupDatepicker(null)
 
     return
 
