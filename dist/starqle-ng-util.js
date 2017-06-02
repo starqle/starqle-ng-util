@@ -313,11 +313,12 @@ shDatepickerModule.directive("shDatepicker", [
       },
       require: '?ngModel',
       link: function(scope, element, attrs, ngModelCtrl) {
-        var changedFromPicker, displayFormat, dpChange, dpHide, dpShow, formatter, isRangeValid, isValidDisplayFormat, isValidValueFormat, lastValid, looseParser, parser, ref, setLastValid, setupDatepicker, updateIcon, updateMaxDate, updateMinDate, valueFormat;
+        var changedFromPicker, displayFormat, dpChange, dpHide, dpShow, formatter, initial, isRangeValid, isValidDisplayFormat, isValidValueFormat, lastValid, looseParser, parser, ref, setLastValid, setupDatepicker, updateIcon, updateMaxDate, updateMinDate, valueFormat;
         valueFormat = 'YYYY-MM-DD';
         displayFormat = (ref = scope.shDisplayFormat) != null ? ref : 'DD-MM-YYYY';
         lastValid = null;
         changedFromPicker = false;
+        initial = true;
         formatter = function(modelValue) {
           if (isValidValueFormat(modelValue)) {
             return moment(modelValue).format(displayFormat);
@@ -386,7 +387,9 @@ shDatepickerModule.directive("shDatepicker", [
               }
             });
             element.data('DateTimePicker').date(moment(newValue));
-            ngModelCtrl.$setViewValue(newValue);
+            if (!initial) {
+              ngModelCtrl.$setViewValue(newValue);
+            }
             updateIcon(scope.shIcons);
             updateMinDate(scope.shFromDate);
             updateMaxDate(scope.shThruDate);
@@ -395,6 +398,7 @@ shDatepickerModule.directive("shDatepicker", [
             element.bind('dp.hide', dpHide);
           }
           changedFromPicker = false;
+          initial = false;
         };
         updateMinDate = function(value) {
           var maxValue, ref1, ref2, ref3, ref4;
@@ -516,11 +520,12 @@ shDatepickerModule.directive("shDatetimepicker", [
       },
       require: '?ngModel',
       link: function(scope, element, attrs, ngModelCtrl) {
-        var changedFromPicker, displayFormat, dpChange, dpHide, dpShow, formatter, isRangeValid, isValidDisplayFormat, isValidIsoFormat, isValidMillisecond, isValidValueFormat, lastValid, looseParser, parser, ref, setLastValid, setupDatepicker, updateIcon, updateMaxDate, updateMinDate, valueFormat;
+        var changedFromPicker, displayFormat, dpChange, dpHide, dpShow, formatter, initial, isRangeValid, isValidDisplayFormat, isValidIsoFormat, isValidMillisecond, isValidValueFormat, lastValid, looseParser, parser, ref, setLastValid, setupDatepicker, updateIcon, updateMaxDate, updateMinDate, valueFormat;
         valueFormat = 'x';
         displayFormat = (ref = scope.shDisplayFormat) != null ? ref : 'DD-MM-YYYY, HH:mm (z)';
         lastValid = null;
         changedFromPicker = false;
+        initial = true;
         formatter = function(modelValue) {
           if (modelValue && isValidValueFormat(modelValue)) {
             if (!isNaN(modelValue)) {
@@ -600,7 +605,9 @@ shDatepickerModule.directive("shDatetimepicker", [
             } else {
               element.data('DateTimePicker').date(null);
             }
-            ngModelCtrl.$setViewValue(newValue + '');
+            if (!initial) {
+              ngModelCtrl.$setViewValue(newValue + '');
+            }
             updateIcon(scope.shIcons);
             updateMinDate(scope.shFromTime);
             updateMaxDate(scope.shThruTime);
@@ -609,6 +616,7 @@ shDatepickerModule.directive("shDatetimepicker", [
             element.bind('dp.hide', dpHide);
           }
           changedFromPicker = false;
+          initial = false;
         };
         updateMinDate = function(value) {
           var maxValue, ref1, ref2, ref3, ref4;

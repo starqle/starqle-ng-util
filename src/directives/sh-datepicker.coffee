@@ -37,6 +37,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
 
     lastValid = null
     changedFromPicker = false
+    initial = true
 
     #
     # ngModelCtrl: Formatter
@@ -110,7 +111,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
 
 
         element.data('DateTimePicker').date(moment(newValue))
-        ngModelCtrl.$setViewValue(newValue)
+        ngModelCtrl.$setViewValue(newValue) unless initial
 
 
         updateIcon(scope.shIcons)
@@ -122,6 +123,7 @@ shDatepickerModule.directive("shDatepicker", [ ->
         element.bind 'dp.hide', dpHide
 
       changedFromPicker = false
+      initial = false
       return
 
 
@@ -261,6 +263,7 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
 
     lastValid = null
     changedFromPicker = false
+    initial = true
 
     #
     # ngModelCtrl: Formatter
@@ -341,7 +344,7 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
           element.data('DateTimePicker').date( moment(newValue).tz(moment.defaultZone.name) )
         else
           element.data('DateTimePicker').date( null )
-        ngModelCtrl.$setViewValue(newValue + '')
+        ngModelCtrl.$setViewValue(newValue + '') unless initial
 
 
         updateIcon(scope.shIcons)
@@ -353,6 +356,7 @@ shDatepickerModule.directive("shDatetimepicker", ['dateFilter', (dateFilter) ->
         element.bind 'dp.hide', dpHide
 
       changedFromPicker = false
+      initial = false
       return
 
 
