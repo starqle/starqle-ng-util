@@ -387,7 +387,7 @@ shDatepickerModule.directive("shDatepicker", [
               }
             });
             element.data('DateTimePicker').date(moment(newValue));
-            if (!initial) {
+            if (ngModelCtrl.$dirty && !initial) {
               ngModelCtrl.$setViewValue(newValue);
             }
             updateIcon(scope.shIcons);
@@ -605,7 +605,7 @@ shDatepickerModule.directive("shDatetimepicker", [
             } else {
               element.data('DateTimePicker').date(null);
             }
-            if (!initial) {
+            if (ngModelCtrl.$dirty && !initial) {
               ngModelCtrl.$setViewValue(newValue + '');
             }
             updateIcon(scope.shIcons);
@@ -2297,484 +2297,6 @@ shFormModule.factory('ShForm', [
 
 /**
  * @ngdoc object
- * @name ShPersistenceHookNotification
- *
- * @description
- * ShPersistenceHookNotification factory
- *
- */
-shPersistenceModule.factory('ShPersistenceHookNotification', [
-  'ShNotification', function(ShNotification) {
-    var ShPersistenceHookNotification;
-    ShPersistenceHookNotification = function(params) {
-      var self;
-      self = this;
-      self.shPersistence = params.shPersistence;
-      self.shPersistence.newEntityErrorHooks.push(function(error) {
-        ShNotification.toastByResponse(error);
-      });
-      self.shPersistence.createEntityErrorHooks.push(function(error) {
-        ShNotification.toastByResponse(error);
-      });
-      self.shPersistence.editEntityErrorHooks.push(function(error) {
-        ShNotification.toastByResponse(error);
-      });
-      self.shPersistence.updateEntityErrorHooks.push(function(error) {
-        ShNotification.toastByResponse(error);
-      });
-      return this;
-    };
-    return ShPersistenceHookNotification;
-  }
-]);
-
-
-/**
- * @ngdoc object
- * @name ShPersistenceHook
- *
- * @description
- * ShPersistenceHook factory
- *
- */
-shPersistenceModule.factory('ShPersistenceHook', [
-  '$q', 'ShApi', 'ShApiHook', 'ShPersistenceHookNotification', function($q, ShApi, ShApiHook, ShPersistenceHookNotification) {
-    var ShPersistenceHook;
-    ShPersistenceHook = function(params) {
-      var base, base1, base2, base3, base4, self, shApi, shApiHook, shPersistenceHookNotification;
-      self = this;
-      self.shPersistence = params.shPersistence;
-      if ((base = self.shPersistence).id == null) {
-        base.id = null;
-      }
-      if ((base1 = self.shPersistence).resource == null) {
-        base1.resource = null;
-      }
-      if ((base2 = self.shPersistence).entity == null) {
-        base2.entity = {};
-      }
-      if ((base3 = self.shPersistence).lookup == null) {
-        base3.lookup = {};
-      }
-      if ((base4 = self.shPersistence).optParams == null) {
-        base4.optParams = {};
-      }
-      self.shPersistence.beforeNewEntityHooks = [];
-      self.shPersistence.newEntitySuccessHooks = [];
-      self.shPersistence.newEntityErrorHooks = [];
-      self.shPersistence.afterNewEntityHooks = [];
-      self.shPersistence.beforeCreateEntityHooks = [];
-      self.shPersistence.createEntitySuccessHooks = [];
-      self.shPersistence.createEntityErrorHooks = [];
-      self.shPersistence.afterCreateEntityHooks = [];
-      self.shPersistence.beforeEditEntityHooks = [];
-      self.shPersistence.editEntitySuccessHooks = [];
-      self.shPersistence.editEntityErrorHooks = [];
-      self.shPersistence.afterEditEntityHooks = [];
-      self.shPersistence.beforeUpdateEntityHooks = [];
-      self.shPersistence.updateEntitySuccessHooks = [];
-      self.shPersistence.updateEntityErrorHooks = [];
-      self.shPersistence.afterUpdateEntityHooks = [];
-      self.shPersistence.beforeDeleteEntityHooks = [];
-      self.shPersistence.deleteEntitySuccessHooks = [];
-      self.shPersistence.deleteEntityErrorHooks = [];
-      self.shPersistence.afterDeleteEntityHooks = [];
-      self.shPersistence.beforeInitEntityHooks = [];
-      self.shPersistence.initEntitySuccessHooks = [];
-      self.shPersistence.initEntityErrorHooks = [];
-      self.shPersistence.afterInitEntityHooks = [];
-      shApi = new ShApi({
-        resource: self.shPersistence.resource
-      });
-      shApiHook = new ShApiHook({
-        shApiInstance: self.shPersistence
-      });
-      shPersistenceHookNotification = new ShPersistenceHookNotification({
-        shPersistence: self.shPersistence
-      });
-
-      /**
-       * @ngdoc method
-       * @name newEntity
-       *
-       * @description
-       * New an entity
-       *
-       * @returns {promise}
-       */
-      self.shPersistence.newEntity = function() {
-        var deferred, hook, i, len, ref;
-        ref = self.shPersistence.beforeNewEntityHooks;
-        for (i = 0, len = ref.length; i < len; i++) {
-          hook = ref[i];
-          hook();
-        }
-        deferred = $q.defer();
-        shApi["new"](self.shPersistence.optParams).then(function(success) {
-          var j, len1, ref1;
-          self.shPersistence.entity = success.data;
-          if (success.lookup != null) {
-            self.shPersistence.lookup = success.lookup;
-          }
-          ref1 = self.shPersistence.newEntitySuccessHooks;
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            hook(success);
-          }
-          return deferred.resolve(success);
-        }, function(error) {
-          var j, len1, ref1;
-          ref1 = self.shPersistence.newEntityErrorHooks;
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            hook(error);
-          }
-          return deferred.reject(error);
-        })["finally"](function() {
-          var j, len1, ref1, results;
-          ref1 = self.shPersistence.afterNewEntityHooks;
-          results = [];
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            results.push(hook());
-          }
-          return results;
-        });
-        return deferred.promise;
-      };
-
-      /**
-       * @ngdoc method
-       * @name createEntity
-       *
-       * @description
-       * Create/persist an entity to database
-       *
-       * @param {Object} entity Entity object which should not contain an id
-       *
-       * @returns {promise}
-       */
-      self.shPersistence.createEntity = function(entity) {
-        var data, deferred, hook, i, len, ref;
-        ref = self.shPersistence.beforeCreateEntityHooks;
-        for (i = 0, len = ref.length; i < len; i++) {
-          hook = ref[i];
-          hook();
-        }
-        deferred = $q.defer();
-        data = {
-          data: entity
-        };
-        if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
-          data = entity;
-        }
-        shApi.create(self.shPersistence.optParams, data).then(function(success) {
-          var j, len1, ref1;
-          self.shPersistence.entity = success.data;
-          if (success.lookup != null) {
-            self.shPersistence.lookup = success.lookup;
-          }
-          ref1 = self.shPersistence.createEntitySuccessHooks;
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            hook(success);
-          }
-          return deferred.resolve(success);
-        }, function(error) {
-          var j, len1, ref1;
-          ref1 = self.shPersistence.createEntityErrorHooks;
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            hook(error);
-          }
-          return deferred.reject(error);
-        })["finally"](function() {
-          var j, len1, ref1, results;
-          ref1 = self.shPersistence.afterCreateEntityHooks;
-          results = [];
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            results.push(hook());
-          }
-          return results;
-        });
-        return deferred.promise;
-      };
-
-      /**
-       * @ngdoc method
-       * @name editEntity
-       *
-       * @description
-       * Edit an entity
-       *
-       * @param {String} id Entity id in string or UUID
-       *
-       * @returns {promise}
-       */
-      self.shPersistence.editEntity = function(id) {
-        var deferred, hook, i, len, ref;
-        ref = self.shPersistence.beforeEditEntityHooks;
-        for (i = 0, len = ref.length; i < len; i++) {
-          hook = ref[i];
-          hook();
-        }
-        deferred = $q.defer();
-        if (!id) {
-          id = self.shPersistence.id;
-        }
-        shApi.edit(id, self.shPersistence.optParams).then(function(success) {
-          var j, len1, ref1;
-          self.shPersistence.entity = success.data;
-          if (success.lookup != null) {
-            self.shPersistence.lookup = success.lookup;
-          }
-          ref1 = self.shPersistence.editEntitySuccessHooks;
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            hook(success);
-          }
-          return deferred.resolve(success);
-        }, function(error) {
-          var j, len1, ref1;
-          ref1 = self.shPersistence.editEntityErrorHooks;
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            hook(error);
-          }
-          return deferred.reject(error);
-        })["finally"](function() {
-          var j, len1, ref1, results;
-          ref1 = self.shPersistence.afterEditEntityHooks;
-          results = [];
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            results.push(hook());
-          }
-          return results;
-        });
-        return deferred.promise;
-      };
-
-      /**
-       * @ngdoc method
-       * @name updateEntity
-       *
-       * @description
-       * Update an entity
-       *
-       * @param {String} id Entity id in string or UUID
-       * @param {Object} entity Entity object which should contain an id
-       *
-       * @returns {promise}
-       */
-      self.shPersistence.updateEntity = function(id, entity) {
-        var data, deferred, hook, i, len, ref;
-        ref = self.shPersistence.beforeUpdateEntityHooks;
-        for (i = 0, len = ref.length; i < len; i++) {
-          hook = ref[i];
-          hook();
-        }
-        deferred = $q.defer();
-        if (angular.isObject(id)) {
-          entity = id;
-          id = self.shPersistence.id;
-        }
-        data = {
-          data: entity
-        };
-        if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
-          data = entity;
-        }
-        shApi.update(id, self.shPersistence.optParams, data).then(function(success) {
-          var j, len1, ref1;
-          self.shPersistence.entity = success.data;
-          if (success.lookup != null) {
-            self.shPersistence.lookup = success.lookup;
-          }
-          ref1 = self.shPersistence.updateEntitySuccessHooks;
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            hook(success);
-          }
-          return deferred.resolve(success);
-        }, function(error) {
-          var j, len1, ref1;
-          ref1 = self.shPersistence.updateEntityErrorHooks;
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            hook(error);
-          }
-          return deferred.reject(error);
-        })["finally"](function() {
-          var j, len1, ref1, results;
-          ref1 = self.shPersistence.afterUpdateEntityHooks;
-          results = [];
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            results.push(hook());
-          }
-          return results;
-        });
-        return deferred.promise;
-      };
-
-      /**
-       * @ngdoc method
-       * @name deleteEntity
-       *
-       * @description
-       * Delete an entity
-       *
-       * @param {String} id Entity id in string or UUID
-       *
-       * @returns {promise}
-       */
-      self.shPersistence.deleteEntity = function(id) {
-        var deferred, hook, i, len, ref;
-        ref = self.shPersistence.beforeDeleteEntityHooks;
-        for (i = 0, len = ref.length; i < len; i++) {
-          hook = ref[i];
-          hook();
-        }
-        deferred = $q.defer();
-        if (!id) {
-          id = self.shPersistence.id;
-        }
-        shApi["delete"](id, self.shPersistence.optParams).then(function(success) {
-          var j, len1, ref1;
-          ref1 = self.shPersistence.deleteEntitySuccessHooks;
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            hook(success);
-          }
-          return deferred.resolve(success);
-        }, function(error) {
-          var j, len1, ref1;
-          ref1 = self.shPersistence.deleteEntityErrorHooks;
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            hook(error);
-          }
-          return deferred.reject(error);
-        })["finally"](function() {
-          var j, len1, ref1, results;
-          ref1 = self.shPersistence.afterDeleteEntityHooks;
-          results = [];
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            results.push(hook());
-          }
-          return results;
-        });
-        return deferred.promise;
-      };
-
-      /**
-       * @ngdoc method
-       * @name initEntity
-       *
-       * @description
-       * Update an entity
-       *
-       * @param {String} id Entity id in string or UUID
-       * @param {Object} entity Entity object which should contain an id
-       *
-       * @returns {promise}
-       */
-      self.shPersistence.initEntity = function() {
-        var deferred, hook, i, len, ref;
-        ref = self.shPersistence.beforeInitEntityHooks;
-        for (i = 0, len = ref.length; i < len; i++) {
-          hook = ref[i];
-          hook();
-        }
-        deferred = $q.defer();
-        $q.when(self.shPersistence.id != null ? self.shPersistence.editEntity(self.shPersistence.id) : self.shPersistence.newEntity()).then(function(success) {
-          var j, len1, ref1;
-          ref1 = self.shPersistence.initEntitySuccessHooks;
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            hook(success);
-          }
-          return deferred.resolve(success);
-        }, function(error) {
-          var j, len1, ref1;
-          ref1 = self.shPersistence.initEntityErrorHooks;
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            hook(error);
-          }
-          return deferred.reject(error);
-        })["finally"](function() {
-          var j, len1, ref1, results;
-          ref1 = self.shPersistence.afterInitEntityHooks;
-          results = [];
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            hook = ref1[j];
-            results.push(hook());
-          }
-          return results;
-        });
-        return deferred.promise;
-      };
-
-      /**
-       * @ngdoc method
-       * @name getLookup
-       *
-       * @description
-       * Return an array of objects
-       *
-       * @param {String} key The expected local lookups key
-       *
-       * @returns {Object|Array} Reference to `obj`.
-       */
-      self.shPersistence.getLookup = function(key) {
-        var ref;
-        return (ref = self.shPersistence.lookup) != null ? ref[key] : void 0;
-      };
-      return this;
-    };
-    return ShPersistenceHook;
-  }
-]);
-
-
-/**
- * @ngdoc object
- * @name ShPersistence
- *
- * @description
- * ShPersistence factory
- *
- */
-shPersistenceModule.factory('ShPersistence', [
-  '$q', 'ShPersistenceHook', function($q, ShPersistenceHook) {
-    var ShPersistence;
-    ShPersistence = function(params) {
-      var ref, ref1, ref2, ref3, self, shPersistenceHook;
-      self = this;
-      self.entity = {};
-      self.id = (ref = params.id) != null ? ref : null;
-      self.localLookup = {};
-      self.optParams = (ref1 = params.optParams) != null ? ref1 : {};
-      self.resource = (ref2 = params.resource) != null ? ref2 : null;
-      self.sorting = (ref3 = params.sorting) != null ? ref3 : {
-        id: "desc"
-      };
-      shPersistenceHook = new ShPersistenceHook({
-        shPersistence: self
-      });
-      return this;
-    };
-    return ShPersistence;
-  }
-]);
-
-
-/**
- * @ngdoc object
  * @name ShTableFilterStorage
  *
  * @description
@@ -4131,6 +3653,484 @@ shTableModule.factory('ShTable', [
       return this;
     };
     return ShTable;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShPersistenceHookNotification
+ *
+ * @description
+ * ShPersistenceHookNotification factory
+ *
+ */
+shPersistenceModule.factory('ShPersistenceHookNotification', [
+  'ShNotification', function(ShNotification) {
+    var ShPersistenceHookNotification;
+    ShPersistenceHookNotification = function(params) {
+      var self;
+      self = this;
+      self.shPersistence = params.shPersistence;
+      self.shPersistence.newEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      self.shPersistence.createEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      self.shPersistence.editEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      self.shPersistence.updateEntityErrorHooks.push(function(error) {
+        ShNotification.toastByResponse(error);
+      });
+      return this;
+    };
+    return ShPersistenceHookNotification;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShPersistenceHook
+ *
+ * @description
+ * ShPersistenceHook factory
+ *
+ */
+shPersistenceModule.factory('ShPersistenceHook', [
+  '$q', 'ShApi', 'ShApiHook', 'ShPersistenceHookNotification', function($q, ShApi, ShApiHook, ShPersistenceHookNotification) {
+    var ShPersistenceHook;
+    ShPersistenceHook = function(params) {
+      var base, base1, base2, base3, base4, self, shApi, shApiHook, shPersistenceHookNotification;
+      self = this;
+      self.shPersistence = params.shPersistence;
+      if ((base = self.shPersistence).id == null) {
+        base.id = null;
+      }
+      if ((base1 = self.shPersistence).resource == null) {
+        base1.resource = null;
+      }
+      if ((base2 = self.shPersistence).entity == null) {
+        base2.entity = {};
+      }
+      if ((base3 = self.shPersistence).lookup == null) {
+        base3.lookup = {};
+      }
+      if ((base4 = self.shPersistence).optParams == null) {
+        base4.optParams = {};
+      }
+      self.shPersistence.beforeNewEntityHooks = [];
+      self.shPersistence.newEntitySuccessHooks = [];
+      self.shPersistence.newEntityErrorHooks = [];
+      self.shPersistence.afterNewEntityHooks = [];
+      self.shPersistence.beforeCreateEntityHooks = [];
+      self.shPersistence.createEntitySuccessHooks = [];
+      self.shPersistence.createEntityErrorHooks = [];
+      self.shPersistence.afterCreateEntityHooks = [];
+      self.shPersistence.beforeEditEntityHooks = [];
+      self.shPersistence.editEntitySuccessHooks = [];
+      self.shPersistence.editEntityErrorHooks = [];
+      self.shPersistence.afterEditEntityHooks = [];
+      self.shPersistence.beforeUpdateEntityHooks = [];
+      self.shPersistence.updateEntitySuccessHooks = [];
+      self.shPersistence.updateEntityErrorHooks = [];
+      self.shPersistence.afterUpdateEntityHooks = [];
+      self.shPersistence.beforeDeleteEntityHooks = [];
+      self.shPersistence.deleteEntitySuccessHooks = [];
+      self.shPersistence.deleteEntityErrorHooks = [];
+      self.shPersistence.afterDeleteEntityHooks = [];
+      self.shPersistence.beforeInitEntityHooks = [];
+      self.shPersistence.initEntitySuccessHooks = [];
+      self.shPersistence.initEntityErrorHooks = [];
+      self.shPersistence.afterInitEntityHooks = [];
+      shApi = new ShApi({
+        resource: self.shPersistence.resource
+      });
+      shApiHook = new ShApiHook({
+        shApiInstance: self.shPersistence
+      });
+      shPersistenceHookNotification = new ShPersistenceHookNotification({
+        shPersistence: self.shPersistence
+      });
+
+      /**
+       * @ngdoc method
+       * @name newEntity
+       *
+       * @description
+       * New an entity
+       *
+       * @returns {promise}
+       */
+      self.shPersistence.newEntity = function() {
+        var deferred, hook, i, len, ref;
+        ref = self.shPersistence.beforeNewEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        shApi["new"](self.shPersistence.optParams).then(function(success) {
+          var j, len1, ref1;
+          self.shPersistence.entity = success.data;
+          if (success.lookup != null) {
+            self.shPersistence.lookup = success.lookup;
+          }
+          ref1 = self.shPersistence.newEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.newEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shPersistence.afterNewEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name createEntity
+       *
+       * @description
+       * Create/persist an entity to database
+       *
+       * @param {Object} entity Entity object which should not contain an id
+       *
+       * @returns {promise}
+       */
+      self.shPersistence.createEntity = function(entity) {
+        var data, deferred, hook, i, len, ref;
+        ref = self.shPersistence.beforeCreateEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        data = {
+          data: entity
+        };
+        if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
+          data = entity;
+        }
+        shApi.create(self.shPersistence.optParams, data).then(function(success) {
+          var j, len1, ref1;
+          self.shPersistence.entity = success.data;
+          if (success.lookup != null) {
+            self.shPersistence.lookup = success.lookup;
+          }
+          ref1 = self.shPersistence.createEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.createEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shPersistence.afterCreateEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name editEntity
+       *
+       * @description
+       * Edit an entity
+       *
+       * @param {String} id Entity id in string or UUID
+       *
+       * @returns {promise}
+       */
+      self.shPersistence.editEntity = function(id) {
+        var deferred, hook, i, len, ref;
+        ref = self.shPersistence.beforeEditEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        if (!id) {
+          id = self.shPersistence.id;
+        }
+        shApi.edit(id, self.shPersistence.optParams).then(function(success) {
+          var j, len1, ref1;
+          self.shPersistence.entity = success.data;
+          if (success.lookup != null) {
+            self.shPersistence.lookup = success.lookup;
+          }
+          ref1 = self.shPersistence.editEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.editEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shPersistence.afterEditEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name updateEntity
+       *
+       * @description
+       * Update an entity
+       *
+       * @param {String} id Entity id in string or UUID
+       * @param {Object} entity Entity object which should contain an id
+       *
+       * @returns {promise}
+       */
+      self.shPersistence.updateEntity = function(id, entity) {
+        var data, deferred, hook, i, len, ref;
+        ref = self.shPersistence.beforeUpdateEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        if (angular.isObject(id)) {
+          entity = id;
+          id = self.shPersistence.id;
+        }
+        data = {
+          data: entity
+        };
+        if (Object.prototype.toString.call(entity).slice(8, -1) === 'FormData') {
+          data = entity;
+        }
+        shApi.update(id, self.shPersistence.optParams, data).then(function(success) {
+          var j, len1, ref1;
+          self.shPersistence.entity = success.data;
+          if (success.lookup != null) {
+            self.shPersistence.lookup = success.lookup;
+          }
+          ref1 = self.shPersistence.updateEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.updateEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shPersistence.afterUpdateEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name deleteEntity
+       *
+       * @description
+       * Delete an entity
+       *
+       * @param {String} id Entity id in string or UUID
+       *
+       * @returns {promise}
+       */
+      self.shPersistence.deleteEntity = function(id) {
+        var deferred, hook, i, len, ref;
+        ref = self.shPersistence.beforeDeleteEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        if (!id) {
+          id = self.shPersistence.id;
+        }
+        shApi["delete"](id, self.shPersistence.optParams).then(function(success) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.deleteEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.deleteEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shPersistence.afterDeleteEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name initEntity
+       *
+       * @description
+       * Update an entity
+       *
+       * @param {String} id Entity id in string or UUID
+       * @param {Object} entity Entity object which should contain an id
+       *
+       * @returns {promise}
+       */
+      self.shPersistence.initEntity = function() {
+        var deferred, hook, i, len, ref;
+        ref = self.shPersistence.beforeInitEntityHooks;
+        for (i = 0, len = ref.length; i < len; i++) {
+          hook = ref[i];
+          hook();
+        }
+        deferred = $q.defer();
+        $q.when(self.shPersistence.id != null ? self.shPersistence.editEntity(self.shPersistence.id) : self.shPersistence.newEntity()).then(function(success) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.initEntitySuccessHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(success);
+          }
+          return deferred.resolve(success);
+        }, function(error) {
+          var j, len1, ref1;
+          ref1 = self.shPersistence.initEntityErrorHooks;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            hook(error);
+          }
+          return deferred.reject(error);
+        })["finally"](function() {
+          var j, len1, ref1, results;
+          ref1 = self.shPersistence.afterInitEntityHooks;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            hook = ref1[j];
+            results.push(hook());
+          }
+          return results;
+        });
+        return deferred.promise;
+      };
+
+      /**
+       * @ngdoc method
+       * @name getLookup
+       *
+       * @description
+       * Return an array of objects
+       *
+       * @param {String} key The expected local lookups key
+       *
+       * @returns {Object|Array} Reference to `obj`.
+       */
+      self.shPersistence.getLookup = function(key) {
+        var ref;
+        return (ref = self.shPersistence.lookup) != null ? ref[key] : void 0;
+      };
+      return this;
+    };
+    return ShPersistenceHook;
+  }
+]);
+
+
+/**
+ * @ngdoc object
+ * @name ShPersistence
+ *
+ * @description
+ * ShPersistence factory
+ *
+ */
+shPersistenceModule.factory('ShPersistence', [
+  '$q', 'ShPersistenceHook', function($q, ShPersistenceHook) {
+    var ShPersistence;
+    ShPersistence = function(params) {
+      var ref, ref1, ref2, ref3, self, shPersistenceHook;
+      self = this;
+      self.entity = {};
+      self.id = (ref = params.id) != null ? ref : null;
+      self.localLookup = {};
+      self.optParams = (ref1 = params.optParams) != null ? ref1 : {};
+      self.resource = (ref2 = params.resource) != null ? ref2 : null;
+      self.sorting = (ref3 = params.sorting) != null ? ref3 : {
+        id: "desc"
+      };
+      shPersistenceHook = new ShPersistenceHook({
+        shPersistence: self
+      });
+      return this;
+    };
+    return ShPersistence;
   }
 ]);
 
