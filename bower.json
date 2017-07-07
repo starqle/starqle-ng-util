@@ -1,6 +1,6 @@
 {
   "name": "starqle-ng-util",
-  "version": "0.5.3",
+  "version": "1.0.0.rc",
   "authors": [
     "Starqle Indonesia <info@starqle.com>"
   ],
@@ -22,8 +22,8 @@
     "tests"
   ],
   "dependencies": {
-    "angular": ">=1.4.x",
-    "angular-local-storage": ">=0.5.0",
+    "angular": ">=1.6.x",
+    "angular-local-storage": ">=0.6.0",
     "eonasdan-bootstrap-datetimepicker": ">=4.17.37",
     "jquery": ">=1.11.1",
     "moment": ">=2.10.3",
