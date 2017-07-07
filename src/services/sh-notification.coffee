@@ -59,9 +59,12 @@ angular.module('sh.notification',[]).service "ShNotification", ['$timeout', '$in
     else
       angular.extend(opts, options)
 
-    opts.beforeAdd.call this
-    @toasts.unshift opts.toast
-    opts.afterAdd.call this
+    if opts.toast
+      opts.beforeAdd.call this
+      @toasts.unshift opts.toast
+      opts.afterAdd.call this
+    else
+      console.warn 'STARQLE_NG_UTIL::ShNotification', 'Trying to add null/undefined toast'
 
     return
 
