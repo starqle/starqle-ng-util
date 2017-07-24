@@ -1430,7 +1430,7 @@ angular.module('sh.submit', []).directive('shSubmit', [
           arr = desc.split('.');
           result = null;
           while (arr.length) {
-            result = (result || obj)[arr.shift()];
+            result = (result || obj)[arr.shift().trim()];
           }
           return result;
         };

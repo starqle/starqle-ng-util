@@ -83,7 +83,7 @@ angular.module('sh.submit',[]).directive 'shSubmit', ['$compile', '$filter', ($c
       arr = desc.split('.')
       result = null
       while arr.length
-        result = (result or obj)[arr.shift()]
+        result = (result or obj)[arr.shift().trim()]
 
       result
 
